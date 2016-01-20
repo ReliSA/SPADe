@@ -1,6 +1,9 @@
 package cz.zcu.kiv.ppicha.spade;
 
 import cz.zcu.kiv.ppicha.spade.domain.Project;
+import cz.zcu.kiv.ppicha.spade.domain.abstracts.BaseEntity;
+import cz.zcu.kiv.ppicha.spade.indao.GenericDAO;
+import cz.zcu.kiv.ppicha.spade.indao.jpa.GenericDAO_JPA;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -27,6 +30,8 @@ public class Main {
         //em.getTransaction().begin();
         //em.persist(p);
         //em.getTransaction().commit();
+
+        GenericDAO dao = new GenericDAO_JPA(em);
 
         em.close();
     }

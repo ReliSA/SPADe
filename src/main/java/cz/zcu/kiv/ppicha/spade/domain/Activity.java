@@ -9,7 +9,7 @@ import java.util.Set;
 @Entity
 public class Activity extends NamedAndDescribedEntity {
 
-    protected Set<WorkUnit> workUnits;
+    private Set<WorkUnit> workUnits;
     private Set<Activity> predecessors;
 
     public Activity() {
@@ -29,7 +29,6 @@ public class Activity extends NamedAndDescribedEntity {
         return this.workUnits;
     }
 
-    //@Override
     public void setWorkUnits(Set<WorkUnit> workUnits) {
         this.workUnits = workUnits;
     }
@@ -53,13 +52,15 @@ public class Activity extends NamedAndDescribedEntity {
 
         Activity activity = (Activity) o;
 
-        return !(predecessors != null ? !predecessors.equals(activity.predecessors) : activity.predecessors != null);
+        if (workUnits != null ? !workUnits.equals(activity.workUnits) : activity.workUnits != null) return false;
+        return predecessors != null ? predecessors.equals(activity.predecessors) : activity.predecessors == null;
 
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
+        result = 31 * result + (workUnits != null ? workUnits.hashCode() : 0);
         result = 31 * result + (predecessors != null ? predecessors.hashCode() : 0);
         return result;
     }
@@ -67,7 +68,8 @@ public class Activity extends NamedAndDescribedEntity {
     @Override
     public String toString() {
         return "Activity{" +
-                "predecessors=" + predecessors +
+                "workUnits=" + workUnits +
+                ", predecessors=" + predecessors +
                 '}';
     }
 }

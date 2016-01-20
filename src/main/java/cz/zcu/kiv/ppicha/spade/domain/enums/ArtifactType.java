@@ -7,6 +7,7 @@ public enum ArtifactType {
 
     FILE,
     FOLDER,
-    WIKIPAGE;
+    WIKIPAGE,
+    EMAIL;
 
 }

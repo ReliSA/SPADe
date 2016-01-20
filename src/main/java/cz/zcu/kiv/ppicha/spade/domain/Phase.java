@@ -32,9 +32,7 @@ public class Phase extends TemporalNamedAndDescribedEntity {
         this.milestone = milestone;
     }
 
-    @ManyToMany
-    @JoinTable(name = "Phase_WorkUnit", joinColumns = @JoinColumn(name = "phase", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "work_unit", referencedColumnName = "id"))
+    @OneToMany
     public Set<WorkUnit> getWorkUnits() {
         return workUnits;
     }

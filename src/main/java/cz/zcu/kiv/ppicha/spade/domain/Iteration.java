@@ -30,9 +30,7 @@ public class Iteration extends TemporalNamedAndDescribedEntity {
         this.configuration = configuration;
     }
 
-    @ManyToMany
-    @JoinTable(name = "Iteration_WorkUnit", joinColumns = @JoinColumn(name = "iteration", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "work_unit", referencedColumnName = "id"))
+    @OneToMany
     public Set<WorkUnit> getWorkUnits() {
         return this.workUnits;
     }

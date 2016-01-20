@@ -9,6 +9,7 @@ public abstract class BaseEntity {
     protected long externalId;
 
     public BaseEntity() {
+        this.id = 0;
     }
 
     public BaseEntity(long id, long externalId) {

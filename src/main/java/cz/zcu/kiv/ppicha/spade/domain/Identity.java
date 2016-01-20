@@ -10,6 +10,7 @@ import java.util.Set;
 public class Identity extends NamedEntity {
 
     private Set<Role> roles;
+    private String email;
     private ToolProjectInstance toolProjectInstance;
 
     public Identity() {
@@ -33,7 +34,14 @@ public class Identity extends NamedEntity {
         this.roles = roles;
     }
 
-    //@Column(nullable = false, updatable = false)
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY)
     public ToolProjectInstance getToolProjectInstance() {
         return toolProjectInstance;
@@ -52,7 +60,8 @@ public class Identity extends NamedEntity {
         Identity identity = (Identity) o;
 
         if (roles != null ? !roles.equals(identity.roles) : identity.roles != null) return false;
-        return !(toolProjectInstance != null ? !toolProjectInstance.equals(identity.toolProjectInstance) : identity.toolProjectInstance != null);
+        if (email != null ? !email.equals(identity.email) : identity.email != null) return false;
+        return toolProjectInstance != null ? toolProjectInstance.equals(identity.toolProjectInstance) : identity.toolProjectInstance == null;
 
     }
 
@@ -60,6 +69,7 @@ public class Identity extends NamedEntity {
     public int hashCode() {
         int result = super.hashCode();
         result = 31 * result + (roles != null ? roles.hashCode() : 0);
+        result = 31 * result + (email != null ? email.hashCode() : 0);
         result = 31 * result + (toolProjectInstance != null ? toolProjectInstance.hashCode() : 0);
         return result;
     }
@@ -68,6 +78,7 @@ public class Identity extends NamedEntity {
     public String toString() {
         return "Identity{" +
                 "roles=" + roles +
+                ", email='" + email + '\'' +
                 ", toolProjectInstance=" + toolProjectInstance +
                 '}';
     }

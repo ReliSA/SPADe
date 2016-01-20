@@ -118,7 +118,7 @@ public class Configuration extends NamedEntity {
             return false;
         if (artifacts != null ? !artifacts.equals(that.artifacts) : that.artifacts != null) return false;
         if (workUnits != null ? !workUnits.equals(that.workUnits) : that.workUnits != null) return false;
-        return !(branch != null ? !branch.equals(that.branch) : that.branch != null);
+        return branch != null ? branch.equals(that.branch) : that.branch == null;
 
     }
 
