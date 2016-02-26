@@ -26,14 +26,12 @@ public class WorkUnit extends WorkItem {
     private Set<WorkUnit> related;
     private Person assignee;
     private Set<WorkItem> prerequisites;
-    private Set<Activity> previousActivities;
     private String category;
 
     public WorkUnit() {
         this.subunits = new LinkedHashSet<>();
         this.related = new LinkedHashSet<>();
         this.prerequisites = new LinkedHashSet<>();
-        this.previousActivities = new LinkedHashSet<>();
     }
 
     public WorkUnit(long id, long externalId, String name, String description, Date created, Person author, String url,
@@ -55,7 +53,6 @@ public class WorkUnit extends WorkItem {
         this.related = related;
         this.assignee = assignee;
         this.prerequisites = prerequisites;
-        this.previousActivities = previousActivities;
         this.category = category;
     }
 
@@ -181,17 +178,6 @@ public class WorkUnit extends WorkItem {
         this.prerequisites = prerequisites;
     }
 
-    @ManyToMany
-    @JoinTable(name = "WorkUnit_PreviousActivity", joinColumns = @JoinColumn(name = "WorkUnit", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "PreviousActivity", referencedColumnName = "id"))
-    public Set<Activity> getPreviousActivities() {
-        return previousActivities;
-    }
-
-    public void setPreviousActivities(Set<Activity> previousActivities) {
-        this.previousActivities = previousActivities;
-    }
-
     public String getCategory() {
         return category;
     }
@@ -222,9 +208,7 @@ public class WorkUnit extends WorkItem {
         if (assignee != null ? !assignee.equals(workUnit.assignee) : workUnit.assignee != null) return false;
         if (prerequisites != null ? !prerequisites.equals(workUnit.prerequisites) : workUnit.prerequisites != null)
             return false;
-        if (previousActivities != null ? !previousActivities.equals(workUnit.previousActivities) : workUnit.previousActivities != null)
-            return false;
-        return !(category != null ? !category.equals(workUnit.category) : workUnit.category != null);
+        return category != null ? category.equals(workUnit.category) : workUnit.category == null;
 
     }
 
@@ -244,7 +228,6 @@ public class WorkUnit extends WorkItem {
         result = 31 * result + (related != null ? related.hashCode() : 0);
         result = 31 * result + (assignee != null ? assignee.hashCode() : 0);
         result = 31 * result + (prerequisites != null ? prerequisites.hashCode() : 0);
-        result = 31 * result + (previousActivities != null ? previousActivities.hashCode() : 0);
         result = 31 * result + (category != null ? category.hashCode() : 0);
         return result;
     }
@@ -265,7 +248,6 @@ public class WorkUnit extends WorkItem {
                 ", related=" + related +
                 ", assignee=" + assignee +
                 ", prerequisites=" + prerequisites +
-                ", previousActivities=" + previousActivities +
                 ", category='" + category + '\'' +
                 '}';
     }
