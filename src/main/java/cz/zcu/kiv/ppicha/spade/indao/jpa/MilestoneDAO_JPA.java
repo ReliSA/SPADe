@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.MilestoneDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class MilestoneDAO_JPA extends GenericDAO_JPA<Milestone> implements MilestoneDAO {
 
     public MilestoneDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Milestone.class);
     }
 
     public Milestone save(Milestone milestone) {

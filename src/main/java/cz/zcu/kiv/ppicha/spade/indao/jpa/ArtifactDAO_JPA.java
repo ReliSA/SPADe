@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.ArtifactDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class ArtifactDAO_JPA extends GenericDAO_JPA<Artifact> implements ArtifactDAO {
 
     public ArtifactDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Artifact.class);
     }
 
     public Artifact save(Artifact artifact) {

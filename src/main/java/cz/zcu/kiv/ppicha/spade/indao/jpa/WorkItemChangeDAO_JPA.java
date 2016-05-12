@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.WorkItemChangeDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class WorkItemChangeDAO_JPA extends GenericDAO_JPA<WorkItemChange> implements WorkItemChangeDAO {
 
     public WorkItemChangeDAO_JPA(EntityManager em){
-        super(em);
+        super(em, WorkItemChange.class);
     }
 
     public WorkItemChange save(WorkItemChange wic) {

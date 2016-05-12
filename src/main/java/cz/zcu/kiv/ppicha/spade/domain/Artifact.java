@@ -1,6 +1,6 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.enums.ArtifactType;
+import cz.zcu.kiv.ppicha.spade.domain.enums.ArtifactClass;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,50 +11,44 @@ import java.util.Date;
 @Entity
 public class Artifact extends WorkItem {
 
-    private ArtifactType type;
+    private ArtifactClass artifactClass;
+    private String mimeType;
+    private long size;
 
     public Artifact() {
     }
 
-    public Artifact(long id, long externalId, String name, String description, Date created, Person author, String url,
-                    ArtifactType type) {
+    public Artifact(long id, String externalId, String name, String description, Date created, Identity author, String url,
+                    ArtifactClass artifactClass, String mimeType, long size) {
         super(id, externalId, name, description, created, author, url);
-        this.type = type;
+        this.artifactClass = artifactClass;
+        this.mimeType = mimeType;
+        this.size = size;
     }
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false, updatable = false)
-    public ArtifactType getType() {
-        return type;
+    public ArtifactClass getArtifactClass() {
+        return artifactClass;
     }
 
-    public void setType(ArtifactType type) {
-        this.type = type;
+    public void setArtifactClass(ArtifactClass artifactClass) {
+        this.artifactClass = artifactClass;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Artifact artifact = (Artifact) o;
-
-        return type == artifact.type;
-
+    public String getMimeType() {
+        return mimeType;
     }
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        return result;
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
     }
 
-    @Override
-    public String toString() {
-        return "Artifact{" +
-                "type=" + type +
-                '}';
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
     }
 }

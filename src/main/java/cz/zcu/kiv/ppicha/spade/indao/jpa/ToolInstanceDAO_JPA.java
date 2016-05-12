@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.ToolInstanceDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class ToolInstanceDAO_JPA extends GenericDAO_JPA<ToolInstance> implements ToolInstanceDAO {
 
     public ToolInstanceDAO_JPA(EntityManager em){
-        super(em);
+        super(em, ToolInstance.class);
     }
 
     public ToolInstance save(ToolInstance ti) {

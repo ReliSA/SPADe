@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.IterationDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class IterationDAO_JPA extends GenericDAO_JPA<Iteration> implements IterationDAO {
 
     public IterationDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Iteration.class);
     }
 
     public Iteration save(Iteration iteration) {

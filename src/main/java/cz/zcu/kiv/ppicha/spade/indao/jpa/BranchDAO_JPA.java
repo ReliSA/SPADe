@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.BranchDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class BranchDAO_JPA extends GenericDAO_JPA<Branch> implements BranchDAO {
 
     public BranchDAO_JPA(EntityManager em) {
-        super(em);
+        super(em, Branch.class);
     }
 
     public Branch save(Branch branch) {

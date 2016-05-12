@@ -6,13 +6,13 @@ import javax.persistence.*;
 public abstract class BaseEntity {
 
     protected long id;
-    protected long externalId;
+    protected String externalId;
 
     public BaseEntity() {
         this.id = 0;
     }
 
-    public BaseEntity(long id, long externalId) {
+    public BaseEntity(long id, String externalId) {
         this.id = id;
         this.externalId = externalId;
     }
@@ -28,38 +28,12 @@ public abstract class BaseEntity {
     }
 
     @Column(updatable = false)
-    public long getExternalId() {
+    public String getExternalId() {
         return externalId;
     }
 
-    public void setExternalId(long externalId) {
+    public void setExternalId(String externalId) {
         this.externalId = externalId;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        BaseEntity that = (BaseEntity) o;
-
-        if (id != that.id) return false;
-        return externalId == that.externalId;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = (int) (id ^ (id >>> 32));
-        result = 31 * result + (int) (externalId ^ (externalId >>> 32));
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "BaseEntity{" +
-                "id=" + id +
-                ", externalId=" + externalId +
-                '}';
-    }
 }

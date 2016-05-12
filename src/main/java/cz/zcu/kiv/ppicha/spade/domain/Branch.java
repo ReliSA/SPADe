@@ -1,55 +1,30 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.abstracts.NamedAndDescribedEntity;
+import cz.zcu.kiv.ppicha.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity
-public class Branch extends NamedAndDescribedEntity {
+public class Branch extends DescribedEntity {
 
-    private boolean isTrunk;
+    private boolean isMain;
 
     public Branch() {
     }
 
-    public Branch(long id, long externalId, String name, String description, boolean isTrunk) {
+    public Branch(long id, String externalId, String name, String description, boolean isMain) {
         super(id, externalId, name, description);
-        this.isTrunk = isTrunk;
+        this.isMain = isMain;
     }
 
     @Column(nullable = false, updatable = false)
-    public boolean getIsTrunk() {
-        return isTrunk;
+    public boolean getIsMain() {
+        return isMain;
     }
 
-    public void setIsTrunk(boolean isTrunk) {
-        this.isTrunk = isTrunk;
+    public void setIsMain(boolean isMain) {
+        this.isMain = isMain;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Branch branch = (Branch) o;
-
-        return isTrunk == branch.isTrunk;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (isTrunk ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Branch{" +
-                "isTrunk=" + isTrunk +
-                '}';
-    }
 }

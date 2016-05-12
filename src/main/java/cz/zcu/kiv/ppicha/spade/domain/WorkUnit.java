@@ -1,9 +1,8 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitPriority;
-import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitSeverity;
-import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitStatus;
-import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitType;
+import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitPrioritySuperclass;
+import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitSeveritySuperclass;
+import cz.zcu.kiv.ppicha.spade.domain.enums.WorkUnitStatusSuperclass;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,28 +16,27 @@ public class WorkUnit extends WorkItem {
     private WorkUnitType type;
     private WorkUnitPriority priority;
     private WorkUnitSeverity severity;
-    private long estimatedTime;
-    private long spentTime;
+    private double estimatedTime;
+    private double spentTime;
+    private double estimatedRemaining;
+    private Date startDate;
     private Date dueDate;
     private WorkUnitStatus status;
     private int progress;
-    private Set<WorkUnit> subunits;
-    private Set<WorkUnit> related;
     private Person assignee;
     private Set<WorkItem> prerequisites;
     private String category;
+    private Set<Configuration> configurations;
 
     public WorkUnit() {
-        this.subunits = new LinkedHashSet<>();
-        this.related = new LinkedHashSet<>();
         this.prerequisites = new LinkedHashSet<>();
+        this.configurations = new LinkedHashSet<>();
     }
 
-    public WorkUnit(long id, long externalId, String name, String description, Date created, Person author, String url,
+    public WorkUnit(long id, String externalId, String name, String description, Date created, Identity author, String url,
                     int number, WorkUnitType type, WorkUnitPriority priority, WorkUnitSeverity severity,
-                    long estimatedTime, long spentTime, Date dueDate, WorkUnitStatus status, int progress,
-                    Set<WorkUnit> subunits, Set<WorkUnit> related, Person assignee, Set<WorkItem> prerequisites,
-                    Set<Activity> previousActivities, String category) {
+                    double estimatedTime, double spentTime, double estimatedRemaining, Date startDate, Date dueDate, WorkUnitStatus status, int progress,
+                    Person assignee, Set<WorkItem> prerequisites, String category, Set<Configuration> configurations) {
         super(id, externalId, name, description, created, author, url);
         this.number = number;
         this.type = type;
@@ -46,14 +44,15 @@ public class WorkUnit extends WorkItem {
         this.severity = severity;
         this.estimatedTime = estimatedTime;
         this.spentTime = spentTime;
+        this.estimatedRemaining = estimatedRemaining;
+        this.startDate = startDate;
         this.dueDate = dueDate;
         this.status = status;
         this.progress = progress;
-        this.subunits = subunits;
-        this.related = related;
         this.assignee = assignee;
         this.prerequisites = prerequisites;
         this.category = category;
+        this.configurations =configurations;
     }
 
     @Column(nullable = false, updatable = false)
@@ -65,8 +64,6 @@ public class WorkUnit extends WorkItem {
         this.number = number;
     }
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
     public WorkUnitType getType() {
         return type;
     }
@@ -75,8 +72,6 @@ public class WorkUnit extends WorkItem {
         this.type = type;
     }
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
     public WorkUnitPriority getPriority() {
         return priority;
     }
@@ -85,7 +80,6 @@ public class WorkUnit extends WorkItem {
         this.priority = priority;
     }
 
-    @Enumerated(value = EnumType.STRING)
     public WorkUnitSeverity getSeverity() {
         return severity;
     }
@@ -94,20 +88,37 @@ public class WorkUnit extends WorkItem {
         this.severity = severity;
     }
 
-    public long getEstimatedTime() {
+    public double getEstimatedTime() {
         return estimatedTime;
     }
 
-    public void setEstimatedTime(long estimatedTime) {
+    public void setEstimatedTime(double estimatedTime) {
         this.estimatedTime = estimatedTime;
     }
 
-    public long getSpentTime() {
+    public double getSpentTime() {
         return spentTime;
     }
 
-    public void setSpentTime(long spentTime) {
+    public void setSpentTime(double spentTime) {
         this.spentTime = spentTime;
+    }
+
+    public double getEstimatedRemaining() {
+        return estimatedRemaining;
+    }
+
+    public void setEstimatedRemaining(double estimatedRemaining) {
+        this.estimatedRemaining = estimatedRemaining;
+    }
+
+    @Temporal(TemporalType.DATE)
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     @Temporal(TemporalType.DATE)
@@ -119,12 +130,10 @@ public class WorkUnit extends WorkItem {
         this.dueDate = dueDate;
     }
 
-    @Column(nullable = false)
     public WorkUnitStatus getStatus() {
         return status;
     }
 
-    @Enumerated(value = EnumType.STRING)
     public void setStatus(WorkUnitStatus status) {
         this.status = status;
     }
@@ -138,26 +147,6 @@ public class WorkUnit extends WorkItem {
         this.progress = progress;
     }
 
-    @OneToMany
-    public Set<WorkUnit> getSubunits() {
-        return subunits;
-    }
-
-    public void setSubunits(Set<WorkUnit> subunits) {
-        this.subunits = subunits;
-    }
-
-    @ManyToMany
-    @JoinTable(name = "WorkUnit_Related", joinColumns = @JoinColumn(name = "WorkUnit", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "Related", referencedColumnName = "id"))
-    public Set<WorkUnit> getRelated() {
-        return related;
-    }
-
-    public void setRelated(Set<WorkUnit> related) {
-        this.related = related;
-    }
-
     @ManyToOne(fetch = FetchType.LAZY)
     public Person getAssignee() {
         return assignee;
@@ -168,8 +157,8 @@ public class WorkUnit extends WorkItem {
     }
 
     @ManyToMany
-    @JoinTable(name = "WorkUnit_Prerequisite", joinColumns = @JoinColumn(name = "WorkUnit", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "Prerequisite", referencedColumnName = "id"))
+    @JoinTable(name = "WorkUnit_Prerequisite", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "prerequisite_id", referencedColumnName = "id"))
     public Set<WorkItem> getPrerequisites() {
         return prerequisites;
     }
@@ -186,69 +175,14 @@ public class WorkUnit extends WorkItem {
         this.category = category;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        WorkUnit workUnit = (WorkUnit) o;
-
-        if (number != workUnit.number) return false;
-        if (estimatedTime != workUnit.estimatedTime) return false;
-        if (spentTime != workUnit.spentTime) return false;
-        if (progress != workUnit.progress) return false;
-        if (type != workUnit.type) return false;
-        if (priority != workUnit.priority) return false;
-        if (severity != workUnit.severity) return false;
-        if (dueDate != null ? !dueDate.equals(workUnit.dueDate) : workUnit.dueDate != null) return false;
-        if (status != workUnit.status) return false;
-        if (subunits != null ? !subunits.equals(workUnit.subunits) : workUnit.subunits != null) return false;
-        if (related != null ? !related.equals(workUnit.related) : workUnit.related != null) return false;
-        if (assignee != null ? !assignee.equals(workUnit.assignee) : workUnit.assignee != null) return false;
-        if (prerequisites != null ? !prerequisites.equals(workUnit.prerequisites) : workUnit.prerequisites != null)
-            return false;
-        return category != null ? category.equals(workUnit.category) : workUnit.category == null;
-
+    @ManyToMany
+    @JoinTable(name = "WorkUnit_Configuration", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"))
+    public Set<Configuration> getConfigurations() {
+        return configurations;
     }
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + number;
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (priority != null ? priority.hashCode() : 0);
-        result = 31 * result + (severity != null ? severity.hashCode() : 0);
-        result = 31 * result + (int) (estimatedTime ^ (estimatedTime >>> 32));
-        result = 31 * result + (int) (spentTime ^ (spentTime >>> 32));
-        result = 31 * result + (dueDate != null ? dueDate.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + progress;
-        result = 31 * result + (subunits != null ? subunits.hashCode() : 0);
-        result = 31 * result + (related != null ? related.hashCode() : 0);
-        result = 31 * result + (assignee != null ? assignee.hashCode() : 0);
-        result = 31 * result + (prerequisites != null ? prerequisites.hashCode() : 0);
-        result = 31 * result + (category != null ? category.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "WorkUnit{" +
-                "number=" + number +
-                ", type=" + type +
-                ", priority=" + priority +
-                ", severity=" + severity +
-                ", estimatedTime=" + estimatedTime +
-                ", spentTime=" + spentTime +
-                ", dueDate=" + dueDate +
-                ", status=" + status +
-                ", progress=" + progress +
-                ", subunits=" + subunits +
-                ", related=" + related +
-                ", assignee=" + assignee +
-                ", prerequisites=" + prerequisites +
-                ", category='" + category + '\'' +
-                '}';
+    public void setConfigurations(Set<Configuration> configurations) {
+        this.configurations = configurations;
     }
 }

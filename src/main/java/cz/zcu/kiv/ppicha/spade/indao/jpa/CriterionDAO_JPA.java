@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.CriterionDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class CriterionDAO_JPA extends GenericDAO_JPA<Criterion> implements CriterionDAO {
 
     public CriterionDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Criterion.class);
     }
 
     public Criterion save(Criterion criterion) {

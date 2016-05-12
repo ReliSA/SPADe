@@ -1,30 +1,29 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.abstracts.NamedAndDescribedEntity;
+import cz.zcu.kiv.ppicha.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-public class Activity extends NamedAndDescribedEntity {
+public class Activity extends DescribedEntity {
 
     private Set<WorkUnit> workUnits;
-    private Set<Activity> predecessors;
 
     public Activity() {
         this.workUnits = new LinkedHashSet<>();
-        this.predecessors = new LinkedHashSet<>();
     }
 
-    public Activity(long id, long externalId, String name, String description, Set<WorkUnit> workUnits,
+    public Activity(long id, String externalId, String name, String description, Set<WorkUnit> workUnits,
                     Set<Activity> predecessors) {
         super(id, externalId, name, description);
         this.workUnits = workUnits;
-        this.predecessors = predecessors;
     }
 
     @OneToMany
+    @JoinTable(name = "Activity_WorkUnit", joinColumns = @JoinColumn(name = "activity_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"))
     public Set<WorkUnit> getWorkUnits() {
         return this.workUnits;
     }
@@ -33,43 +32,4 @@ public class Activity extends NamedAndDescribedEntity {
         this.workUnits = workUnits;
     }
 
-    @ManyToMany
-    @JoinTable(name = "Activity_Predecessor", joinColumns = @JoinColumn(name = "activity", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "predecessor", referencedColumnName = "id"))
-    public Set<Activity> getPredecessors() {
-        return predecessors;
-    }
-
-    public void setPredecessors(Set<Activity> predecessors) {
-        this.predecessors = predecessors;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Activity activity = (Activity) o;
-
-        if (workUnits != null ? !workUnits.equals(activity.workUnits) : activity.workUnits != null) return false;
-        return predecessors != null ? predecessors.equals(activity.predecessors) : activity.predecessors == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (workUnits != null ? workUnits.hashCode() : 0);
-        result = 31 * result + (predecessors != null ? predecessors.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Activity{" +
-                "workUnits=" + workUnits +
-                ", predecessors=" + predecessors +
-                '}';
-    }
 }

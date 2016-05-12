@@ -21,57 +21,14 @@
     <favorites_list name="SPADe" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="GenericDAO.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/GenericDAO.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="13" column="8" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="GenericDAO_JPA.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/GenericDAO_JPA.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ToolProjectInstance.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolProjectInstance.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Identity.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Identity.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.17525773">
-              <caret line="13" column="51" selection-start-line="13" selection-start-column="51" selection-end-line="13" selection-end-column="51" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Enum" />
         <option value="Interface" />
         <option value="Class" />
+        <option value="Enum" />
       </list>
     </option>
   </component>
@@ -83,57 +40,57 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Activity.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Identity.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/WorkItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItem.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/BaseEntity.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/Main.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Configuration.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/DevelopmentProgram.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnit.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ActivityDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ArtifactDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/BranchDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/CompetencyDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ConfigurationDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/CriterionDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/DevelopmentProgramDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/IdentityDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/IterationDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/MilestoneDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/PersonDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/Phase.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/Project.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ProjectDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/RoleDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolInstanceDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolProjectInstanceDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/WorkItemChangeDAO.java" />
         <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/WorkUnitDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ActivityDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ArticfactDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ArtifactDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/BranchDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/CompetenczDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/CompetencyDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ConfigurationDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/CriterionDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/DevelopmentProgramDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/IdentityDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/IterationDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/MilestoneDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/PersonDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/PhaseDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ProjectDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/RoleDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ToolInstanceDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ToolProjectInstance.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ToolProjectInstanceDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/WorkItemChangeDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/WorkUnitDAO_JPA.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/GenericDAO.java" />
-        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/GenericDAO_JPA.java" />
+        <option value="$PROJECT_DIR$/src/main/resources/META-INF/persistence.xml" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Group.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitType.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitStatus.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitSeverity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitPriority.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/ArtifactType.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/ArtifactClass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/BaseEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/TemporalNamedAndDescribedEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Activity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Artifact.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Branch.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Competency.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Criterion.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/DevelopmentProgram.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Identity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/IdentityGroup.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Iteration.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Milestone.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Person.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Phase.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Role.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolInstance.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItemChange.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitSeverity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitType.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/RoleSuperclass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitStatusSuperclass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitTypeSuperclass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitSeveritySuperclass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitPrioritySuperclass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitStatus.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitPriority.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItem.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/AuthoredEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitPriorityClass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitStatusClass.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Configuration.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ProjectSegment.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/ProjectSegment.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/NamedAndDescribedEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/NamedEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnit.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Project.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolProjectInstance.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/DescribedEntity.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitRelationType.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitRelation.java" />
+        <option value="$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Release.java" />
       </list>
     </option>
   </component>
@@ -145,10 +102,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-8" />
-    <option name="y" value="-8" />
-    <option name="width" value="1296" />
-    <option name="height" value="1010" />
+    <option name="width" value="640" />
+    <option name="height" value="994" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -175,6 +130,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -190,6 +146,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="SPADe" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SPADe" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SPADe" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -271,41 +241,7 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="indao" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SPADe" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="SPADe" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="src" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="java" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="spade" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="indao" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="jpa" />
+              <option name="myItemId" value="domain" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -338,12 +274,49 @@
               <option name="myItemId" value="domain" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="enums" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SPADe" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="SPADe" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="spade" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="domain" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="abstracts" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
           </PATH>
         </subPane>
       </pane>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="RunManager" selected="Application.Main">
@@ -634,7 +607,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1010" extended-state="6" />
+    <frame x="0" y="0" width="640" height="994" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
@@ -645,19 +618,19 @@
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24921875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.4198718" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32868218" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32852387" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32963374" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32963374" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32868218" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32713178" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
@@ -681,10 +654,187 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItemChange.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolProjectInstanceDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolInstanceDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/RoleDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ProjectDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/PhaseDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/PersonDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/MilestoneDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/IterationDAO.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.058419243">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/resources/META-INF/persistence.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-9.153846">
+          <caret line="14" column="65" selection-start-line="14" selection-start-column="65" selection-end-line="14" selection-end-column="65" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/ArtifactClass.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="13" selection-start-line="12" selection-start-column="13" selection-end-line="12" selection-end-column="13" />
+          <caret line="5" column="25" selection-start-line="5" selection-start-column="25" selection-end-line="5" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/ProgramType.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="12" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/Tool.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="5" column="12" selection-start-line="5" selection-start-column="12" selection-end-line="5" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitPrioritySuperclass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.24797407">
+          <caret line="9" column="9" selection-start-line="9" selection-start-column="9" selection-end-line="9" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitSeveritySuperclass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.30307943">
+          <caret line="11" column="12" selection-start-line="11" selection-start-column="12" selection-end-line="12" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitStatusSuperclass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.22042139">
+          <caret line="8" column="11" selection-start-line="8" selection-start-column="11" selection-end-line="8" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitTypeSuperclass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.30307943">
+          <caret line="11" column="9" selection-start-line="11" selection-start-column="9" selection-end-line="11" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/RoleSuperclass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="17" column="10" selection-start-line="17" selection-start-column="10" selection-end-line="17" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitPriorityClass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitStatusClass.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.027552674">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/BaseEntity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="37" column="0" selection-start-line="37" selection-start-column="0" selection-end-line="37" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/NamedEntity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4089347">
+          <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/ProjectSegment.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="40" column="0" selection-start-line="40" selection-start-column="0" selection-end-line="40" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/AuthoredEntity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="8" column="22" selection-start-line="8" selection-start-column="22" selection-end-line="8" selection-end-column="22" />
+          <folding>
+            <element signature="imports" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/abstracts/DescribedEntity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -692,38 +842,31 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Activity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="12" column="34" selection-start-line="12" selection-start-column="34" selection-end-line="12" selection-end-column="34" />
+          <caret line="9" column="40" selection-start-line="9" selection-start-column="40" selection-end-line="9" selection-end-column="40" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnit.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="235" column="18" selection-start-line="235" selection-start-column="18" selection-end-line="235" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/ArtifactType.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Artifact.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="13" selection-start-line="11" selection-start-column="13" selection-end-line="11" selection-end-column="13" />
+          <caret line="20" column="35" selection-start-line="20" selection-start-column="35" selection-end-line="20" selection-end-column="35" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItem.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Branch.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="34" column="0" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+          <caret line="15" column="33" selection-start-line="15" selection-start-column="33" selection-end-line="15" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Competency.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="37" selection-start-line="12" selection-start-column="37" selection-end-line="12" selection-end-column="37" />
           <folding />
         </state>
       </provider>
@@ -731,119 +874,65 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Configuration.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="17" column="23" selection-start-line="17" selection-start-column="23" selection-end-line="17" selection-end-column="23" />
+          <caret line="17" column="25" selection-start-line="17" selection-start-column="25" selection-end-line="17" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Criterion.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="12" column="36" selection-start-line="12" selection-start-column="36" selection-end-line="12" selection-end-column="36" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Role.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/DevelopmentProgram.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <caret line="20" column="45" selection-start-line="20" selection-start-column="45" selection-end-line="20" selection-end-column="45" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Project.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Identity.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="15" column="41" selection-start-line="15" selection-start-column="41" selection-end-line="15" selection-end-column="41" />
+          <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolInstance.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/IdentityGroup.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+          <caret line="20" column="40" selection-start-line="20" selection-start-column="40" selection-end-line="20" selection-end-column="40" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ActivityDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Iteration.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="22" column="7" selection-start-line="22" selection-start-column="7" selection-end-line="22" selection-end-column="7" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ArtifactDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Milestone.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="17" column="36" selection-start-line="17" selection-start-column="36" selection-end-line="17" selection-end-column="36" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/BranchDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Person.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/CompetencyDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="43" selection-start-line="9" selection-start-column="43" selection-end-line="9" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ConfigurationDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/CriterionDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/DevelopmentProgramDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/IdentityDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/IterationDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/MilestoneDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/PersonDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="39" column="17" selection-start-line="39" selection-start-column="17" selection-end-line="39" selection-end-column="17" />
           <folding />
         </state>
       </provider>
@@ -851,282 +940,129 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Phase.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="34" column="14" selection-start-line="34" selection-start-column="14" selection-end-line="34" selection-end-column="14" />
+          <caret line="16" column="0" selection-start-line="16" selection-start-column="0" selection-end-line="16" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/PhaseDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Project.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="53" column="0" selection-start-line="53" selection-start-column="0" selection-end-line="53" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ProjectDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Role.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="19" column="31" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/RoleDAO.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolInstance.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+          <caret line="16" column="39" selection-start-line="16" selection-start-column="39" selection-end-line="16" selection-end-column="39" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolProjectInstanceDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/WorkItemChangeDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/ToolInstanceDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/WorkUnitDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="0" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ActivityDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#357#358#0" expanded="true" />
-            <element signature="e#382#383#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/BranchDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="44" selection-start-line="24" selection-start-column="44" selection-end-line="24" selection-end-column="44" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#346#347#0" expanded="true" />
-            <element signature="e#371#372#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ArtifactDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="1" selection-start-line="10" selection-start-column="29" selection-end-line="31" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/CompetencyDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="31" column="1" selection-start-line="10" selection-start-column="31" selection-end-line="31" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/CriterionDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/DevelopmentProgramDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="46" selection-start-line="24" selection-start-column="46" selection-end-line="24" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/IdentityDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="47" selection-start-line="24" selection-start-column="47" selection-end-line="24" selection-end-column="47" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/IterationDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.55105346">
-          <caret line="22" column="28" selection-start-line="22" selection-start-column="28" selection-end-line="22" selection-end-column="28" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/MilestoneDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="48" selection-start-line="24" selection-start-column="48" selection-end-line="24" selection-end-column="48" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/PersonDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="45" selection-start-line="24" selection-start-column="45" selection-end-line="24" selection-end-column="45" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/PhaseDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="44" selection-start-line="24" selection-start-column="44" selection-end-line="24" selection-end-column="44" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ProjectDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="46" selection-start-line="24" selection-start-column="46" selection-end-line="24" selection-end-column="46" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/RoleDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="43" selection-start-line="24" selection-start-column="43" selection-end-line="24" selection-end-column="43" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ToolInstanceDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="41" selection-start-line="24" selection-start-column="41" selection-end-line="24" selection-end-column="41" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ToolProjectInstanceDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="42" selection-start-line="24" selection-start-column="42" selection-end-line="24" selection-end-column="42" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/WorkItemChangeDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="42" selection-start-line="24" selection-start-column="42" selection-end-line="24" selection-end-column="42" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/WorkUnitDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.60615885">
-          <caret line="24" column="41" selection-start-line="24" selection-start-column="41" selection-end-line="24" selection-end-column="41" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/ConfigurationDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.79902756">
-          <caret line="31" column="1" selection-start-line="10" selection-start-column="34" selection-end-line="31" selection-end-column="1" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/GenericDAO.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="13" column="8" selection-start-line="13" selection-start-column="8" selection-end-line="13" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/indao/jpa/GenericDAO_JPA.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="49" column="0" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/ToolProjectInstance.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="7" column="13" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+          <caret line="38" column="0" selection-start-line="38" selection-start-column="0" selection-end-line="38" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Identity.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItem.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.17525773">
-          <caret line="13" column="51" selection-start-line="13" selection-start-column="51" selection-end-line="13" selection-end-column="51" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="7" column="0" selection-start-line="7" selection-start-column="0" selection-end-line="8" selection-end-column="47" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnit.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="25" column="9" selection-start-line="25" selection-start-column="9" selection-end-line="25" selection-end-column="9" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkItemChange.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.4562427">
+          <caret line="30" column="14" selection-start-line="30" selection-start-column="14" selection-end-line="30" selection-end-column="14" />
+          <folding>
+            <element signature="e#783#784#0" expanded="true" />
+            <element signature="e#829#830#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitPriority.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="25" column="29" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/enums/WorkUnitRelationType.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="19" column="12" selection-start-line="19" selection-start-column="12" selection-end-line="19" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitType.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="39" selection-start-line="16" selection-start-column="39" selection-end-line="16" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitStatus.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="25" column="29" selection-start-line="25" selection-start-column="29" selection-end-line="25" selection-end-column="29" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitSeverity.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="43" selection-start-line="16" selection-start-column="43" selection-end-line="16" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/WorkUnitRelation.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="32" column="44" selection-start-line="32" selection-start-column="44" selection-end-line="32" selection-end-column="44" />
+          <folding>
+            <element signature="imports" expanded="false" />
+            <element signature="e#1184#1185#0" expanded="false" />
+            <element signature="e#1216#1217#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/cz/zcu/kiv/ppicha/spade/domain/Release.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.13885647">
+          <caret line="7" column="22" selection-start-line="7" selection-start-column="22" selection-end-line="7" selection-end-column="22" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

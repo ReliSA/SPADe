@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.IdentityDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class IdentityDAO_JPA extends GenericDAO_JPA<Identity> implements IdentityDAO {
 
     public IdentityDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Identity.class);
     }
 
     public Identity save(Identity identity) {

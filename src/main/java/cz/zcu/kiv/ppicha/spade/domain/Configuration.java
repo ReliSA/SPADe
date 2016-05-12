@@ -1,38 +1,40 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.abstracts.NamedEntity;
+import cz.zcu.kiv.ppicha.spade.domain.abstracts.AuthoredEntity;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-public class Configuration extends NamedEntity {
+public class Configuration extends AuthoredEntity {
 
-    private int number;
-    private WorkItemChange lastWorkItemChange;
-    private boolean isRevision;
-    private Set<Artifact> artifacts;
-    private Set<WorkUnit> workUnits;
-    private Branch branch;
-    private boolean isTag;
+    protected int number;
+    protected Set<WorkItemChange> changes;
+    protected boolean isRevision;
+    protected Set<Artifact> artifacts;
+    protected Set<WorkUnit> workUnits;
+    protected Branch branch;
+    protected String tags;
 
     public Configuration() {
+        this.changes = new LinkedHashSet<>();
         this.artifacts = new LinkedHashSet<>();
         this.workUnits = new LinkedHashSet<>();
     }
 
-    public Configuration(long id, long externalId, String name, int number, WorkItemChange lastWorkItemChange,
+    public Configuration(long id, String externalId, String name, String description, int number, Date created, Identity author, Set<WorkItemChange> changes, WorkItemChange lastWorkItemChange,
                          boolean isRevision, Set<Artifact> artifacts, Set<WorkUnit> workUnits, Branch branch,
-                         boolean isTag) {
-        super(id, externalId, name);
+                         String tags) {
+        super(id, externalId, name, description, created, author);
         this.number = number;
-        this.lastWorkItemChange = lastWorkItemChange;
+        this.changes = changes;
         this.isRevision = isRevision;
         this.artifacts = artifacts;
         this.workUnits = workUnits;
         this.branch = branch;
-        this.isTag = isTag;
+        this.tags = tags;
     }
 
     @Column(updatable = false)
@@ -44,14 +46,15 @@ public class Configuration extends NamedEntity {
         this.number = number;
     }
 
-    //@Column(nullable = false, updatable = false)
-    @OneToOne(fetch = FetchType.LAZY)
-    public WorkItemChange getLastWorkItemChange() {
-        return lastWorkItemChange;
+    public Set<WorkItemChange> getChanges() {
+        return changes;
     }
 
-    public void setLastWorkItemChange(WorkItemChange lastWorkItemChange) {
-        this.lastWorkItemChange = lastWorkItemChange;
+    @OneToMany
+    @JoinTable(name = "Configuration_Change", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "changet_id", referencedColumnName = "id"))
+    public void setChanges(Set<WorkItemChange> changes) {
+        this.changes = changes;
     }
 
     @Column(nullable = false, updatable = false)
@@ -64,8 +67,8 @@ public class Configuration extends NamedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "Configuration_Artifact", joinColumns = @JoinColumn(name = "configuration", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "artifact", referencedColumnName = "id"))
+    @JoinTable(name = "Configuration_Artifact", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "artifact_id", referencedColumnName = "id"))
     public Set<Artifact> getArtifacts() {
         return artifacts;
     }
@@ -75,8 +78,8 @@ public class Configuration extends NamedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "Configuration_WorkUnit", joinColumns = @JoinColumn(name = "configuration", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "work_unit", referencedColumnName = "id"))
+    @JoinTable(name = "Configuration_WorkUnit", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"))
     public Set<WorkUnit> getWorkUnits() {
         return workUnits;
     }
@@ -94,57 +97,11 @@ public class Configuration extends NamedEntity {
         this.branch = branch;
     }
 
-    @Column(updatable = false)
-    public boolean getIsTag() {
-        return isTag;
+    public String getTags() {
+        return tags;
     }
 
-    public void setIsTag(boolean isTag) {
-        this.isTag = isTag;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-
-        Configuration that = (Configuration) o;
-
-        if (number != that.number) return false;
-        if (isRevision != that.isRevision) return false;
-        if (isTag != that.isTag) return false;
-        if (lastWorkItemChange != null ? !lastWorkItemChange.equals(that.lastWorkItemChange) : that.lastWorkItemChange != null)
-            return false;
-        if (artifacts != null ? !artifacts.equals(that.artifacts) : that.artifacts != null) return false;
-        if (workUnits != null ? !workUnits.equals(that.workUnits) : that.workUnits != null) return false;
-        return branch != null ? branch.equals(that.branch) : that.branch == null;
-
-    }
-
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + number;
-        result = 31 * result + (lastWorkItemChange != null ? lastWorkItemChange.hashCode() : 0);
-        result = 31 * result + (isRevision ? 1 : 0);
-        result = 31 * result + (artifacts != null ? artifacts.hashCode() : 0);
-        result = 31 * result + (workUnits != null ? workUnits.hashCode() : 0);
-        result = 31 * result + (branch != null ? branch.hashCode() : 0);
-        result = 31 * result + (isTag ? 1 : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Configuration{" +
-                "number=" + number +
-                ", lastWorkItemChange=" + lastWorkItemChange +
-                ", isRevision=" + isRevision +
-                ", artifacts=" + artifacts +
-                ", workUnits=" + workUnits +
-                ", branch=" + branch +
-                ", isTag=" + isTag +
-                '}';
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 }

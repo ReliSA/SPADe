@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.WorkUnitDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUnitDAO {
 
     public WorkUnitDAO_JPA(EntityManager em){
-        super(em);
+        super(em, WorkUnit.class);
     }
 
     public WorkUnit save(WorkUnit wu) {

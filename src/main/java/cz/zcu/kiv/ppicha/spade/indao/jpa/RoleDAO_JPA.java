@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.RoleDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class RoleDAO_JPA extends GenericDAO_JPA<Role> implements RoleDAO {
 
     public RoleDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Role.class);
     }
 
     public Role save(Role role) {

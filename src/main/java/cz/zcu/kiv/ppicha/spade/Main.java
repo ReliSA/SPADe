@@ -25,14 +25,6 @@ public class Main {
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         EntityManager em = factory.createEntityManager();
 
-        //Project p = new Project(0, 0, "p", null, null, new Date(), new Date(), null, null, null, null, null, null, null);
-
-        //em.getTransaction().begin();
-        //em.persist(p);
-        //em.getTransaction().commit();
-
-        GenericDAO dao = new GenericDAO_JPA(em);
-
         em.close();
     }
 }

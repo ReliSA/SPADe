@@ -5,9 +5,6 @@ import cz.zcu.kiv.ppicha.spade.indao.GenericDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 20.1.2016.
- */
 public class GenericDAO_JPA<E extends BaseEntity> implements GenericDAO<E> {
 
     protected EntityManager entityManager;
@@ -37,11 +34,7 @@ public class GenericDAO_JPA<E extends BaseEntity> implements GenericDAO<E> {
 
     @Override
     public E findByID(long id) {
-        entityManager.getTransaction().begin();
-
         return entityManager.find(persistedClass, id);
-
-        entityManager.getTransaction().commit();
     }
 
     @Override

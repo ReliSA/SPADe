@@ -1,13 +1,13 @@
 package cz.zcu.kiv.ppicha.spade.domain;
 
-import cz.zcu.kiv.ppicha.spade.domain.abstracts.NamedAndDescribedEntity;
+import cz.zcu.kiv.ppicha.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.*;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Entity
-public class Milestone extends NamedAndDescribedEntity {
+public class Milestone extends DescribedEntity {
 
     private Set<Criterion> criteria;
 
@@ -15,14 +15,14 @@ public class Milestone extends NamedAndDescribedEntity {
         this.criteria = new LinkedHashSet<>();
     }
 
-    public Milestone(long id, long externalId, String name, String description, Set<Criterion> criteria) {
+    public Milestone(long id, String externalId, String name, String description, Set<Criterion> criteria) {
         super(id, externalId, name, description);
         this.criteria = criteria;
     }
 
     @ManyToMany
-    @JoinTable(name = "Phase_Criterion", joinColumns = @JoinColumn(name = "phase", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "criterion", referencedColumnName = "id"))
+    @JoinTable(name = "Phase_Criterion", joinColumns = @JoinColumn(name = "phase_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "criterion_id", referencedColumnName = "id"))
     public Set<Criterion> getCriteria() {
         return criteria;
     }
@@ -43,17 +43,4 @@ public class Milestone extends NamedAndDescribedEntity {
 
     }
 
-    @Override
-    public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (criteria != null ? criteria.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Milestone{" +
-                "criteria=" + criteria +
-                '}';
-    }
 }

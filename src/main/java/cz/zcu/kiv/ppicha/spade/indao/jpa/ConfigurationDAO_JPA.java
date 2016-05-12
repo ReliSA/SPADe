@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.ConfigurationDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class ConfigurationDAO_JPA extends GenericDAO_JPA<Configuration> implements ConfigurationDAO {
 
     public ConfigurationDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Configuration.class);
     }
 
     public Configuration save(Configuration config) {

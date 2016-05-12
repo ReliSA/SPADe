@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.PhaseDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class PhaseDAO_JPA extends GenericDAO_JPA<Phase> implements PhaseDAO {
 
     public PhaseDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Phase.class);
     }
 
     public Phase save(Phase phase) {

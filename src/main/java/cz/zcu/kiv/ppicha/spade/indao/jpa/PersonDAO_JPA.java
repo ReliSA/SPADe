@@ -5,13 +5,10 @@ import cz.zcu.kiv.ppicha.spade.indao.PersonDAO;
 
 import javax.persistence.EntityManager;
 
-/**
- * Created by Petr on 21.1.2016.
- */
 public class PersonDAO_JPA extends GenericDAO_JPA<Person> implements PersonDAO {
 
     public PersonDAO_JPA(EntityManager em){
-        super(em);
+        super(em, Person.class);
     }
 
     public Person save(Person person) {
