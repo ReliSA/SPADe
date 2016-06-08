@@ -9,7 +9,7 @@ import javax.persistence.OneToOne;
 import java.util.Date;
 
 @MappedSuperclass
-public class DefinedProjectSegment extends ProjectSegment {
+public abstract class DefinedProjectSegment extends ProjectSegment {
 
     protected Date created;
     protected Configuration configuration;
