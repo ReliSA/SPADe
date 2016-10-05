@@ -6,7 +6,7 @@ import javax.persistence.Persistence;
 
 public class Main {
 
-    private static final String PERSISTENCE_UNIT = "cz.zcu.kiv.ppicha.spade";
+    private static final String PERSISTENCE_UNIT = "cz.zcu.kiv.spade";
 
     public static void main(String[] args) {
 

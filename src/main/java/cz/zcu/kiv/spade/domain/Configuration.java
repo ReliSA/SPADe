@@ -16,7 +16,7 @@ public class Configuration extends AuthoredEntity {
     protected Collection<Artifact> artifacts;
     protected Collection<WorkUnit> workUnits;
     protected Branch branch;
-    protected Collection<String> tags;
+    protected Collection<VCSTag> tags;
 
     public Configuration() {
         this.changes = new LinkedHashSet<>();
@@ -27,7 +27,7 @@ public class Configuration extends AuthoredEntity {
 
     public Configuration(long id, String externalId, String name, String description, int number, Date created, Identity author, Collection<WorkItemChange> changes, WorkItemChange lastWorkItemChange,
                          boolean isRevision, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Branch branch,
-                         Collection<String> tags) {
+                         Collection<VCSTag> tags) {
         super(id, externalId, name, description, created, author);
         this.number = number;
         this.changes = changes;
@@ -46,13 +46,13 @@ public class Configuration extends AuthoredEntity {
         this.number = number;
     }
 
+    @OneToMany
+    @JoinTable(name = "Configuration_Change", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "change_id", referencedColumnName = "id"))
     public Collection<WorkItemChange> getChanges() {
         return changes;
     }
 
-    @OneToMany
-    @JoinTable(name = "Configuration_Change", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "changet_id", referencedColumnName = "id"))
     public void setChanges(Collection<WorkItemChange> changes) {
         this.changes = changes;
     }
@@ -96,11 +96,14 @@ public class Configuration extends AuthoredEntity {
         this.branch = branch;
     }
 
-    public Collection<String> getTags() {
+    @OneToMany
+    @JoinTable(name = "Configuration_VCSTag", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
+    public Collection<VCSTag> getTags() {
         return tags;
     }
 
-    public void setTags(Collection<String> tags) {
+    public void setTags(Collection<VCSTag> tags) {
         this.tags = tags;
     }
 }

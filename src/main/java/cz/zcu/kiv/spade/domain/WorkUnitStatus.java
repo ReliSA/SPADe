@@ -4,9 +4,11 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitStatusClass;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitStatusSuperclass;
 
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+@Entity
 public class WorkUnitStatus extends DescribedEntity {
 
     private WorkUnitStatusClass statusClass;

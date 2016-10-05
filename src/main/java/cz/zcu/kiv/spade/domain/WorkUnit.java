@@ -13,6 +13,7 @@ public class WorkUnit extends WorkItem {
     private WorkUnitSeverity severity;
     private WorkUnitType type;
     private WorkUnitStatus status;
+    private WorkUnitResolution resolution;
     private WorkUnitCategory category;
     private double estimatedTime;
     private double spentTime;
@@ -28,14 +29,16 @@ public class WorkUnit extends WorkItem {
 
     public WorkUnit(long id, String externalId, String name, String description, Date created, Identity author, String url,
                     int number, WorkUnitType type, WorkUnitPriority priority, WorkUnitSeverity severity,
-                    double estimatedTime, double spentTime, Date startDate, Date dueDate, WorkUnitStatus status, int progress,
-                    Person assignee, Collection<WorkItem> prerequisites, WorkUnitCategory category) {
+                    double estimatedTime, double spentTime, Date startDate, Date dueDate, WorkUnitStatus status,
+                    WorkUnitResolution resolution, int progress, Person assignee, Collection<WorkItem> prerequisites,
+                    WorkUnitCategory category) {
         super(id, externalId, name, description, created, author, url);
         this.number = number;
         this.priority = priority;
         this.severity = severity;
         this.type = type;
         this.status = status;
+        this.resolution = resolution;
         this.category = category;
         this.estimatedTime = estimatedTime;
         this.spentTime = spentTime;
@@ -123,6 +126,15 @@ public class WorkUnit extends WorkItem {
 
     public void setStatus(WorkUnitStatus status) {
         this.status = status;
+    }
+
+    @OneToOne(fetch = FetchType.LAZY)
+    public WorkUnitResolution getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(WorkUnitResolution resolution) {
+        this.resolution = resolution;
     }
 
     public int getProgress() {

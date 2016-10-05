@@ -20,7 +20,6 @@ public class Iteration extends DefinedProjectSegment {
                      Date created, Configuration configuration, Collection<Activity> activities) {
         super(id, externalId, name, description, project, startDate, endDate, created, configuration);
         this.activities = activities;
-        this.configuration = configuration;
     }
 
     @OneToMany
@@ -32,15 +31,6 @@ public class Iteration extends DefinedProjectSegment {
 
     public void setActivities(Collection<Activity> activities) {
         this.activities = activities;
-    }
-
-    @OneToOne(fetch = FetchType.LAZY)
-    public Configuration getConfiguration() {
-        return configuration;
-    }
-
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
     }
 
 }

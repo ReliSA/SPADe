@@ -4,9 +4,11 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitPriorityClass;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitPrioritySuperclass;
 
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+@Entity
 public class WorkUnitPriority extends DescribedEntity {
 
     private WorkUnitPriorityClass priorityClass;

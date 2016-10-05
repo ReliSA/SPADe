@@ -16,19 +16,21 @@ public class ToolProjectInstance extends DescribedEntity {
     private Collection<WorkUnitSeverity> severities;
     private Collection<WorkUnitType> workUnitTypes;
     private Collection<WorkUnitStatus> statuses;
+    private Collection<WorkUnitResolution> resolutions;
     private Collection<WorkUnitCategory> categories;
     private Collection<Identity> identities;
     private Collection<IdentityGroup> groups;
     private Collection<Role> roles;
     private Collection<Configuration> configurations;
     private Collection<Branch> branches;
-    private Collection<String> tags;
+    private Collection<VCSTag> tags;
 
     public ToolProjectInstance() {
         this.priorities = new LinkedHashSet<>();
         this.severities = new LinkedHashSet<>();
         this.workUnitTypes = new LinkedHashSet<>();
         this.statuses = new LinkedHashSet<>();
+        this.resolutions = new LinkedHashSet<>();
         this.categories = new LinkedHashSet<>();
         this.identities = new LinkedHashSet<>();
         this.groups = new LinkedHashSet<>();
@@ -38,7 +40,7 @@ public class ToolProjectInstance extends DescribedEntity {
         this.tags = new LinkedHashSet<>();
     }
 
-    public ToolProjectInstance(long id, String externalId, String name, String description, ToolInstance toolInstance, Project project, String url, Collection<WorkUnitPriority> priorities, Collection<WorkUnitSeverity> severities, Collection<WorkUnitType> workUnitTypes, Collection<WorkUnitStatus> statuses, Collection<WorkUnitCategory> categories, Collection<Identity> identities, Collection<IdentityGroup> groups, Collection<Role> roles, Collection<Configuration> configurations, Collection<Branch> branches, Collection<String> tags) {
+    public ToolProjectInstance(long id, String externalId, String name, String description, ToolInstance toolInstance, Project project, String url, Collection<WorkUnitPriority> priorities, Collection<WorkUnitSeverity> severities, Collection<WorkUnitType> workUnitTypes, Collection<WorkUnitStatus> statuses, Collection<WorkUnitResolution> resolutions, Collection<WorkUnitCategory> categories, Collection<Identity> identities, Collection<IdentityGroup> groups, Collection<Role> roles, Collection<Configuration> configurations, Collection<Branch> branches, Collection<VCSTag> tags) {
         super(id, externalId, name, description);
         this.toolInstance = toolInstance;
         this.project = project;
@@ -47,6 +49,7 @@ public class ToolProjectInstance extends DescribedEntity {
         this.severities = severities;
         this.workUnitTypes = workUnitTypes;
         this.statuses = statuses;
+        this.resolutions = resolutions;
         this.categories = categories;
         this.identities = identities;
         this.groups = groups;
@@ -139,6 +142,17 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @ManyToMany
+    @JoinTable(name = "ToolProjectInstance_WorkUnitResolutions", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "wur_id", referencedColumnName = "id"))
+    public Collection<WorkUnitResolution> getResolutions() {
+        return resolutions;
+    }
+
+    public void setResolutions(Collection<WorkUnitResolution> resolutions) {
+        this.resolutions = resolutions;
+    }
+
+    @ManyToMany
     @JoinTable(name = "ToolProjectInstance_Identity", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "identity_id", referencedColumnName = "id"))
     public Collection<Identity> getIdentities() {
@@ -193,11 +207,14 @@ public class ToolProjectInstance extends DescribedEntity {
         this.branches = branches;
     }
 
-    public Collection<String> getTags() {
+    @OneToMany
+    @JoinTable(name = "ToolProjectInstance_VCSTag", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
+    public Collection<VCSTag> getTags() {
         return tags;
     }
 
-    public void setTags(Collection<String> tags) {
+    public void setTags(Collection<VCSTag> tags) {
         this.tags = tags;
     }
 }

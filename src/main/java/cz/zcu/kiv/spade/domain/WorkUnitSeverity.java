@@ -3,9 +3,11 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitSeverityClass;
 
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
+@Entity
 public class WorkUnitSeverity extends DescribedEntity {
 
     private WorkUnitSeverityClass severityClass;

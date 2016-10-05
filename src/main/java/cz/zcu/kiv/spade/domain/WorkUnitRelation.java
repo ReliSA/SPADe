@@ -3,9 +3,11 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationType;
 
+import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
 
+@Entity
 public class WorkUnitRelation extends DescribedEntity {
 
     private WorkUnitRelationType type;
