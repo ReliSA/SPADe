@@ -97,8 +97,7 @@ public class Configuration extends AuthoredEntity {
     }
 
     @OneToMany
-    @JoinTable(name = "Configuration_VCSTag", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
+    @JoinColumn(name = "configuration_id")
     public Collection<VCSTag> getTags() {
         return tags;
     }

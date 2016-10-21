@@ -8,6 +8,6 @@ public enum WorkUnitPrioritySuperclass {
     LOW,
     NORMAL,
     HIGH,
-    UNASSIGNED;
+    UNASSIGNED
 
 }

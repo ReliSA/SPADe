@@ -13,16 +13,14 @@ import java.util.Date;
 public class DevelopmentProgram extends Project {
 
     private ProgramType type;
-    private Collection<Project> projects;
 
     public DevelopmentProgram() {
     }
 
-    public DevelopmentProgram(long id, String externalId, String name, String description, Project project, Date startDate, Date endDate,
+    public DevelopmentProgram(long id, String externalId, String name, String description, DevelopmentProgram program, Date startDate, Date endDate,
                               Collection<Person> personnel, ProgramType type, Collection<Project> projects) {
-        super(id, externalId, name, description, project, startDate, endDate, personnel);
+        super(id, externalId, name, description, program, startDate, endDate, personnel);
         this.type = type;
-        this.projects = projects;
     }
 
     public ProgramType getType() {
@@ -31,17 +29,6 @@ public class DevelopmentProgram extends Project {
 
     public void setType(ProgramType type) {
         this.type = type;
-    }
-
-    @OneToMany
-    @JoinTable(name = "DevelopmentProgram_Project", joinColumns = @JoinColumn(name = "program_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"))
-    public Collection<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(Collection<Project> workUnits) {
-        this.projects = workUnits;
     }
 
 }

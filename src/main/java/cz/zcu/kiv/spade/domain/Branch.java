@@ -18,7 +18,6 @@ public class Branch extends NamedEntity {
         this.isMain = isMain;
     }
 
-    @Column(nullable = false, updatable = false)
     public boolean getIsMain() {
         return isMain;
     }

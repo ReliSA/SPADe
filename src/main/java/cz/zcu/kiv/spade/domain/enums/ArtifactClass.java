@@ -8,6 +8,6 @@ public enum ArtifactClass {
     FILE,
     FOLDER,
     WIKIPAGE,
-    EMAIL;
+    EMAIL
 
 }

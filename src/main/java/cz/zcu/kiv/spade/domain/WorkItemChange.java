@@ -8,7 +8,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "WorkItemChange")
 public class WorkItemChange extends BaseEntity {
 
     private String description;

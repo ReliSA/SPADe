@@ -120,7 +120,7 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "ToolProjectInstance_Categories", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+    @JoinTable(name = "ToolProjectInstance_Category", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "category_id", referencedColumnName = "id"))
     public Collection<WorkUnitCategory> getCategories() {
         return categories;
@@ -131,8 +131,8 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "ToolProjectInstance_WorkUnitStatuses", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "wus_id", referencedColumnName = "id"))
+    @JoinTable(name = "ToolProjectInstance_Status", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "status_id", referencedColumnName = "id"))
     public Collection<WorkUnitStatus> getStatuses() {
         return statuses;
     }
@@ -142,8 +142,8 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "ToolProjectInstance_WorkUnitResolutions", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "wur_id", referencedColumnName = "id"))
+    @JoinTable(name = "ToolProjectInstance_Resolution", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "resolution_id", referencedColumnName = "id"))
     public Collection<WorkUnitResolution> getResolutions() {
         return resolutions;
     }
@@ -164,7 +164,7 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "ToolProjectInstance_IdentityGroup", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
+    @JoinTable(name = "ToolProjectInstance_Group", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "group_id", referencedColumnName = "id"))
     public Collection<IdentityGroup> getGroups() {
         return groups;
@@ -208,8 +208,7 @@ public class ToolProjectInstance extends DescribedEntity {
     }
 
     @OneToMany
-    @JoinTable(name = "ToolProjectInstance_VCSTag", joinColumns = @JoinColumn(name = "tpi_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id"))
+    @JoinColumn(name = "tpi_id")
     public Collection<VCSTag> getTags() {
         return tags;
     }

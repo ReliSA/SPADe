@@ -17,9 +17,9 @@ public class Project extends ProjectSegment {
         this.personnel = new LinkedHashSet<>();
     }
 
-    public Project(long id, String externalId, String name, String description, Project project, Date startDate, Date endDate,
+    public Project(long id, String externalId, String name, String description, DevelopmentProgram program, Date startDate, Date endDate,
                    Collection<Person> personnel) {
-        super(id, externalId, name, description, project, startDate, endDate);
+        super(id, externalId, name, description, program, startDate, endDate);
         this.personnel = personnel;
     }
 

@@ -6,6 +6,6 @@ package cz.zcu.kiv.spade.domain.enums;
 public enum WorkUnitStatusSuperclass {
 
     OPEN,
-    CLOSED;
+    CLOSED
 
 }

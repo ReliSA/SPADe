@@ -7,6 +7,5 @@ public enum WorkUnitPriorityClass {
     NORMAL,
     HIGH,
     HIGHEST,
-    CRITICAL,
-    UNASSIGNED;
+    UNASSIGNED
 }

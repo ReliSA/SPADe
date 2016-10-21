@@ -24,8 +24,7 @@ public class Person extends NamedEntity {
     }
 
     @OneToMany
-    @JoinTable(name = "Person_Identity", joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "identity_id", referencedColumnName = "id"))
+    @JoinColumn(name = "person_id")
     public Collection<Identity> getIdentities() {
         return identities;
     }

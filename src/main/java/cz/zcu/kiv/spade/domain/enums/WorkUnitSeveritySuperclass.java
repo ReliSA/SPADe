@@ -1,12 +1,11 @@
 package cz.zcu.kiv.spade.domain.enums;
 
-public enum WorkUnitSeverityClass {
-
-    TRIVIAL,
+/**
+ * Created by Petr on 19.10.2016.
+ */
+public enum WorkUnitSeveritySuperclass {
     MINOR,
     NORMAL,
     MAJOR,
-    CRITICAL,
     UNASSIGNED
-
 }

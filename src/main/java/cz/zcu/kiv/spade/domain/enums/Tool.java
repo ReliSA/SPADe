@@ -12,6 +12,6 @@ public enum Tool {
     ASSEMBLA,
     GITHUB,
     SVN,
-    GIT;
+    GIT
 
 }

@@ -1,16 +1,16 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
-import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationType;
+import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationClass;
+import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationSuperclass;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class WorkUnitRelation extends DescribedEntity {
 
-    private WorkUnitRelationType type;
+    private WorkUnitRelationClass relationClass;
+    private WorkUnitRelationSuperclass relationSuperclass;
     private WorkUnit leftUnit;
     private WorkUnit rightUnit;
 
@@ -18,19 +18,30 @@ public class WorkUnitRelation extends DescribedEntity {
 
     }
 
-    public WorkUnitRelation(long id, String externalId, String name, String description, WorkUnitRelationType type, WorkUnit leftUnit, WorkUnit rightUnit) {
+    public WorkUnitRelation(long id, String externalId, String name, String description, WorkUnitRelationClass relationClass, WorkUnitRelationSuperclass relationSuperclass, WorkUnit leftUnit, WorkUnit rightUnit) {
         super(id, externalId, name, description);
-        this.type = type;
+        this.relationClass = relationClass;
+        this.relationSuperclass = relationSuperclass;
         this.leftUnit = leftUnit;
         this.rightUnit = rightUnit;
     }
 
-    public WorkUnitRelationType getType() {
-        return type;
+    @Enumerated(value = EnumType.STRING)
+    public WorkUnitRelationClass getRelationClass() {
+        return relationClass;
     }
 
-    public void setType(WorkUnitRelationType type) {
-        this.type = type;
+    public void setRelationClass(WorkUnitRelationClass relationClass) {
+        this.relationClass = relationClass;
+    }
+
+    @Enumerated(value = EnumType.STRING)
+    public WorkUnitRelationSuperclass getRelationSuperclass() {
+        return relationSuperclass;
+    }
+
+    public void setRelationSuperclass(WorkUnitRelationSuperclass relationSuperclass) {
+        this.relationSuperclass = relationSuperclass;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

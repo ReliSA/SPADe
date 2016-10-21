@@ -22,6 +22,9 @@ public class WorkUnit extends WorkItem {
     private int progress;
     private Person assignee;
     private Collection<WorkItem> prerequisites;
+    private Iteration iteration;
+    private Phase phase;
+    private Activity activity;
 
     public WorkUnit() {
         this.prerequisites = new LinkedHashSet<>();
@@ -31,7 +34,7 @@ public class WorkUnit extends WorkItem {
                     int number, WorkUnitType type, WorkUnitPriority priority, WorkUnitSeverity severity,
                     double estimatedTime, double spentTime, Date startDate, Date dueDate, WorkUnitStatus status,
                     WorkUnitResolution resolution, int progress, Person assignee, Collection<WorkItem> prerequisites,
-                    WorkUnitCategory category) {
+                    WorkUnitCategory category, Iteration iteration, Phase phase, Activity activity) {
         super(id, externalId, name, description, created, author, url);
         this.number = number;
         this.priority = priority;
@@ -47,9 +50,11 @@ public class WorkUnit extends WorkItem {
         this.progress = progress;
         this.assignee = assignee;
         this.prerequisites = prerequisites;
+        this.iteration = iteration;
+        this.phase = phase;
+        this.activity = activity;
     }
 
-    @Column(nullable = false, updatable = false)
     public int getNumber() {
         return number;
     }
@@ -174,4 +179,30 @@ public class WorkUnit extends WorkItem {
         this.category = category;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Iteration getIteration() {
+        return iteration;
+    }
+
+    public void setIteration(Iteration iteration) {
+        this.iteration = iteration;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Phase getPhase() {
+        return phase;
+    }
+
+    public void setPhase(Phase phase) {
+        this.phase = phase;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Activity getActivity() {
+        return activity;
+    }
+
+    public void setActivity(Activity activity) {
+        this.activity = activity;
+    }
 }
