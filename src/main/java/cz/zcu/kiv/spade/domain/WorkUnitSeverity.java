@@ -7,8 +7,10 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitSeveritySuperclass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "Severity")
 public class WorkUnitSeverity extends DescribedEntity {
 
     private WorkUnitSeverityClass severityClass;

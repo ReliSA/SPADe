@@ -10,13 +10,13 @@ import java.util.LinkedHashSet;
 @Entity
 public class Configuration extends AuthoredEntity {
 
-    protected int number;
-    protected Collection<WorkItemChange> changes;
-    protected boolean isRevision;
-    protected Collection<Artifact> artifacts;
-    protected Collection<WorkUnit> workUnits;
-    protected Branch branch;
-    protected Collection<VCSTag> tags;
+    private int number;
+    private Collection<WorkItemChange> changes;
+    private boolean isRelease;
+    private Collection<Artifact> artifacts;
+    private Collection<WorkUnit> workUnits;
+    private Branch branch;
+    private Collection<VCSTag> tags;
 
     public Configuration() {
         this.changes = new LinkedHashSet<>();
@@ -25,13 +25,13 @@ public class Configuration extends AuthoredEntity {
         this.tags = new LinkedHashSet<>();
     }
 
-    public Configuration(long id, String externalId, String name, String description, int number, Date created, Identity author, Collection<WorkItemChange> changes, WorkItemChange lastWorkItemChange,
-                         boolean isRevision, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Branch branch,
+    public Configuration(long id, String externalId, String name, String description, int number, Date created, Person author, Collection<WorkItemChange> changes,
+                         boolean isRelease, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Branch branch,
                          Collection<VCSTag> tags) {
         super(id, externalId, name, description, created, author);
         this.number = number;
         this.changes = changes;
-        this.isRevision = isRevision;
+        this.isRelease = isRelease;
         this.artifacts = artifacts;
         this.workUnits = workUnits;
         this.branch = branch;
@@ -57,12 +57,12 @@ public class Configuration extends AuthoredEntity {
         this.changes = changes;
     }
 
-    public boolean getIsRevision() {
-        return isRevision;
+    public boolean getIsRelease() {
+        return isRelease;
     }
 
-    public void setIsRevision(boolean isRevision) {
-        this.isRevision = isRevision;
+    public void setIsRelease(boolean isRelease) {
+        this.isRelease = isRelease;
     }
 
     @ManyToMany

@@ -17,7 +17,7 @@ public class Artifact extends WorkItem {
     public Artifact() {
     }
 
-    public Artifact(long id, String externalId, String name, String description, Date created, Identity author, String url,
+    public Artifact(long id, String externalId, String name, String description, Date created, Person author, String url,
                     ArtifactClass artifactClass, String mimeType, long size) {
         super(id, externalId, name, description, created, author, url);
         this.artifactClass = artifactClass;

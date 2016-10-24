@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
 import cz.zcu.kiv.spade.domain.Identity;
+import cz.zcu.kiv.spade.domain.Person;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -9,12 +10,12 @@ import java.util.Date;
 public abstract class AuthoredEntity extends DescribedEntity {
 
     protected Date created;
-    protected Identity author;
+    protected Person author;
 
     public AuthoredEntity() {
     }
 
-    public AuthoredEntity(long id, String externalId, String name, String description, Date created, Identity author) {
+    public AuthoredEntity(long id, String externalId, String name, String description, Date created, Person author) {
         super(id, externalId, name, description);
         this.created = created;
         this.author = author;
@@ -30,11 +31,11 @@ public abstract class AuthoredEntity extends DescribedEntity {
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    public Identity getAuthor() {
+    public Person getAuthor() {
         return author;
     }
 
-    public void setAuthor(Identity author) {
+    public void setAuthor(Person author) {
         this.author = author;
     }
 

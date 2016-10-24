@@ -1,9 +1,9 @@
 package cz.zcu.kiv.spade.indao;
 
-import cz.zcu.kiv.spade.domain.ToolProjectInstance;
+import cz.zcu.kiv.spade.domain.ProjectInstance;
 
-public interface ToolProjectInstanceDAO extends GenericDAO<ToolProjectInstance> {
+public interface ToolProjectInstanceDAO extends GenericDAO<ProjectInstance> {
 
-    ToolProjectInstance save(ToolProjectInstance tpi);
+    ProjectInstance save(ProjectInstance tpi);
 
 }

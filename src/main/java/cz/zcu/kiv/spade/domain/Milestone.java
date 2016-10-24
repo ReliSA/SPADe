@@ -24,7 +24,7 @@ public class Milestone extends DescribedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "Phase_Criterion", joinColumns = @JoinColumn(name = "phase_id", referencedColumnName = "id"),
+    @JoinTable(name = "Milestone_Criterion", joinColumns = @JoinColumn(name = "milestone_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "criterion_id", referencedColumnName = "id"))
     public Collection<Criterion> getCriteria() {
         return criteria;

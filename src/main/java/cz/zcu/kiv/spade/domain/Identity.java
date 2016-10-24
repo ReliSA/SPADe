@@ -12,27 +12,13 @@ import java.util.LinkedHashSet;
 @Entity
 public class Identity extends DescribedEntity {
 
-    private Collection<Role> roles;
     private String email;
 
     public Identity() {
-        this.roles = new LinkedHashSet<>();
     }
 
-    public Identity(long id, String externalId, String name, String description, Collection<Role> roles) {
+    public Identity(long id, String externalId, String name, String description) {
         super(id, externalId, name, description);
-        this.roles = roles;
-    }
-
-    @ManyToMany
-    @JoinTable(name = "Identity_Role", joinColumns = @JoinColumn(name = "identity_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    public Collection<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
     }
 
     public String getEmail() {

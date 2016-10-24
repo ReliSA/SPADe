@@ -7,8 +7,10 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitResolutionSuperclass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "Resolution")
 public class WorkUnitResolution extends DescribedEntity {
 
     private WorkUnitResolutionClass resolutionClass;

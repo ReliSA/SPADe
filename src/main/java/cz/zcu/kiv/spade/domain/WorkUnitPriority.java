@@ -7,8 +7,10 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitPrioritySuperclass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "Priority")
 public class WorkUnitPriority extends DescribedEntity {
 
     private WorkUnitPriorityClass priorityClass;

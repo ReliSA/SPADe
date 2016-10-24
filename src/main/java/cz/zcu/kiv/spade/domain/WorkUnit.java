@@ -30,7 +30,7 @@ public class WorkUnit extends WorkItem {
         this.prerequisites = new LinkedHashSet<>();
     }
 
-    public WorkUnit(long id, String externalId, String name, String description, Date created, Identity author, String url,
+    public WorkUnit(long id, String externalId, String name, String description, Date created, Person author, String url,
                     int number, WorkUnitType type, WorkUnitPriority priority, WorkUnitSeverity severity,
                     double estimatedTime, double spentTime, Date startDate, Date dueDate, WorkUnitStatus status,
                     WorkUnitResolution resolution, int progress, Person assignee, Collection<WorkItem> prerequisites,

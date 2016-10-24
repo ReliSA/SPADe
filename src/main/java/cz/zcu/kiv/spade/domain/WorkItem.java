@@ -16,7 +16,7 @@ public class WorkItem extends AuthoredEntity {
     public WorkItem() {
     }
 
-    public WorkItem(long id, String externalId, String name, String description, Date created, Identity author, String url) {
+    public WorkItem(long id, String externalId, String name, String description, Date created, Person author, String url) {
         super(id, externalId, name, description, created, author);
         this.url = url;
     }
