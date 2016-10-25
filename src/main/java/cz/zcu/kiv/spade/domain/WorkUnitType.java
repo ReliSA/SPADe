@@ -6,7 +6,6 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitTypeClass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Table;
 
 @Entity
 public class WorkUnitType extends DescribedEntity {

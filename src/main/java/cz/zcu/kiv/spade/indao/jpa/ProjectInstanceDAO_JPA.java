@@ -1,13 +1,13 @@
 package cz.zcu.kiv.spade.indao.jpa;
 
 import cz.zcu.kiv.spade.domain.ProjectInstance;
-import cz.zcu.kiv.spade.indao.ToolProjectInstanceDAO;
+import cz.zcu.kiv.spade.indao.ProjectInstanceDAO;
 
 import javax.persistence.EntityManager;
 
-public class ToolProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> implements ToolProjectInstanceDAO {
+public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> implements ProjectInstanceDAO {
 
-    public ToolProjectInstanceDAO_JPA(EntityManager em) {
+    public ProjectInstanceDAO_JPA(EntityManager em) {
         super(em, ProjectInstance.class);
     }
 

@@ -1,6 +1,5 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
-import cz.zcu.kiv.spade.domain.Identity;
 import cz.zcu.kiv.spade.domain.Person;
 
 import javax.persistence.*;

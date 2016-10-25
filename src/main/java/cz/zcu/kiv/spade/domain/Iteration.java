@@ -2,10 +2,8 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DefinedProjectSegment;
 
-import javax.persistence.*;
-import java.util.Collection;
+import javax.persistence.Entity;
 import java.util.Date;
-import java.util.LinkedHashSet;
 
 @Entity
 public class Iteration extends DefinedProjectSegment {

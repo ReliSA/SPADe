@@ -3,11 +3,6 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 
 @Entity
 public class Identity extends DescribedEntity {

@@ -3,9 +3,6 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.enums.ProgramType;
 
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
 import java.util.Collection;
 import java.util.Date;
 

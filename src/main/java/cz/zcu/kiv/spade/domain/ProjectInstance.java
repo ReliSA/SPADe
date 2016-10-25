@@ -2,9 +2,9 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
-import javax.persistence.*;
-import java.util.Collection;
-import java.util.LinkedHashSet;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
 
 @Entity
 public class ProjectInstance extends DescribedEntity {

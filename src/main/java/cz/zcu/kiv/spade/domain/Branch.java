@@ -2,7 +2,6 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 
 @Entity

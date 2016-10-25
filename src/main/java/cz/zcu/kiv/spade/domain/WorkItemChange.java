@@ -5,7 +5,6 @@ import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 
 @Entity
 public class WorkItemChange extends BaseEntity {

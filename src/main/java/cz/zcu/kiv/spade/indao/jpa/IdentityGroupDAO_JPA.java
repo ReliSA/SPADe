@@ -1,13 +1,13 @@
 package cz.zcu.kiv.spade.indao.jpa;
 
 import cz.zcu.kiv.spade.domain.IdentityGroup;
-import cz.zcu.kiv.spade.indao.GroupDAO;
+import cz.zcu.kiv.spade.indao.IdentityGroupDAO;
 
 import javax.persistence.EntityManager;
 
-public class GroupDAO_JPA extends GenericDAO_JPA<IdentityGroup> implements GroupDAO {
+public class IdentityGroupDAO_JPA extends GenericDAO_JPA<IdentityGroup> implements IdentityGroupDAO {
 
-    public GroupDAO_JPA(EntityManager em) {
+    public IdentityGroupDAO_JPA(EntityManager em) {
         super(em, IdentityGroup.class);
     }
 
