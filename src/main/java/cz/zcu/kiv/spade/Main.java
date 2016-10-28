@@ -14,7 +14,8 @@ public class Main {
         //em.close();
 
         //GitPump gitPump = new GitPump("https://github.com/ReliSA/SPADe.git");
-        GitPump gitPump = new GitPump("https://github.com/grimoirelab/perceval.git");
+        //GitPump gitPump = new GitPump("https://github.com/grimoirelab/perceval.git");
+        GitPump gitPump = new GitPump("https://github.com/siemens/codeface.git");
         gitPump.mineData();
 
     }

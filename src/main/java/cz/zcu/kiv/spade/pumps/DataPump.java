@@ -1,7 +1,5 @@
 package cz.zcu.kiv.spade.pumps;
 
-import cz.zcu.kiv.spade.domain.enums.Tool;
-
 import java.io.File;
 import java.util.Date;
 
@@ -11,21 +9,12 @@ public abstract class DataPump {
 
     protected String projectHandle;
     protected String projectName;
-    protected String projectDir;
-    protected Tool tool;
 
-    public DataPump(String projectHandle, Tool tool) {
+    public DataPump(String projectHandle) {
         this.projectHandle = projectHandle;
-        this.tool = tool;
+        this.projectName = projectHandle.substring(projectHandle.lastIndexOf("/") + 1);
+        this.getRootObject();
     }
-
-    public abstract void mineData();
-
-    protected abstract Object getRootObject();
-
-    protected abstract void trimProjectName();
-
-    protected abstract Date convertDate(Object date);
 
     protected static void deleteTempDir(File file) {
         if (file.isDirectory()) {
@@ -36,4 +25,10 @@ public abstract class DataPump {
         }
         file.delete();
     }
+
+    public abstract void mineData();
+
+    protected abstract void getRootObject();
+
+    protected abstract Date convertDate(Object date);
 }
