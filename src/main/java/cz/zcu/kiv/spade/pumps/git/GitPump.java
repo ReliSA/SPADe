@@ -1,10 +1,16 @@
 package cz.zcu.kiv.spade.pumps.git;
 
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import cz.zcu.kiv.spade.pumps.DataPump;
+import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
+import org.eclipse.jgit.diff.Edit;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
@@ -14,6 +20,8 @@ import org.eclipse.jgit.revwalk.FooterLine;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.File;
@@ -23,16 +31,28 @@ import java.util.*;
 public class GitPump extends DataPump {
 
     private Repository repository;
-    private Set<String> people;
+    private Set<String> people = new HashSet<>();
+    private Map<String, Set<String>> commitsToTickets  = new HashMap<>();
 
     public GitPump(String projectHandle) {
         super(projectHandle);
-        this.people = new HashSet<>();
+    }
+
+    public GitPump(String projectHandle, String username, String password) {
+        super(projectHandle, username, password);
+    }
+
+    public GitPump(String projectHandle, String privateKeyLoc) {
+        super(projectHandle, privateKeyLoc);
+    }
+
+    public GitPump(String projectHandle, String privateKeyLoc, String username, String password) {
+        super(projectHandle, privateKeyLoc, username, password);
     }
 
     @Override
     public void mineData() {
-
+        loadRootObject();
         Git git = new Git(repository);
         List<Ref> branches = new LinkedList<>();
         try {
@@ -40,6 +60,8 @@ public class GitPump extends DataPump {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
+
+        System.out.println();
 
         mineCommits();
 
@@ -53,11 +75,17 @@ public class GitPump extends DataPump {
             if (i != branches.size() - 1) System.out.print(", ");
             else System.out.println("]");
         }
-        System.out.println("Contributors: " + people.size() + " " + people.toString());
+        System.out.println("People: " + people.size() + " " + people.toString());
+        System.out.println("Mentions: " + commitsToTickets.size());
+        for (Map.Entry ticketsPerCommit : commitsToTickets.entrySet()) {
+            for (String ticket : commitsToTickets.get(ticketsPerCommit.getKey())){
+                System.out.println("\tCommit: " + ticketsPerCommit.getKey() + " \tTicket: #" + ticket);
+            }
+        }
     }
 
     private void mineCommits() {
-        System.out.println("Changes:\n");
+        System.out.println("Commits:\n");
 
         RevWalk revWalk = new RevWalk(repository);
 
@@ -77,14 +105,15 @@ public class GitPump extends DataPump {
         people.add(commit.getAuthorIdent().getName());
         people.add(commit.getCommitterIdent().getName());
 
-        for (FooterLine line : commit.getFooterLines()){
-            if (line.getKey().endsWith("-by")) {
-                String[] parts = line.getValue().split("<");
-                people.add(parts[0].trim());
-            }
+        analyzeCommitMsg(commit);
+
+        String mentions = "";
+        if (commitsToTickets.containsKey(commit.getId().getName())) {
+            mentions = commitsToTickets.get(commit.getId().getName()).toString();
+            mentions = mentions.substring(1, mentions.length() - 1);
         }
 
-        /*System.out.print("Id:\n" +
+        System.out.print("Id:\n" +
                 "\t" + commit.getId().getName() + "\n" +
                 "Author:\n" +
                 "\t" + commit.getAuthorIdent().getName() + "\n" +
@@ -94,11 +123,40 @@ public class GitPump extends DataPump {
                 "\t" + commit.getCommitterIdent().getEmailAddress() + "\n" +
                 "Time:\n" +
                 "\t" + convertDate(commit.getCommitTime()).toString() + "\n" +
+                "Mentioned work units:\n" +
+                "\t" + mentions + "\n" +
                 "Msg:\n" +
                 "\t" + commit.getFullMessage() + "\n" +
                 "----------------------------------------\n");
 
-        mineChanges(commit);*/
+        mineChanges(commit);
+    }
+
+    protected void analyzeCommitMsg(RevCommit commit) {
+
+        for (FooterLine line : commit.getFooterLines()) {
+            if (line.getKey().endsWith("-by")) {
+                String[] parts = line.getValue().split("<");
+                people.add(parts[0].trim());
+            }
+        }
+
+        Set<String> mentions = new HashSet<>();
+        if (commit.getFullMessage().contains("#")) {
+            String[] parts = commit.getFullMessage().split("#");
+            for (int i = 1; i < parts.length; i++) {
+                String mention = "";
+                for (int j = 0; j < parts[i].length(); j++) {
+                    if (Character.isDigit(parts[i].charAt(j)))
+                        mention += parts[i].charAt(j);
+                    else break;
+                }
+                if (!mention.isEmpty()) {
+                    mentions.add(mention);
+                }
+            }
+            if (!mentions.isEmpty()) commitsToTickets.put(commit.getId().getName(), mentions);
+        }
     }
 
     private void mineChanges(RevCommit commit) {
@@ -113,9 +171,26 @@ public class GitPump extends DataPump {
             df.setDetectRenames(true);
 
             List<DiffEntry> diffs = df.scan(parentTree, commit.getTree());
+            System.out.println("Files changed: " + diffs.size());
+
+            int additions = 0, deletions = 0;
+
             for (DiffEntry diff : diffs) {
+                int linesAdded = 0, linesDeleted = 0;
+
                 mineChange(diff);
+
+                for (Edit edit : df.toFileHeader(diff).toEditList()) {
+                    linesDeleted += edit.getLengthA();
+                    linesAdded += edit.getLengthB();
+                    System.out.println(edit.getType().toString());
+                }
+                additions += linesAdded;
+                deletions += linesDeleted;
+                System.out.println("\t\tLines: " + linesAdded + " added, " + linesDeleted + " deleted");
             }
+
+            System.out.println("Total: " + additions + " lines added, " + deletions + " lines deleted");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -147,33 +222,56 @@ public class GitPump extends DataPump {
                     "\t\tto: " + diff.getNewPath() + "\n" +
                     "\t\tscore: " + diff.getScore();
         }
+
         System.out.println("\t" + type + desc);
     }
 
     @Override
-    protected void getRootObject() {
+    protected void loadRootObject() {
         File file = new File(ROOT_TEMP_DIR + getProjectDir());
-        Git git = null;
-
         if (file.exists()) DataPump.deleteTempDir(file);
+
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setBare(true)
+                .setURI(projectHandle)
+                .setGitDir(file);
+
+        if (username != null)
+            cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+
+        if (privateKeyLoc != null) cloneCommand = authenticate(cloneCommand);
+
+        Git git = null;
         try {
-            git = Git.cloneRepository()
-                    .setBare(true)
-                    .setURI(projectHandle)
-                    .setGitDir(file)
-                    .call();
+            git = cloneCommand.call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
         repository = git.getRepository();
     }
 
-    protected String getProjectDir() {
-        String withoutProtocol = projectHandle.split("://")[1];
-        String server = withoutProtocol.substring(0, withoutProtocol.indexOf('/'));
-        String pathOnServer = withoutProtocol.substring(withoutProtocol.indexOf('/'));
-        String withoutPort = server.split(":")[0] + pathOnServer;
-        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
+    private CloneCommand authenticate(CloneCommand cloneCommand) {
+        SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
+            @Override
+            protected void configure(OpenSshConfig.Host host, Session session) {
+            }
+
+            @Override
+            protected JSch createDefaultJSch(FS fs) throws JSchException {
+                JSch defaultJSch = super.createDefaultJSch(fs);
+                defaultJSch.addIdentity(privateKeyLoc);
+                return defaultJSch;
+            }
+        };
+
+        cloneCommand.setTransportConfigCallback(new TransportConfigCallback() {
+            @Override
+            public void configure(Transport transport) {
+                SshTransport sshTransport = (SshTransport) transport;
+                sshTransport.setSshSessionFactory(sshSessionFactory);
+            }
+        });
+        return cloneCommand;
     }
 
     @Override
@@ -182,10 +280,4 @@ public class GitPump extends DataPump {
         milliseconds *= 1000;
         return new Date(milliseconds);
     }
-
-    private String stripFileName(String path) {
-        if (path.contains("/")) return path.substring(path.lastIndexOf("/") + 1);
-        else return path;
-    }
-
 }

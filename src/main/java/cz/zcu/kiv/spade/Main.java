@@ -13,9 +13,17 @@ public class Main {
 
         //em.close();
 
-        //GitPump gitPump = new GitPump("https://github.com/ReliSA/SPADe.git");
+        GitPump gitPump = new GitPump("https://github.com/ReliSA/SPADe.git");
+
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/crce.git");
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/crce-jacc.git");
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/crce-client.git");
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/multijar-to-graphml.git");
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/jar-api-representation.git");
+
         //GitPump gitPump = new GitPump("https://github.com/grimoirelab/perceval.git");
-        GitPump gitPump = new GitPump("https://github.com/siemens/codeface.git");
+        //GitPump gitPump = new GitPump("https://github.com/siemens/codeface.git");
+
         gitPump.mineData();
 
     }
