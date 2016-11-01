@@ -25,4 +25,10 @@ public class Branch extends NamedEntity {
         this.isMain = isMain;
     }
 
+    @Override
+    public String toString() {
+        String ret = super.toString();
+        if (isMain) ret += "(default)\n";
+        return ret;
+    }
 }

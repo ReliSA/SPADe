@@ -5,6 +5,7 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
+import java.util.Set;
 
 @Entity
 public class ProjectInstance extends DescribedEntity {
@@ -49,4 +50,17 @@ public class ProjectInstance extends DescribedEntity {
         this.url = url;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "URL: " + url + "\n" +
+                "Tool Instance:\n" +
+                "<----------------------------------------\n" +
+                toolInstance.toString() +
+                ">----------------------------------------\n" +
+                "Project:\n" +
+                "<----------------------------------------\n" +
+                project.toString() +
+                ">----------------------------------------\n";
+    }
 }

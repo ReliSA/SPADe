@@ -58,4 +58,15 @@ public class Person extends NamedEntity {
         this.roles = roles;
     }
 
+    @Override
+    public String toString() {
+        String ret = super.toString() +
+                "Identities:\n" +
+                "<----------------------------------------\n";
+        for (Identity identity : identities){
+            ret += identity.getEmail() + "\n\n";
+        }
+        return ret +
+                ">----------------------------------------\n";
+    }
 }

@@ -24,4 +24,9 @@ public class Identity extends DescribedEntity {
         this.email = email;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Email: " + email + "\n";
+    }
 }

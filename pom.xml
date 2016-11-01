@@ -59,6 +59,13 @@
             <version>4.5.0.201609210915-r</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.79</version>
+        </dependency>
+
     </dependencies>
 
     <build>

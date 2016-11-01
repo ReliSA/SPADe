@@ -65,12 +65,20 @@ public abstract class DataPump {
     }
 
     protected String getProjectDir() {
+        String cut = cutProtocolAndUser();
+        String withoutPort = getServer().split(":")[0] + cut.substring(cut.indexOf('/'));
+        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
+    }
+
+    protected String getServer() {
+        String cut = cutProtocolAndUser();
+        return cut.substring(0, cut.indexOf('/'));
+    }
+
+    protected String cutProtocolAndUser() {
         String withoutProtocol = projectHandle;
         if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
         if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
-        String server = withoutProtocol.substring(0, withoutProtocol.indexOf('/'));
-        String pathOnServer = withoutProtocol.substring(withoutProtocol.indexOf('/'));
-        String withoutPort = server.split(":")[0] + pathOnServer;
-        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
+        return withoutProtocol;
     }
 }

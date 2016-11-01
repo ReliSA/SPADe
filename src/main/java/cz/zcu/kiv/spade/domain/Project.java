@@ -47,4 +47,21 @@ public class Project extends ProjectSegment {
         this.configurations = configurations;
     }
 
+    @Override
+    public String toString() {
+        String ret = super.toString() +
+                "Personnel:\n" +
+                "<----------------------------------------\n";
+        for (Person person : personnel){
+            ret += person + "\n\n";
+        }
+        ret += ">----------------------------------------\n" +
+                "Configurations:\n" +
+                "<----------------------------------------\n";
+        for (Configuration configuration : configurations){
+            ret += configuration + "\n\n";
+        }
+        return ret +
+                ">----------------------------------------\n";
+    }
 }

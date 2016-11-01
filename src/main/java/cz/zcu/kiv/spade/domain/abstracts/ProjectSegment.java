@@ -50,4 +50,12 @@ public abstract class ProjectSegment extends DescribedEntity {
         this.endDate = endDate;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Start date: " + startDate + "\n" +
+                "End date: " + endDate + "\n" +
+                "Project: " + project + "\n";
+
+    }
 }

@@ -25,7 +25,7 @@ public class WorkItemChange extends BaseEntity {
         return description;
     }
 
-    public void setDescription(String type) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
@@ -38,4 +38,10 @@ public class WorkItemChange extends BaseEntity {
         this.changedItem = changedItem;
     }
 
+    @Override
+    public String toString() {
+        return "ChangedItem: " + changedItem.getName() + "\n" +
+                "Description:\n" +
+                "\t" + description + "\n";
+    }
 }

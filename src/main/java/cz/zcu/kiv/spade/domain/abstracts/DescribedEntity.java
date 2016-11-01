@@ -23,4 +23,9 @@ public abstract class DescribedEntity extends NamedEntity {
         this.description = description;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Description: " + description + "\n";
+    }
 }

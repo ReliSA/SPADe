@@ -17,17 +17,19 @@ public class Configuration extends AuthoredEntity {
     private Collection<WorkUnit> workUnits;
     private Branch branch;
     private Collection<VCSTag> tags;
+    private Collection<ConfigPersonRelation> relations;
 
     public Configuration() {
         this.changes = new LinkedHashSet<>();
         this.artifacts = new LinkedHashSet<>();
         this.workUnits = new LinkedHashSet<>();
         this.tags = new LinkedHashSet<>();
+        this.relations = new LinkedHashSet<>();
     }
 
     public Configuration(long id, String externalId, String name, String description, int number, Date created, Person author, Collection<WorkItemChange> changes,
                          boolean isRelease, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Branch branch,
-                         Collection<VCSTag> tags) {
+                         Collection<VCSTag> tags, Collection<ConfigPersonRelation> relations) {
         super(id, externalId, name, description, created, author);
         this.number = number;
         this.changes = changes;
@@ -36,6 +38,7 @@ public class Configuration extends AuthoredEntity {
         this.workUnits = workUnits;
         this.branch = branch;
         this.tags = tags;
+        this.relations = relations;
     }
 
     public int getNumber() {
@@ -104,5 +107,40 @@ public class Configuration extends AuthoredEntity {
 
     public void setTags(Collection<VCSTag> tags) {
         this.tags = tags;
+    }
+
+    @OneToMany
+    @JoinColumn(name = "configuration_id")
+    public Collection<ConfigPersonRelation> getRelations() {
+        return relations;
+    }
+
+    public void setRelations(Collection<ConfigPersonRelation> relations) {
+        this.relations = relations;
+    }
+
+    @Override
+    public String toString() {
+        String ret = super.toString() +
+                "Branch: " + branch + "\n" +
+                "Work units:\n" +
+                "<----------------------------------------\n";
+        for (WorkUnit wu : workUnits){
+            ret += wu + "\n\n";
+        }
+        ret += ">----------------------------------------\n" +
+                "Related people:\n" +
+                "<----------------------------------------\n";
+        for (ConfigPersonRelation relation : relations){
+            ret += relation + "\n\n";
+        }
+        ret += ">----------------------------------------\n" +
+                "Changes:\n" +
+                "<----------------------------------------\n";
+        for (WorkItemChange change : changes){
+            ret += change + "\n\n";
+        }
+        return ret +
+                ">----------------------------------------\n";
     }
 }

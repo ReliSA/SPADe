@@ -3,6 +3,8 @@ package cz.zcu.kiv.spade.pumps.git;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -23,6 +25,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.kohsuke.github.GHRepository;
+import org.kohsuke.github.GitHub;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,8 +35,7 @@ import java.util.*;
 public class GitPump extends DataPump {
 
     private Repository repository;
-    private Set<String> people = new HashSet<>();
-    private Map<String, Set<String>> commitsToTickets  = new HashMap<>();
+    private Map<String, Set<String>> commitBranches = new TreeMap<>();
 
     public GitPump(String projectHandle) {
         super(projectHandle);
@@ -54,6 +57,16 @@ public class GitPump extends DataPump {
     public void mineData() {
         loadRootObject();
         Git git = new Git(repository);
+
+        ToolInstance ti = new ToolInstance(0, getServer(), Tool.GIT, "");
+
+        Project project = new Project(0, "", projectName, "", null, null, null, new LinkedHashSet<>(), new LinkedHashSet<>());
+
+        ProjectInstance pi = new ProjectInstance(0, "", projectName, "", ti, project, projectHandle);
+
+        //pi.setExternalId();
+        //pi.setDescription();
+
         List<Ref> branches = new LinkedList<>();
         try {
             branches = git.branchList().call();
@@ -61,13 +74,17 @@ public class GitPump extends DataPump {
             e.printStackTrace();
         }
 
-        System.out.println();
+        for (Ref branchRef : branches){
+            Branch branch = new Branch();
+            branch.setExternalId(branchRef.getName());
+            branch.setName(stripFileName(branchRef.getName()));
+            if (branchRef.getName().equals("master")) {
+                branch.setIsMain(true);
+            }
+            mineCommits(branch);
+        }
 
-        mineCommits();
-
-        System.out.println();
-        System.out.println("Project: " + projectName);
-        System.out.println("URL: " + projectHandle);
+        /*System.out.println();
         System.out.println("Tags: " + repository.getTags().size() + " " + repository.getTags().keySet().toString());
         System.out.print("Branches: " + branches.size() + " [");
         for (int i = 0; i < branches.size(); i++) {
@@ -81,67 +98,93 @@ public class GitPump extends DataPump {
             for (String ticket : commitsToTickets.get(ticketsPerCommit.getKey())){
                 System.out.println("\tCommit: " + ticketsPerCommit.getKey() + " \tTicket: #" + ticket);
             }
-        }
+        }*/
     }
 
-    private void mineCommits() {
-        System.out.println("Commits:\n");
+    private void mineCommits(Branch branch) {
 
         RevWalk revWalk = new RevWalk(repository);
 
         try {
-            ObjectId commitId = repository.resolve(Constants.HEAD);
+            ObjectId commitId = repository.resolve(branch.getName());
             revWalk.markStart(revWalk.parseCommit(commitId));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         for (RevCommit commit : revWalk) {
-            mineCommit(commit);
-        }
-    }
-
-    private void mineCommit(RevCommit commit) {
-        people.add(commit.getAuthorIdent().getName());
-        people.add(commit.getCommitterIdent().getName());
-
-        analyzeCommitMsg(commit);
-
-        String mentions = "";
-        if (commitsToTickets.containsKey(commit.getId().getName())) {
-            mentions = commitsToTickets.get(commit.getId().getName()).toString();
-            mentions = mentions.substring(1, mentions.length() - 1);
-        }
-
-        System.out.print("Id:\n" +
-                "\t" + commit.getId().getName() + "\n" +
-                "Author:\n" +
-                "\t" + commit.getAuthorIdent().getName() + "\n" +
-                "Committer:\n" +
-                "\t" + commit.getCommitterIdent().getName() + "\n" +
-                "Email:\n" +
-                "\t" + commit.getCommitterIdent().getEmailAddress() + "\n" +
-                "Time:\n" +
-                "\t" + convertDate(commit.getCommitTime()).toString() + "\n" +
-                "Mentioned work units:\n" +
-                "\t" + mentions + "\n" +
-                "Msg:\n" +
-                "\t" + commit.getFullMessage() + "\n" +
-                "----------------------------------------\n");
-
-        mineChanges(commit);
-    }
-
-    protected void analyzeCommitMsg(RevCommit commit) {
-
-        for (FooterLine line : commit.getFooterLines()) {
-            if (line.getKey().endsWith("-by")) {
-                String[] parts = line.getValue().split("<");
-                people.add(parts[0].trim());
+            Configuration configuration = mineCommit(commit);
+            configuration.setBranch(branch);
+            if (commitBranches.containsKey(commit.getId().getName())) {
+                commitBranches.get(commit.getId().getName()).add(stripFileName(branch.getName()));
+            } else {
+                Set<String> branchNames = new HashSet<>();
+                branchNames.add(stripFileName(branch.getName()));
+                commitBranches.put(commit.getId().getName(), branchNames);
             }
         }
+    }
 
-        Set<String> mentions = new HashSet<>();
+    private Configuration mineCommit(RevCommit commit) {
+        Identity authorI = new Identity();
+        authorI.setName(commit.getAuthorIdent().getName());
+        authorI.setEmail(commit.getAuthorIdent().getEmailAddress());
+
+        Person author = new Person();
+        author.setName(authorI.getName());
+        author.getIdentities().add(authorI);
+
+        Identity committerI = new Identity();
+        committerI.setName(commit.getCommitterIdent().getName());
+        committerI.setEmail(commit.getCommitterIdent().getEmailAddress());
+
+        Person committer = new Person();
+        committer.setName(authorI.getName());
+        committer.getIdentities().add(committerI);
+
+        ConfigPersonRelation relation = new ConfigPersonRelation();
+        relation.setAuthor(committer);
+        relation.setName("Committed-by");
+
+        Configuration configuration = new Configuration();
+        configuration.setExternalId(commit.getId().toString());
+        configuration.setName(commit.getId().getName());
+        configuration.setDescription(commit.getFullMessage());
+        configuration.setCreated(convertDate(commit.getCommitTime()));
+        configuration.setAuthor(author);
+        configuration.setWorkUnits(getAssociatedWorkUnits(commit));
+        configuration.getRelations().addAll(getRelatedPeople(commit));
+        configuration.setChanges(mineChanges(commit, configuration));
+
+        return configuration;
+    }
+
+    private Set<ConfigPersonRelation> getRelatedPeople(RevCommit commit) {
+        Set<ConfigPersonRelation> relations = new HashSet<>();
+        for (FooterLine line : commit.getFooterLines()) {
+            if (line.getKey().endsWith("-by") || line.getKey().equals("CC")) {
+                Identity identity = new Identity();
+                String[] parts = line.getValue().split("<");
+                identity.setName(parts[0].trim());
+                if(parts.length > 1) identity.setEmail(parts[1].substring(0, parts[1].length() - 1));
+
+                Person person = new Person();
+                person.setName(identity.getName());
+                person.getIdentities().add(identity);
+
+                ConfigPersonRelation relation = new ConfigPersonRelation();
+                relation. setAuthor(person);
+                relation.setName(line.getKey());
+
+                relations.add(relation);
+            }
+        }
+        return relations;
+    }
+
+    protected Set<WorkUnit> getAssociatedWorkUnits(RevCommit commit) {
+        Set<WorkUnit> associated = new HashSet<>();
+
         if (commit.getFullMessage().contains("#")) {
             String[] parts = commit.getFullMessage().split("#");
             for (int i = 1; i < parts.length; i++) {
@@ -152,15 +195,17 @@ public class GitPump extends DataPump {
                     else break;
                 }
                 if (!mention.isEmpty()) {
-                    mentions.add(mention);
+                    WorkUnit wu = new WorkUnit();
+                    wu.setNumber(Integer.parseInt(mention));
+                    associated.add(wu);
                 }
             }
-            if (!mentions.isEmpty()) commitsToTickets.put(commit.getId().getName(), mentions);
         }
+        return associated;
     }
 
-    private void mineChanges(RevCommit commit) {
-        System.out.println("Changes:");
+    private Set<WorkItemChange> mineChanges(RevCommit commit, Configuration configuration) {
+        Set<WorkItemChange> changes = new LinkedHashSet<>();
         try {
             RevTree parentTree = null;
             if (commit.getParentCount() != 0) parentTree = commit.getParent(0).getTree();
@@ -171,33 +216,38 @@ public class GitPump extends DataPump {
             df.setDetectRenames(true);
 
             List<DiffEntry> diffs = df.scan(parentTree, commit.getTree());
-            System.out.println("Files changed: " + diffs.size());
-
-            int additions = 0, deletions = 0;
 
             for (DiffEntry diff : diffs) {
                 int linesAdded = 0, linesDeleted = 0;
 
-                mineChange(diff);
+                WorkItemChange change = mineChange(diff);
 
                 for (Edit edit : df.toFileHeader(diff).toEditList()) {
                     linesDeleted += edit.getLengthA();
                     linesAdded += edit.getLengthB();
-                    System.out.println(edit.getType().toString());
+
+                    String desc = change.getDescription() + "\\ttEdit type: " + edit.getType().toString() + "\n";
+                    desc += "\t\t\tLines: " + edit.getLengthB() + " added, " + edit.getLengthA() + " deleted" + "\n";
+
+                    change.setDescription(desc);
                 }
-                additions += linesAdded;
-                deletions += linesDeleted;
-                System.out.println("\t\tLines: " + linesAdded + " added, " + linesDeleted + " deleted");
+                String desc = change.getDescription() + "\tLines: " + linesAdded + " added, " + linesDeleted + " deleted" + "\n";
+                change.setDescription(desc);
+
+                System.out.println(change);
+
+                changes.add(change);
             }
 
-            System.out.println("Total: " + additions + " lines added, " + deletions + " lines deleted");
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("========================================");
+        return changes;
     }
 
-    private void mineChange(DiffEntry diff) {
+    private WorkItemChange mineChange(DiffEntry diff) {
+        Artifact artifact = new Artifact();
+
         String type = diff.getChangeType().name();
         String desc = "";
         String newFileName = stripFileName(diff.getNewPath());
@@ -206,24 +256,28 @@ public class GitPump extends DataPump {
         String oldFileDir = diff.getOldPath().substring(0, diff.getOldPath().lastIndexOf(oldFileName));
 
         if (type.equals("DELETE")) {
-            desc += " " + oldFileName + "\n" +
-                    "\t\t" + diff.getOldPath();
+            desc += "\tfrom: " + diff.getOldPath();
+            artifact.setName(oldFileName);
         } else if (type.equals("ADD") || type.equals("MODIFY")) {
-            desc += " " + newFileName + "\n" +
-                    "\t\t" + diff.getNewPath();
+            desc += "\tto: " + diff.getNewPath();
+            artifact.setName(newFileName);
         } else {
             if (type.equals("RENAME")) {
                 if (newFileName.equals(oldFileName)) type = "MOVE";
                 else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
             }
             if (diff.getScore() < 100) type += " AND MODIFY";
-            desc += " " + newFileName + "\n" +
-                    "\t\tfrom: " + diff.getOldPath() + "\n" +
-                    "\t\tto: " + diff.getNewPath() + "\n" +
-                    "\t\tscore: " + diff.getScore();
+            desc += "\tfrom: " + diff.getOldPath() + "\n" +
+                    "\tto: " + diff.getNewPath() + "\n" +
+                    "\tscore: " + diff.getScore();
+            artifact.setName(newFileName);
         }
 
-        System.out.println("\t" + type + desc);
+        WorkItemChange change = new WorkItemChange();
+        change.setChangedItem(artifact);
+        change.setDescription("Change type: " + type + "\n" + desc + "\n");
+
+        return change;
     }
 
     @Override

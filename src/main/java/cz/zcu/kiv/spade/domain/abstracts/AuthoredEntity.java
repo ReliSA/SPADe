@@ -38,4 +38,10 @@ public abstract class AuthoredEntity extends DescribedEntity {
         this.author = author;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Author:\n" +
+                author + "\n";
+    }
 }

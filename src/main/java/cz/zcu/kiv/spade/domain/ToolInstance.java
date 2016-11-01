@@ -39,4 +39,10 @@ public class ToolInstance extends BaseEntity {
         this.version = version;
     }
 
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Tool: " + tool.name() + "\n" +
+                "Version: " + version + "\n";
+    }
 }

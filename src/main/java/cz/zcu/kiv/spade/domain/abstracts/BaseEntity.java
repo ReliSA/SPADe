@@ -38,4 +38,9 @@ public abstract class BaseEntity {
         this.externalId = externalId;
     }
 
+    @Override
+    public String toString() {
+        return "ID: " + id + "\n" +
+                "External ID: " + externalId + "\n";
+    }
 }

@@ -205,4 +205,10 @@ public class WorkUnit extends WorkItem {
     public void setActivity(Activity activity) {
         this.activity = activity;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() +
+                "Number: " + number + "\n";
+    }
 }
