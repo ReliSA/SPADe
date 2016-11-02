@@ -5,7 +5,6 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
-import java.util.Set;
 
 @Entity
 public class ProjectInstance extends DescribedEntity {

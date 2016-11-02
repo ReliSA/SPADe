@@ -1,23 +1,39 @@
 package cz.zcu.kiv.spade.domain;
 
-import cz.zcu.kiv.spade.domain.abstracts.AuthoredEntity;
-import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
-import java.util.Date;
+@Entity
+@Table(name = "Configuration_Person")
+public class ConfigPersonRelation {
 
-/**
- * Created by Petr on 31.10.2016.
- */
-public class ConfigPersonRelation extends AuthoredEntity{
+    private String description;
+    private Person person;
+
     public ConfigPersonRelation() {
     }
 
-    public ConfigPersonRelation(long id, String externalId, String name, String description, Date created, Person author) {
-        super(id, externalId, name, description, created, author);
+    public ConfigPersonRelation(String description, Person person) {
+        this.description = description;
+        this.person = person;
     }
 
-    @Override
-    public String toString() {
-        return description + ": " + author.getName();
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
     }
 }

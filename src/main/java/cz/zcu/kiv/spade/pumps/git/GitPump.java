@@ -4,29 +4,23 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.diff.DiffEntry;
-import org.eclipse.jgit.diff.DiffFormatter;
-import org.eclipse.jgit.diff.Edit;
-import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.FooterLine;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTree;
-import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.transport.*;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GitHub;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,21 +28,39 @@ import java.util.*;
 
 public class GitPump extends DataPump {
 
+    /** JGit root object for mining data */
     private Repository repository;
-    private Map<String, Set<String>> commitBranches = new TreeMap<>();
 
+    /**
+     * @param projectHandle URL of the project instance
+     */
     public GitPump(String projectHandle) {
         super(projectHandle);
     }
 
+    /**
+     * @param projectHandle URL of the project instance
+     * @param username username for authenticated login
+     * @param password password for authenticated login
+     */
     public GitPump(String projectHandle, String username, String password) {
         super(projectHandle, username, password);
     }
 
+    /**
+     * @param projectHandle URL of the project instance
+     * @param privateKeyLoc private key location for authenticated login
+     */
     public GitPump(String projectHandle, String privateKeyLoc) {
         super(projectHandle, privateKeyLoc);
     }
 
+    /**
+     * @param projectHandle URL of the project instance
+     * @param privateKeyLoc private key location for authenticated login
+     * @param username username for authenticated login
+     * @param password password for authenticated login
+     */
     public GitPump(String projectHandle, String privateKeyLoc, String username, String password) {
         super(projectHandle, privateKeyLoc, username, password);
     }
@@ -56,53 +68,87 @@ public class GitPump extends DataPump {
     @Override
     public void mineData() {
         loadRootObject();
-        Git git = new Git(repository);
 
-        ToolInstance ti = new ToolInstance(0, getServer(), Tool.GIT, "");
+        ToolInstance ti = new ToolInstance();
+        ti.setExternalId(getServer());
+        ti.setTool(Tool.GIT);
 
-        Project project = new Project(0, "", projectName, "", null, null, null, new LinkedHashSet<>(), new LinkedHashSet<>());
-
-        ProjectInstance pi = new ProjectInstance(0, "", projectName, "", ti, project, projectHandle);
-
-        //pi.setExternalId();
-        //pi.setDescription();
+        Project project = new Project();
+        project.setName(projectName);
 
         List<Ref> branches = new LinkedList<>();
+        Git git = new Git(repository);
         try {
             branches = git.branchList().call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
 
-        for (Ref branchRef : branches){
+        for (Ref branchRef : branches) {
             Branch branch = new Branch();
             branch.setExternalId(branchRef.getName());
             branch.setName(stripFileName(branchRef.getName()));
-            if (branchRef.getName().equals("master")) {
+            if (branchRef.getName().endsWith("master")) {
                 branch.setIsMain(true);
             }
             mineCommits(branch);
         }
 
-        /*System.out.println();
-        System.out.println("Tags: " + repository.getTags().size() + " " + repository.getTags().keySet().toString());
-        System.out.print("Branches: " + branches.size() + " [");
-        for (int i = 0; i < branches.size(); i++) {
-            System.out.print(stripFileName(branches.get(i).getName()));
-            if (i != branches.size() - 1) System.out.print(", ");
-            else System.out.println("]");
-        }
-        System.out.println("People: " + people.size() + " " + people.toString());
-        System.out.println("Mentions: " + commitsToTickets.size());
-        for (Map.Entry ticketsPerCommit : commitsToTickets.entrySet()) {
-            for (String ticket : commitsToTickets.get(ticketsPerCommit.getKey())){
-                System.out.println("\tCommit: " + ticketsPerCommit.getKey() + " \tTicket: #" + ticket);
+        List<Configuration> list = new ArrayList<>();
+        list.addAll(configurations.values());
+        list.sort(new Comparator<Configuration>() {
+            @Override
+            public int compare(Configuration o1, Configuration o2) {
+                return o1.getCreated().compareTo(o2.getCreated());
             }
-        }*/
+        });
+
+        project.setPersonnel(people);
+        project.setConfigurations(list);
+        project.setStartDate(list.get(0).getCreated());
+
+        ProjectInstance pi = new ProjectInstance();
+        pi.setName(projectName);
+        pi.setUrl(projectHandle);
+        pi.setToolInstance(ti);
+        pi.setProject(project);
+
+        printReport(pi);
     }
 
-    private void mineCommits(Branch branch) {
+    @Override
+    protected Map<String, Set<VCSTag>> loadTags() {
+        Map<String, Set<VCSTag>> tags = new HashMap<>();
+        RevWalk walk = new RevWalk(repository);
 
+        for (Map.Entry<String, Ref> entry : repository.getTags().entrySet()) {
+            VCSTag tag = new VCSTag();
+            tag.setName(entry.getKey());
+
+            try {
+                Ref simpleTag = repository.findRef(entry.getKey());
+                RevObject any = walk.parseAny(simpleTag.getObjectId());
+                tag.setExternalId(any.getId().toString());
+
+                // annotated tag
+                if (any.getType() == Constants.OBJ_TAG) {
+                    tags.get(((RevTag) any).getObject().getId().getName()).add(tag);
+                // not annotated tag
+                } else {
+                    tags.get(any.getId().getName()).add(tag);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        walk.dispose();
+        return tags;
+    }
+
+    @Override
+    protected void mineCommits(Branch branch) {
+        // TODO branch determination
+        Map<String, Set<VCSTag>> tags = loadTags();
         RevWalk revWalk = new RevWalk(repository);
 
         try {
@@ -112,39 +158,31 @@ public class GitPump extends DataPump {
             e.printStackTrace();
         }
 
+
         for (RevCommit commit : revWalk) {
-            Configuration configuration = mineCommit(commit);
-            configuration.setBranch(branch);
-            if (commitBranches.containsKey(commit.getId().getName())) {
-                commitBranches.get(commit.getId().getName()).add(stripFileName(branch.getName()));
+            Configuration configuration;
+            if (!configurations.containsKey(commit.getId().toString())) {
+                configuration = mineCommit(commit);
+                if (tags.containsKey(configuration.getName())) {
+                    configuration.getTags().addAll(tags.get(configuration.getName()));
+                    configuration.setIsRelease(true);
+                }
+                configurations.put(commit.getId().toString(), configuration);
             } else {
-                Set<String> branchNames = new HashSet<>();
-                branchNames.add(stripFileName(branch.getName()));
-                commitBranches.put(commit.getId().getName(), branchNames);
+                configuration = configurations.get(commit.getId().toString());
             }
+            configuration.getBranches().add(branch);
         }
+        revWalk.dispose();
     }
 
+    /**
+     * mines data from a particular commit and returns them in the form of Configuration
+     * @param commit commit to mine
+     * @return configuration object with commit's data
+     */
     private Configuration mineCommit(RevCommit commit) {
-        Identity authorI = new Identity();
-        authorI.setName(commit.getAuthorIdent().getName());
-        authorI.setEmail(commit.getAuthorIdent().getEmailAddress());
-
-        Person author = new Person();
-        author.setName(authorI.getName());
-        author.getIdentities().add(authorI);
-
-        Identity committerI = new Identity();
-        committerI.setName(commit.getCommitterIdent().getName());
-        committerI.setEmail(commit.getCommitterIdent().getEmailAddress());
-
-        Person committer = new Person();
-        committer.setName(authorI.getName());
-        committer.getIdentities().add(committerI);
-
-        ConfigPersonRelation relation = new ConfigPersonRelation();
-        relation.setAuthor(committer);
-        relation.setName("Committed-by");
+        Person author = addPerson(commit.getAuthorIdent().getName(), commit.getAuthorIdent().getEmailAddress());
 
         Configuration configuration = new Configuration();
         configuration.setExternalId(commit.getId().toString());
@@ -153,28 +191,76 @@ public class GitPump extends DataPump {
         configuration.setCreated(convertDate(commit.getCommitTime()));
         configuration.setAuthor(author);
         configuration.setWorkUnits(getAssociatedWorkUnits(commit));
-        configuration.getRelations().addAll(getRelatedPeople(commit));
-        configuration.setChanges(mineChanges(commit, configuration));
+        configuration.setChanges(mineChanges(commit));
+        configuration.setArtifacts(getArtifactsInConf(commit));
+        configuration.setRelations(getRelatedPeople(commit));
 
         return configuration;
     }
 
-    private Set<ConfigPersonRelation> getRelatedPeople(RevCommit commit) {
+    /**
+     * gets all the files present in repository in time of a given commit
+     * @param commit commit to mine
+     * @return all files in the commit
+     */
+    private Collection<Artifact> getArtifactsInConf(RevCommit commit) {
+        Collection<Artifact> artifacts = new HashSet<>();
+        TreeWalk treeWalk = new TreeWalk(repository);
+
+        try {
+
+            treeWalk.addTree(commit.getTree());
+            treeWalk.setRecursive(true);
+            while (treeWalk.next()) {
+                String id = treeWalk.getObjectId(0).getName();
+
+                Artifact artifact = new Artifact();
+                String fileName = treeWalk.getNameString();
+                artifact.setExternalId(id);
+                artifact.setArtifactClass(ArtifactClass.FILE);
+                artifact.setName(fileName);
+                artifact.setUrl(projectHandle + "/" + treeWalk.getPathString());
+                artifact.setMimeType("");
+                if (fileName.contains(".")) {
+                    artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
+                }
+
+                artifacts.add(artifact);
+            }
+            treeWalk.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return artifacts;
+    }
+
+    /**
+     * gets all relations of people (except for the author) involved in a commit based on commit message analysis
+     * @param commit commit to be analysed
+     * @return collection of relations of people to the commit
+     */
+    private Collection<ConfigPersonRelation> getRelatedPeople(RevCommit commit) {
         Set<ConfigPersonRelation> relations = new HashSet<>();
+
+        Person committer = addPerson(commit.getCommitterIdent().getName(), commit.getCommitterIdent().getEmailAddress());
+
+        ConfigPersonRelation relation = new ConfigPersonRelation();
+        relation.setPerson(committer);
+        relation.setDescription("Committed-by");
+        relations.add(relation);
+
         for (FooterLine line : commit.getFooterLines()) {
             if (line.getKey().endsWith("-by") || line.getKey().equals("CC")) {
-                Identity identity = new Identity();
                 String[] parts = line.getValue().split("<");
-                identity.setName(parts[0].trim());
-                if(parts.length > 1) identity.setEmail(parts[1].substring(0, parts[1].length() - 1));
+                String name = parts[0].trim();
+                String email = null;
+                if (parts.length > 1) email = parts[1].substring(0, parts[1].length() - 1);
+                addPerson(name, email);
 
-                Person person = new Person();
-                person.setName(identity.getName());
-                person.getIdentities().add(identity);
-
-                ConfigPersonRelation relation = new ConfigPersonRelation();
-                relation. setAuthor(person);
-                relation.setName(line.getKey());
+                relation = new ConfigPersonRelation();
+                relation.setPerson(addPerson(name, email));
+                relation.setDescription(line.getKey());
 
                 relations.add(relation);
             }
@@ -182,8 +268,13 @@ public class GitPump extends DataPump {
         return relations;
     }
 
-    protected Set<WorkUnit> getAssociatedWorkUnits(RevCommit commit) {
-        Set<WorkUnit> associated = new HashSet<>();
+    /**
+     * mines work units mentioned in a commit message
+     * @param commit commit to be analysed
+     * @return collection of mentioned work units
+     */
+    private Collection<WorkUnit> getAssociatedWorkUnits(RevCommit commit) {
+        Set<WorkUnit> units = new HashSet<>();
 
         if (commit.getFullMessage().contains("#")) {
             String[] parts = commit.getFullMessage().split("#");
@@ -197,14 +288,19 @@ public class GitPump extends DataPump {
                 if (!mention.isEmpty()) {
                     WorkUnit wu = new WorkUnit();
                     wu.setNumber(Integer.parseInt(mention));
-                    associated.add(wu);
+                    units.add(wu);
                 }
             }
         }
-        return associated;
+        return units;
     }
 
-    private Set<WorkItemChange> mineChanges(RevCommit commit, Configuration configuration) {
+    /**
+     * mines all individual file changes in a given commit
+     * @param commit commit to be mined
+     * @return changes associated with the commit
+     */
+    private Collection<WorkItemChange> mineChanges(RevCommit commit) {
         Set<WorkItemChange> changes = new LinkedHashSet<>();
         try {
             RevTree parentTree = null;
@@ -218,24 +314,7 @@ public class GitPump extends DataPump {
             List<DiffEntry> diffs = df.scan(parentTree, commit.getTree());
 
             for (DiffEntry diff : diffs) {
-                int linesAdded = 0, linesDeleted = 0;
-
-                WorkItemChange change = mineChange(diff);
-
-                for (Edit edit : df.toFileHeader(diff).toEditList()) {
-                    linesDeleted += edit.getLengthA();
-                    linesAdded += edit.getLengthB();
-
-                    String desc = change.getDescription() + "\\ttEdit type: " + edit.getType().toString() + "\n";
-                    desc += "\t\t\tLines: " + edit.getLengthB() + " added, " + edit.getLengthA() + " deleted" + "\n";
-
-                    change.setDescription(desc);
-                }
-                String desc = change.getDescription() + "\tLines: " + linesAdded + " added, " + linesDeleted + " deleted" + "\n";
-                change.setDescription(desc);
-
-                System.out.println(change);
-
+                WorkItemChange change = mineChange(diff, df.toFileHeader(diff).toEditList());
                 changes.add(change);
             }
 
@@ -245,7 +324,13 @@ public class GitPump extends DataPump {
         return changes;
     }
 
-    private WorkItemChange mineChange(DiffEntry diff) {
+    /**
+     * mines a particular change of a file
+     * @param diff difference between before- and after-commit version of a file
+     * @param edits edited segments of the file
+     * @return data in a work item change form
+     */
+    private WorkItemChange mineChange(DiffEntry diff, EditList edits) {
         Artifact artifact = new Artifact();
 
         String type = diff.getChangeType().name();
@@ -255,27 +340,40 @@ public class GitPump extends DataPump {
         String oldFileName = stripFileName(diff.getOldPath());
         String oldFileDir = diff.getOldPath().substring(0, diff.getOldPath().lastIndexOf(oldFileName));
 
-        if (type.equals("DELETE")) {
-            desc += "\tfrom: " + diff.getOldPath();
-            artifact.setName(oldFileName);
-        } else if (type.equals("ADD") || type.equals("MODIFY")) {
-            desc += "\tto: " + diff.getNewPath();
-            artifact.setName(newFileName);
-        } else {
-            if (type.equals("RENAME")) {
-                if (newFileName.equals(oldFileName)) type = "MOVE";
-                else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
-            }
-            if (diff.getScore() < 100) type += " AND MODIFY";
-            desc += "\tfrom: " + diff.getOldPath() + "\n" +
-                    "\tto: " + diff.getNewPath() + "\n" +
-                    "\tscore: " + diff.getScore();
-            artifact.setName(newFileName);
+        switch (type) {
+            case "DELETE":
+                desc += "from: " + diff.getOldPath() + "\n";
+                artifact.setName(oldFileName);
+                break;
+            case "ADD":
+            case "MODIFY":
+                desc += "to: " + diff.getNewPath() + "\n";
+                artifact.setName(newFileName);
+                break;
+            default:
+                if (type.equals("RENAME")) {
+                    if (newFileName.equals(oldFileName)) type = "MOVE";
+                    else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
+                }
+                if (diff.getScore() < 100) type += " AND MODIFY";
+                desc += "from: " + diff.getOldPath() + "\n" +
+                        "to: " + diff.getNewPath() + "\n" +
+                        "score: " + diff.getScore() + "\n";
+                artifact.setName(newFileName);
+                break;
         }
 
         WorkItemChange change = new WorkItemChange();
         change.setChangedItem(artifact);
-        change.setDescription("Change type: " + type + "\n" + desc + "\n");
+        change.setName(type);
+
+        int linesAdded = 0, linesDeleted = 0;
+        for (Edit edit : edits) {
+            linesDeleted += edit.getLengthA();
+            linesAdded += edit.getLengthB();
+        }
+        desc += linesAdded + " lines added, " + linesDeleted + " lines deleted";
+        change.setDescription(desc);
 
         return change;
     }
@@ -295,15 +393,19 @@ public class GitPump extends DataPump {
 
         if (privateKeyLoc != null) cloneCommand = authenticate(cloneCommand);
 
-        Git git = null;
         try {
-            git = cloneCommand.call();
+            Git git = cloneCommand.call();
+            repository = git.getRepository();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-        repository = git.getRepository();
     }
 
+    /**
+     * authenticates a clone command using protected field values of the pump
+     * @param cloneCommand unauthenticated clone command
+     * @return authenticated clone command
+     */
     private CloneCommand authenticate(CloneCommand cloneCommand) {
         SshSessionFactory sshSessionFactory = new JschConfigSessionFactory() {
             @Override
@@ -328,9 +430,13 @@ public class GitPump extends DataPump {
         return cloneCommand;
     }
 
-    @Override
-    protected Date convertDate(Object date) {
-        long milliseconds = Long.parseLong(date.toString());
+    /**
+     * converts time in seconds since the start of the epoch to a Date object
+     * @param date number of seconds since the start of the epoch
+     * @return proper date object
+     */
+    private Date convertDate(int date) {
+        long milliseconds = Long.parseLong(date + "");
         milliseconds *= 1000;
         return new Date(milliseconds);
     }

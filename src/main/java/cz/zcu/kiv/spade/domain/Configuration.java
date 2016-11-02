@@ -15,7 +15,7 @@ public class Configuration extends AuthoredEntity {
     private boolean isRelease;
     private Collection<Artifact> artifacts;
     private Collection<WorkUnit> workUnits;
-    private Branch branch;
+    private Collection<Branch> branches;
     private Collection<VCSTag> tags;
     private Collection<ConfigPersonRelation> relations;
 
@@ -24,11 +24,12 @@ public class Configuration extends AuthoredEntity {
         this.artifacts = new LinkedHashSet<>();
         this.workUnits = new LinkedHashSet<>();
         this.tags = new LinkedHashSet<>();
+        this.branches = new LinkedHashSet<>();
         this.relations = new LinkedHashSet<>();
     }
 
     public Configuration(long id, String externalId, String name, String description, int number, Date created, Person author, Collection<WorkItemChange> changes,
-                         boolean isRelease, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Branch branch,
+                         boolean isRelease, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Collection<Branch> branches,
                          Collection<VCSTag> tags, Collection<ConfigPersonRelation> relations) {
         super(id, externalId, name, description, created, author);
         this.number = number;
@@ -36,7 +37,7 @@ public class Configuration extends AuthoredEntity {
         this.isRelease = isRelease;
         this.artifacts = artifacts;
         this.workUnits = workUnits;
-        this.branch = branch;
+        this.branches = branches;
         this.tags = tags;
         this.relations = relations;
     }
@@ -90,13 +91,15 @@ public class Configuration extends AuthoredEntity {
         this.workUnits = workUnits;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
-    public Branch getBranch() {
-        return branch;
+    @ManyToMany
+    @JoinTable(name = "Configuration_Branch", joinColumns = @JoinColumn(name = "configuration_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
+    public Collection<Branch> getBranches() {
+        return branches;
     }
 
-    public void setBranch(Branch branch) {
-        this.branch = branch;
+    public void setBranches(Collection<Branch> branches) {
+        this.branches = branches;
     }
 
     @OneToMany
@@ -117,30 +120,5 @@ public class Configuration extends AuthoredEntity {
 
     public void setRelations(Collection<ConfigPersonRelation> relations) {
         this.relations = relations;
-    }
-
-    @Override
-    public String toString() {
-        String ret = super.toString() +
-                "Branch: " + branch + "\n" +
-                "Work units:\n" +
-                "<----------------------------------------\n";
-        for (WorkUnit wu : workUnits){
-            ret += wu + "\n\n";
-        }
-        ret += ">----------------------------------------\n" +
-                "Related people:\n" +
-                "<----------------------------------------\n";
-        for (ConfigPersonRelation relation : relations){
-            ret += relation + "\n\n";
-        }
-        ret += ">----------------------------------------\n" +
-                "Changes:\n" +
-                "<----------------------------------------\n";
-        for (WorkItemChange change : changes){
-            ret += change + "\n\n";
-        }
-        return ret +
-                ">----------------------------------------\n";
     }
 }
