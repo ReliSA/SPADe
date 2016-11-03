@@ -221,7 +221,7 @@ public abstract class DataPump {
      */
     protected void printReport(ProjectInstance pi) {
         try {
-            PrintStream stream = new PrintStream("D:/report_" + projectName + ".txt");
+            PrintStream stream = new PrintStream("D:/reports/" + projectName + ".txt");
 
             stream.println();
             stream.println("Project: " + pi.getProject().getName());
@@ -244,7 +244,8 @@ public abstract class DataPump {
             for (Configuration conf : pi.getProject().getConfigurations()) {
                 stream.println("\tSHA: " + conf.getName().substring(0, 7));
                 stream.println("\tAuthor: " + conf.getAuthor().getName());
-                stream.println("\tTime: " + conf.getCreated());
+                stream.println("\tCreated: " + conf.getCreated());
+                stream.println("\tCommitted: " + conf.getCommitted());
                 String tagList = "\tTags: ";
                 for (VCSTag tag : conf.getTags()) {
                     tagList = tagList.concat(tag.getName());
