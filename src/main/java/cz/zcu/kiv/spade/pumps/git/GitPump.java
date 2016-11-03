@@ -261,7 +261,6 @@ public class GitPump extends DataPump {
                 artifact.setUrl(projectHandle + "/" + treeWalk.getPathString());
                 if (fileName.contains(".")) {
                     artifact.setMimeType(URLConnection.guessContentTypeFromName(fileName));
-                    File file = new File(artifact.getUrl());
                     if (artifact.getMimeType() == null) {
                         artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
                     }

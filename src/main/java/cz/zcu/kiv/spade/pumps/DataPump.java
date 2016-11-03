@@ -98,11 +98,13 @@ public abstract class DataPump {
      *
      * @param file temporary directory
      */
-    public static void deleteTempDir(File file) {
+    protected static void deleteTempDir(File file) {
         if (file.isDirectory()) {
             File[] fileList = file.listFiles();
-            for (int i = 0; i < fileList.length; i++) {
-                deleteTempDir(fileList[i]);
+            if (fileList != null) {
+                for (File f : fileList) {
+                    deleteTempDir(f);
+                }
             }
         }
         file.delete();
@@ -205,7 +207,7 @@ public abstract class DataPump {
      *
      * @return project URL without protocol and username
      */
-    protected String cutProtocolAndUser() {
+    private String cutProtocolAndUser() {
         String withoutProtocol = projectHandle;
         if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
         if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
@@ -285,7 +287,30 @@ public abstract class DataPump {
                 stream.println();
             }
             stream.println("Tags: " + tags.size() + " " + tags.toString());
-            stream.print("Branches: " + branches.size() + " " + branches.toString());
+            stream.println("Branches: " + branches.size() + " " + branches.toString());
+
+            stream.println();
+
+            Map<String, Integer> brs = new HashMap<>();
+            int i = 1;
+            for (String b : branches) {
+                brs.put(b, i);
+                stream.println(i + " - " + b);
+                i++;
+            }
+            stream.println();
+
+            for (Configuration conf : pi.getProject().getConfigurations()) {
+                for (Map.Entry<String, Integer> b : brs.entrySet()) {
+                    boolean found = false;
+                    for (Branch br : conf.getBranches()) {
+                        if (b.getKey().contains(br.getName())) found = true;
+                    }
+                    if (found) stream.print("x ");
+                    else stream.print("  ");
+                }
+                stream.println(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
+            }
 
             stream.flush();
             stream.close();
