@@ -22,8 +22,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URLConnection;
 import java.util.*;
 
 public class GitPump extends DataPump {
@@ -69,15 +72,33 @@ public class GitPump extends DataPump {
     public void mineData() {
         loadRootObject();
 
-        ToolInstance ti = new ToolInstance();
-        ti.setExternalId(getServer());
-        ti.setTool(Tool.GIT);
-
+        ToolInstance ti = new ToolInstance(1L, getServer(), Tool.GIT, "");
         Project project = new Project();
         project.setName(projectName);
+        ProjectInstance pi = new ProjectInstance();
+        pi.setName(projectName);
+        pi.setUrl(projectHandle);
+        pi.setToolInstance(ti);
 
+        mineBranches();
+        List<Configuration> list = sortConfigsByDate();
+
+        project.setPersonnel(people);
+        project.setConfigurations(list);
+        project.setStartDate(list.get(0).getCreated());
+
+        pi.setProject(project);
+
+        printReport(pi);
+    }
+
+    /**
+     * mines data one branch after another while storing date in private fields
+     */
+    private void mineBranches() {
         List<Ref> branches = new LinkedList<>();
         Git git = new Git(repository);
+
         try {
             branches = git.branchList().call();
         } catch (GitAPIException e) {
@@ -85,15 +106,16 @@ public class GitPump extends DataPump {
         }
 
         for (Ref branchRef : branches) {
-            Branch branch = new Branch();
-            branch.setExternalId(branchRef.getName());
-            branch.setName(stripFileName(branchRef.getName()));
-            if (branchRef.getName().endsWith("master")) {
-                branch.setIsMain(true);
-            }
+            Branch branch = getBranch(branchRef);
             mineCommits(branch);
         }
+    }
 
+    /**
+     * returns configurations in a form of a list sorted by date from earliest
+     * @return sorted list of configurations
+     */
+    private List<Configuration> sortConfigsByDate() {
         List<Configuration> list = new ArrayList<>();
         list.addAll(configurations.values());
         list.sort(new Comparator<Configuration>() {
@@ -102,18 +124,22 @@ public class GitPump extends DataPump {
                 return o1.getCreated().compareTo(o2.getCreated());
             }
         });
+        return list;
+    }
 
-        project.setPersonnel(people);
-        project.setConfigurations(list);
-        project.setStartDate(list.get(0).getCreated());
-
-        ProjectInstance pi = new ProjectInstance();
-        pi.setName(projectName);
-        pi.setUrl(projectHandle);
-        pi.setToolInstance(ti);
-        pi.setProject(project);
-
-        printReport(pi);
+    /**
+     * get SPADe branch object from Git branch reference
+     * @param branchRef branch reference from Git
+     * @return branch object from SPADe
+     */
+    private Branch getBranch(Ref branchRef) {
+        Branch branch = new Branch();
+        branch.setExternalId(branchRef.getName());
+        branch.setName(stripFileName(branchRef.getName()));
+        if (branchRef.getName().endsWith("master")) {
+            branch.setIsMain(true);
+        }
+        return branch;
     }
 
     @Override
@@ -126,17 +152,23 @@ public class GitPump extends DataPump {
             tag.setName(entry.getKey());
 
             try {
-                Ref simpleTag = repository.findRef(entry.getKey());
-                RevObject any = walk.parseAny(simpleTag.getObjectId());
+                Ref tagRef = repository.findRef(entry.getKey());
+                RevObject any = walk.parseAny(tagRef.getObjectId());
                 tag.setExternalId(any.getId().toString());
 
+                String commitSHA;
                 // annotated tag
                 if (any.getType() == Constants.OBJ_TAG) {
-                    tags.get(((RevTag) any).getObject().getId().getName()).add(tag);
+                    commitSHA = ((RevTag) any).getObject().getId().getName();
                 // not annotated tag
                 } else {
-                    tags.get(any.getId().getName()).add(tag);
+                    commitSHA = any.getId().getName();
                 }
+
+                if (!tags.containsKey(commitSHA)) {
+                    tags.put(commitSHA, new HashSet<>());
+                }
+                tags.get(commitSHA).add(tag);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -220,9 +252,13 @@ public class GitPump extends DataPump {
                 artifact.setArtifactClass(ArtifactClass.FILE);
                 artifact.setName(fileName);
                 artifact.setUrl(projectHandle + "/" + treeWalk.getPathString());
-                artifact.setMimeType("");
                 if (fileName.contains(".")) {
-                    artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
+                    artifact.setMimeType(URLConnection.guessContentTypeFromName(fileName));
+                    File file = new File(artifact.getUrl());
+                    if (artifact.getMimeType() == null){
+                        artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
+                    }
+                    System.out.println(artifact.getMimeType());
                 }
 
                 artifacts.add(artifact);
