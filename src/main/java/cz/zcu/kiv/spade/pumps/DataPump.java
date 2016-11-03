@@ -221,7 +221,7 @@ public abstract class DataPump {
      */
     protected void printReport(ProjectInstance pi) {
         try {
-            PrintStream stream = new PrintStream("D:/report.txt");
+            PrintStream stream = new PrintStream("D:/report_" + projectName + ".txt");
 
             stream.println();
             stream.println("Project: " + pi.getProject().getName());
