@@ -22,16 +22,16 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URLConnection;
 import java.util.*;
 
 public class GitPump extends DataPump {
 
-    /** JGit root object for mining data */
+    /**
+     * JGit root object for mining data
+     */
     private Repository repository;
 
     /**
@@ -43,8 +43,8 @@ public class GitPump extends DataPump {
 
     /**
      * @param projectHandle URL of the project instance
-     * @param username username for authenticated login
-     * @param password password for authenticated login
+     * @param username      username for authenticated login
+     * @param password      password for authenticated login
      */
     public GitPump(String projectHandle, String username, String password) {
         super(projectHandle, username, password);
@@ -61,8 +61,8 @@ public class GitPump extends DataPump {
     /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
-     * @param username username for authenticated login
-     * @param password password for authenticated login
+     * @param username      username for authenticated login
+     * @param password      password for authenticated login
      */
     public GitPump(String projectHandle, String privateKeyLoc, String username, String password) {
         super(projectHandle, privateKeyLoc, username, password);
@@ -113,6 +113,7 @@ public class GitPump extends DataPump {
 
     /**
      * returns configurations in a form of a list sorted by date from earliest
+     *
      * @return sorted list of configurations
      */
     private List<Configuration> sortConfigsByDate() {
@@ -121,7 +122,9 @@ public class GitPump extends DataPump {
         list.sort(new Comparator<Configuration>() {
             @Override
             public int compare(Configuration o1, Configuration o2) {
-                return o1.getCreated().compareTo(o2.getCreated());
+                int ret = o1.getCommitted().compareTo(o2.getCommitted());
+                if (ret != 0) return ret;
+                else return o1.getCreated().compareTo(o2.getCreated());
             }
         });
         return list;
@@ -129,6 +132,7 @@ public class GitPump extends DataPump {
 
     /**
      * get SPADe branch object from Git branch reference
+     *
      * @param branchRef branch reference from Git
      * @return branch object from SPADe
      */
@@ -160,7 +164,7 @@ public class GitPump extends DataPump {
                 // annotated tag
                 if (any.getType() == Constants.OBJ_TAG) {
                     commitSHA = ((RevTag) any).getObject().getId().getName();
-                // not annotated tag
+                    // not annotated tag
                 } else {
                     commitSHA = any.getId().getName();
                 }
@@ -210,6 +214,7 @@ public class GitPump extends DataPump {
 
     /**
      * mines data from a particular commit and returns them in the form of Configuration
+     *
      * @param commit commit to mine
      * @return configuration object with commit's data
      */
@@ -220,7 +225,8 @@ public class GitPump extends DataPump {
         configuration.setExternalId(commit.getId().toString());
         configuration.setName(commit.getId().getName());
         configuration.setDescription(commit.getFullMessage());
-        configuration.setCreated(convertDate(commit.getCommitTime()));
+        configuration.setCommitted(commit.getCommitterIdent().getWhen());
+        configuration.setCreated(commit.getAuthorIdent().getWhen());
         configuration.setAuthor(author);
         configuration.setWorkUnits(getAssociatedWorkUnits(commit));
         configuration.setChanges(mineChanges(commit));
@@ -232,6 +238,7 @@ public class GitPump extends DataPump {
 
     /**
      * gets all the files present in repository in time of a given commit
+     *
      * @param commit commit to mine
      * @return all files in the commit
      */
@@ -255,10 +262,9 @@ public class GitPump extends DataPump {
                 if (fileName.contains(".")) {
                     artifact.setMimeType(URLConnection.guessContentTypeFromName(fileName));
                     File file = new File(artifact.getUrl());
-                    if (artifact.getMimeType() == null){
+                    if (artifact.getMimeType() == null) {
                         artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
                     }
-                    System.out.println(artifact.getMimeType());
                 }
 
                 artifacts.add(artifact);
@@ -273,6 +279,7 @@ public class GitPump extends DataPump {
 
     /**
      * gets all relations of people (except for the author) involved in a commit based on commit message analysis
+     *
      * @param commit commit to be analysed
      * @return collection of relations of people to the commit
      */
@@ -306,6 +313,7 @@ public class GitPump extends DataPump {
 
     /**
      * mines work units mentioned in a commit message
+     *
      * @param commit commit to be analysed
      * @return collection of mentioned work units
      */
@@ -333,6 +341,7 @@ public class GitPump extends DataPump {
 
     /**
      * mines all individual file changes in a given commit
+     *
      * @param commit commit to be mined
      * @return changes associated with the commit
      */
@@ -362,7 +371,8 @@ public class GitPump extends DataPump {
 
     /**
      * mines a particular change of a file
-     * @param diff difference between before- and after-commit version of a file
+     *
+     * @param diff  difference between before- and after-commit version of a file
      * @param edits edited segments of the file
      * @return data in a work item change form
      */
@@ -439,6 +449,7 @@ public class GitPump extends DataPump {
 
     /**
      * authenticates a clone command using protected field values of the pump
+     *
      * @param cloneCommand unauthenticated clone command
      * @return authenticated clone command
      */
@@ -464,16 +475,5 @@ public class GitPump extends DataPump {
             }
         });
         return cloneCommand;
-    }
-
-    /**
-     * converts time in seconds since the start of the epoch to a Date object
-     * @param date number of seconds since the start of the epoch
-     * @return proper date object
-     */
-    private Date convertDate(int date) {
-        long milliseconds = Long.parseLong(date + "");
-        milliseconds *= 1000;
-        return new Date(milliseconds);
     }
 }

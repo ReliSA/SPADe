@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 public class Configuration extends AuthoredEntity {
 
     private int number;
+    private Date committed;
     private Collection<WorkItemChange> changes;
     private boolean isRelease;
     private Collection<Artifact> artifacts;
@@ -28,11 +29,12 @@ public class Configuration extends AuthoredEntity {
         this.relations = new LinkedHashSet<>();
     }
 
-    public Configuration(long id, String externalId, String name, String description, int number, Date created, Person author, Collection<WorkItemChange> changes,
+    public Configuration(long id, String externalId, String name, String description, int number, Date created, Person author, Date committed, Collection<WorkItemChange> changes,
                          boolean isRelease, Collection<Artifact> artifacts, Collection<WorkUnit> workUnits, Collection<Branch> branches,
                          Collection<VCSTag> tags, Collection<ConfigPersonRelation> relations) {
         super(id, externalId, name, description, created, author);
         this.number = number;
+        this.committed = committed;
         this.changes = changes;
         this.isRelease = isRelease;
         this.artifacts = artifacts;
@@ -48,6 +50,15 @@ public class Configuration extends AuthoredEntity {
 
     public void setNumber(int number) {
         this.number = number;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getCommitted() {
+        return committed;
+    }
+
+    public void setCommitted(Date committed) {
+        this.committed = committed;
     }
 
     @OneToMany

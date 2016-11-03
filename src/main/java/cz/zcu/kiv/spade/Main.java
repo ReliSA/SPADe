@@ -25,6 +25,5 @@ public class Main {
         GitPump gitPump = new GitPump("https://github.com/siemens/codeface.git");
 
         gitPump.mineData();
-
     }
 }

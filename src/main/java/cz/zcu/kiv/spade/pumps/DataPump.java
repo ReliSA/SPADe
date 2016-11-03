@@ -12,24 +12,40 @@ import java.util.*;
  */
 public abstract class DataPump {
 
-    /** temporary directory to transfer necessary data into */
+    /**
+     * temporary directory to transfer necessary data into
+     */
     protected static final String ROOT_TEMP_DIR = "D:/repos/";
 
-    /** URL of the project */
+    /**
+     * URL of the project
+     */
     protected String projectHandle;
-    /** name of the project */
+    /**
+     * name of the project
+     */
     protected String projectName;
 
-    /** username for authenticated login */
+    /**
+     * username for authenticated login
+     */
     protected String username;
-    /** password for authenticated login */
+    /**
+     * password for authenticated login
+     */
     protected String password;
-    /** private key location for authenticated login */
+    /**
+     * private key location for authenticated login
+     */
     protected String privateKeyLoc;
 
-    /** project personnel gathered from this project instance */
+    /**
+     * project personnel gathered from this project instance
+     */
     protected Collection<Person> people = new HashSet<>();
-    /** project configurations gathered from this project instance using SHA/revision number as key */
+    /**
+     * project configurations gathered from this project instance using SHA/revision number as key
+     */
     protected Map<String, Configuration> configurations = new HashMap<>();
 
 
@@ -43,8 +59,8 @@ public abstract class DataPump {
 
     /**
      * @param projectHandle URL of the project instance
-     * @param username username for authenticated login
-     * @param password password for authenticated login
+     * @param username      username for authenticated login
+     * @param password      password for authenticated login
      */
     public DataPump(String projectHandle, String username, String password) {
         this.projectHandle = projectHandle;
@@ -66,8 +82,8 @@ public abstract class DataPump {
     /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
-     * @param username username for authenticated login
-     * @param password password for authenticated login
+     * @param username      username for authenticated login
+     * @param password      password for authenticated login
      */
     public DataPump(String projectHandle, String privateKeyLoc, String username, String password) {
         this.projectHandle = projectHandle;
@@ -79,6 +95,7 @@ public abstract class DataPump {
 
     /**
      * deletes temporary directory
+     *
      * @param file temporary directory
      */
     public static void deleteTempDir(File file) {
@@ -103,19 +120,22 @@ public abstract class DataPump {
 
     /**
      * loads a map using commit's external ID as a key and a set of associated tags as a value
+     *
      * @return map of tags per commit ID
      */
     protected abstract Map<String, Set<VCSTag>> loadTags();
 
     /**
      * mines data from all commits associated with a particular branch
+     *
      * @param branch branch to mine commits from
      */
     protected abstract void mineCommits(Branch branch);
 
     /**
      * adds either a new person to a private collection or a new identity to an existing person based on name and email
-     * @param name person's name
+     *
+     * @param name  person's name
      * @param email person's email
      * @return added person
      */
@@ -150,6 +170,7 @@ public abstract class DataPump {
 
     /**
      * cuts off the path part of the file path
+     *
      * @param path path of the file
      * @return simple name of the file
      */
@@ -160,6 +181,7 @@ public abstract class DataPump {
 
     /**
      * returns a temporary directory location of this project instance data
+     *
      * @return project's temporary directory
      */
     protected String getProjectDir() {
@@ -170,6 +192,7 @@ public abstract class DataPump {
 
     /**
      * cuts a server name from project handle
+     *
      * @return server the project is mined from
      */
     protected String getServer() {
@@ -179,6 +202,7 @@ public abstract class DataPump {
 
     /**
      * cuts protocol and username (e.g. "ppicha@...") from project handle
+     *
      * @return project URL without protocol and username
      */
     protected String cutProtocolAndUser() {
@@ -190,6 +214,7 @@ public abstract class DataPump {
 
     /**
      * prints data report to an output text file
+     *
      * @param pi project instance with all the necessary data
      */
     protected void printReport(ProjectInstance pi) {
