@@ -1,5 +1,8 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
+import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
@@ -7,25 +10,16 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Configuration_Person")
-public class ConfigPersonRelation {
+public class ConfigPersonRelation extends NamedEntity {
 
-    private String description;
     private Person person;
 
     public ConfigPersonRelation() {
     }
 
-    public ConfigPersonRelation(String description, Person person) {
-        this.description = description;
+    public ConfigPersonRelation(long id, String externalId, String name, Person person) {
+        super(id, externalId, name);
         this.person = person;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     @ManyToOne(fetch = FetchType.LAZY)

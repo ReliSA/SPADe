@@ -269,7 +269,7 @@ public abstract class DataPump {
                 stream.println("\tMsg: " + formatted.trim());
                 stream.println("\tAssociated people:");
                 for (ConfigPersonRelation rel : conf.getRelations()) {
-                    stream.println("\t\t" + rel.getDescription() + ": " + rel.getPerson().getName());
+                    stream.println("\t\t" + rel.getName() + ": " + rel.getPerson().getName());
                 }
                 String workUnitsList = "\tAssociated work units: ";
                 for (WorkUnit wu : conf.getWorkUnits()) {

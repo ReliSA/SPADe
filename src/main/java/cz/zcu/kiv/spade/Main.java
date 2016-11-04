@@ -2,18 +2,22 @@ package cz.zcu.kiv.spade;
 
 import cz.zcu.kiv.spade.pumps.git.GitPump;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
 public class Main {
 
     private static final String PERSISTENCE_UNIT = "cz.zcu.kiv.spade";
 
     public static void main(String[] args) {
 
-        //EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
-        //EntityManager em = factory.createEntityManager();
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        EntityManager em = factory.createEntityManager();
 
-        //em.close();
+        em.close();
 
-        GitPump gitPump = new GitPump("https://github.com/ReliSA/SPADe.git");
+        //GitPump gitPump = new GitPump("https://github.com/ReliSA/SPADe.git");
 
         //GitPump gitPump = new GitPump("https://github.com/ReliSA/crce.git");
         //GitPump gitPump = new GitPump("https://github.com/ReliSA/crce-jacc.git");
@@ -24,6 +28,6 @@ public class Main {
         //GitPump gitPump = new GitPump("https://github.com/grimoirelab/perceval.git");
         //GitPump gitPump = new GitPump("https://github.com/siemens/codeface.git");
 
-        gitPump.mineData();
+        //gitPump.mineData();
     }
 }

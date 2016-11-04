@@ -289,7 +289,7 @@ public class GitPump extends DataPump {
 
         ConfigPersonRelation relation = new ConfigPersonRelation();
         relation.setPerson(committer);
-        relation.setDescription("Committed-by");
+        relation.setName("Committed-by");
         relations.add(relation);
 
         for (FooterLine line : commit.getFooterLines()) {
@@ -302,7 +302,7 @@ public class GitPump extends DataPump {
 
                 relation = new ConfigPersonRelation();
                 relation.setPerson(addPerson(name, email));
-                relation.setDescription(line.getKey());
+                relation.setName(line.getKey());
 
                 relations.add(relation);
             }
