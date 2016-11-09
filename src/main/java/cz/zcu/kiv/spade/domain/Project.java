@@ -11,30 +11,30 @@ import java.util.LinkedHashSet;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Project extends ProjectSegment {
 
-    protected Collection<Person> personnel;
+    protected Collection<Person> watchers;
     protected Collection<Configuration> configurations;
 
     public Project() {
-        this.personnel = new LinkedHashSet<>();
+        this.watchers = new LinkedHashSet<>();
         this.configurations = new LinkedHashSet<>();
     }
 
     public Project(long id, String externalId, String name, String description, DevelopmentProgram program, Date startDate, Date endDate,
-                   Collection<Person> personnel, Collection<Configuration> configurations) {
+                   Collection<Person> watchers, Collection<Configuration> configurations) {
         super(id, externalId, name, description, program, startDate, endDate);
-        this.personnel = personnel;
+        this.watchers = watchers;
         this.configurations = configurations;
     }
 
     @ManyToMany
-    @JoinTable(name = "Project_Person", joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
+    @JoinTable(name = "Project_Watcher", joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "member_id", referencedColumnName = "id"))
-    public Collection<Person> getPersonnel() {
-        return personnel;
+    public Collection<Person> getWatchers() {
+        return watchers;
     }
 
-    public void setPersonnel(Collection<Person> personnel) {
-        this.personnel = personnel;
+    public void setWatchers(Collection<Person> watchers) {
+        this.watchers = watchers;
     }
 
     @OneToMany

@@ -81,11 +81,14 @@ public class GitPump extends DataPump {
         pi.setToolInstance(ti);
 
         mineBranches();
-        List<Configuration> list = sortConfigsByDate();
 
-        project.setPersonnel(people);
+        List<Configuration> list = sortConfigsByDate();
         project.setConfigurations(list);
         project.setStartDate(list.get(0).getCreated());
+
+        for (ProjectPersonRole ppr : people){
+            ppr.setProject(project);
+        }
 
         pi.setProject(project);
 

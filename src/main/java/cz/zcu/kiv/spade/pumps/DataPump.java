@@ -40,9 +40,9 @@ public abstract class DataPump {
     protected String privateKeyLoc;
 
     /**
-     * project personnel gathered from this project instance
+     * project personnel gathered from this project instance in a form of Project-Person-Role relation collection
      */
-    protected Collection<Person> people = new HashSet<>();
+    protected Collection<ProjectPersonRole> people = new HashSet<>();
     /**
      * project configurations gathered from this project instance using SHA/revision number as key
      */
@@ -135,15 +135,16 @@ public abstract class DataPump {
     protected abstract void mineCommits(Branch branch);
 
     /**
-     * adds either a new person to a private collection or a new identity to an existing person based on name and email
+     * adds either a new Project-Person-Role to a private collection or a new identity to an existing person based on name and email
      *
      * @param name  person's name
      * @param email person's email
-     * @return added person
+     * @return added person or identified or enhanced (added identity) priviosly existing one
      */
     protected Person addPerson(String name, String email) {
         // TODO disambiguation - heuristic for aggregating people based on name and email
-        for (Person person : people) {
+        for (ProjectPersonRole triad : people) {
+            Person person = triad.getPerson();
             for (Identity identity : person.getIdentities()) {
                 if (identity.getEmail().equals(email)) {
                     return person;
@@ -166,7 +167,9 @@ public abstract class DataPump {
         newPerson.setName(identity.getName());
         newPerson.getIdentities().add(identity);
 
-        people.add(newPerson);
+        ProjectPersonRole ppr = new ProjectPersonRole();
+        ppr.setPerson(newPerson);
+        people.add(ppr);
         return newPerson;
     }
 
@@ -228,8 +231,9 @@ public abstract class DataPump {
             stream.println("Start date: " + pi.getProject().getStartDate());
             stream.println("Tool: " + pi.getToolInstance().getTool() + " (" + pi.getToolInstance().getExternalId() + ")");
             stream.println("URL: " + pi.getUrl());
-            stream.println("Personnel: " + pi.getProject().getPersonnel().size());
-            for (Person person : pi.getProject().getPersonnel()) {
+            stream.println("Personnel: " + people.size());
+            for (ProjectPersonRole triad : people) {
+                Person person = triad.getPerson();
                 String personString = "\t" + person.getName() + " (";
                 for (Identity identity : person.getIdentities()) {
                     personString += identity.getEmail() + ", ";

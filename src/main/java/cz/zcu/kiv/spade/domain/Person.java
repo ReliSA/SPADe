@@ -11,19 +11,16 @@ public class Person extends NamedEntity {
 
     private Collection<Identity> identities;
     private Collection<Competency> competencies;
-    private Collection<Role> roles;
 
     public Person() {
         this.identities = new LinkedHashSet<>();
         this.competencies = new LinkedHashSet<>();
-        this.roles = new LinkedHashSet<>();
     }
 
-    public Person(long id, String externalId, String name, Collection<Identity> identities, Collection<Competency> competencies, Collection<Role> roles) {
+    public Person(long id, String externalId, String name, Collection<Identity> identities, Collection<Competency> competencies) {
         super(id, externalId, name);
         this.identities = identities;
         this.competencies = competencies;
-        this.roles = roles;
     }
 
     @OneToMany
@@ -47,14 +44,4 @@ public class Person extends NamedEntity {
         this.competencies = competencies;
     }
 
-    @ManyToMany
-    @JoinTable(name = "Person_Role", joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    public Collection<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Collection<Role> roles) {
-        this.roles = roles;
-    }
 }
