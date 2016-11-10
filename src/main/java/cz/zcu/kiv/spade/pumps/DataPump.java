@@ -287,6 +287,10 @@ public abstract class DataPump {
                 stream.println("\tChanged files: " + conf.getChanges().size());
                 for (WorkItemChange change : conf.getChanges()) {
                     stream.println("\t\t" + change.getName() + " " + change.getChangedItem().getName());
+                    stream.println("\t\t\t" + "File path: " + change.getChangedItem().getUrl());
+                    for (FieldChange field : change.getFieldChanges()) {
+                        stream.println("\t\t\t" + field.getName() + " changed from: " + field.getOldValue() + " to: " + field.getNewValue());
+                    }
                     stream.println("\t\t\t" + change.getDescription().replaceAll("\n", "\n\t\t\t"));
                 }
                 stream.println();

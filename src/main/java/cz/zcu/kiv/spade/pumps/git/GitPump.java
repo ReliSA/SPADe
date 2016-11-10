@@ -385,6 +385,7 @@ public class GitPump extends DataPump {
      * @return data in a work item change form
      */
     private WorkItemChange mineChange(DiffEntry diff, EditList edits) {
+        WorkItemChange change = new WorkItemChange();
         Artifact artifact = new Artifact();
 
         String type = diff.getChangeType().name();
@@ -396,29 +397,45 @@ public class GitPump extends DataPump {
 
         switch (type) {
             case "DELETE":
-                desc += "from: " + diff.getOldPath() + "\n";
                 artifact.setName(oldFileName);
+                artifact.setUrl(projectHandle + "/" + diff.getOldPath());
                 break;
-            case "ADD":
             case "MODIFY":
-                desc += "to: " + diff.getNewPath() + "\n";
+            case "ADD":
                 artifact.setName(newFileName);
+                artifact.setUrl(projectHandle + "/" + diff.getNewPath());
                 break;
             default:
                 if (type.equals("RENAME")) {
                     if (newFileName.equals(oldFileName)) type = "MOVE";
                     else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
+
+                    if (type.contains("RENAME")) {
+                        FieldChange rename = new FieldChange();
+                        rename.setName("name");
+                        rename.setOldValue(oldFileName);
+                        rename.setNewValue(newFileName);
+                        change.getFieldChanges().add(rename);
+                    }
+                    if (type.contains("MOVE")) {
+                        FieldChange move = new FieldChange();
+                        move.setName("directory");
+                        move.setOldValue(oldFileDir);
+                        move.setNewValue(newFileDir);
+                        change.getFieldChanges().add(move);
+                    }
+                }
+                if (type.equals("COPY")) {
+                    desc += "copied from: " + diff.getOldPath() + "\n";
                 }
                 if (diff.getScore() < 100) type += " AND MODIFY";
-                desc += "from: " + diff.getOldPath() + "\n" +
-                        "to: " + diff.getNewPath() + "\n" +
-                        "score: " + diff.getScore() + "\n";
+                desc += "score: " + diff.getScore() + "\n";
+
                 artifact.setName(newFileName);
+                artifact.setUrl(projectHandle + "/" + diff.getNewPath());
                 break;
         }
-        artifact.setUrl(diff.getNewPath());
 
-        WorkItemChange change = new WorkItemChange();
         change.setChangedItem(artifact);
         change.setName(type);
 
