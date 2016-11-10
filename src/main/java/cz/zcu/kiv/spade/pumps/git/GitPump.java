@@ -90,6 +90,12 @@ public class GitPump extends DataPump {
             ppr.setProject(project);
         }
 
+        for (Configuration conf : project.getConfigurations()) {
+            for (WorkUnit unit : conf.getWorkUnits()) {
+                unit.setProject(project);
+            }
+        }
+
         pi.setProject(project);
 
         printReport(pi);
@@ -410,6 +416,7 @@ public class GitPump extends DataPump {
                 artifact.setName(newFileName);
                 break;
         }
+        artifact.setUrl(diff.getNewPath());
 
         WorkItemChange change = new WorkItemChange();
         change.setChangedItem(artifact);

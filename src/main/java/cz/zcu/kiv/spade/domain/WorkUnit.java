@@ -21,38 +21,17 @@ public class WorkUnit extends WorkItem {
     private Date dueDate;
     private int progress;
     private Person assignee;
-    private Collection<WorkItem> prerequisites;
+    private Collection<Artifact> attachments;
     private Iteration iteration;
     private Phase phase;
     private Activity activity;
+    private Project project;
+    private Collection<Person> watchers;
 
     public WorkUnit() {
-        this.prerequisites = new LinkedHashSet<>();
-    }
-
-    public WorkUnit(long id, String externalId, String name, String description, Date created, Person author, String url,
-                    int number, WorkUnitType type, WorkUnitPriority priority, WorkUnitSeverity severity,
-                    double estimatedTime, double spentTime, Date startDate, Date dueDate, WorkUnitStatus status,
-                    WorkUnitResolution resolution, int progress, Person assignee, Collection<WorkItem> prerequisites,
-                    WorkUnitCategory category, Iteration iteration, Phase phase, Activity activity) {
-        super(id, externalId, name, description, created, author, url);
-        this.number = number;
-        this.priority = priority;
-        this.severity = severity;
-        this.type = type;
-        this.status = status;
-        this.resolution = resolution;
-        this.category = category;
-        this.estimatedTime = estimatedTime;
-        this.spentTime = spentTime;
-        this.startDate = startDate;
-        this.dueDate = dueDate;
-        this.progress = progress;
-        this.assignee = assignee;
-        this.prerequisites = prerequisites;
-        this.iteration = iteration;
-        this.phase = phase;
-        this.activity = activity;
+        super();
+        this.attachments = new LinkedHashSet<>();
+        this.watchers = new LinkedHashSet<>();
     }
 
     public int getNumber() {
@@ -160,14 +139,14 @@ public class WorkUnit extends WorkItem {
     }
 
     @ManyToMany
-    @JoinTable(name = "WorkUnit_Prerequisite", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "prerequisite_id", referencedColumnName = "id"))
-    public Collection<WorkItem> getPrerequisites() {
-        return prerequisites;
+    @JoinTable(name = "WorkUnit_Attachment", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "artifact_id", referencedColumnName = "id"))
+    public Collection<Artifact> getAttachments() {
+        return attachments;
     }
 
-    public void setPrerequisites(Collection<WorkItem> prerequisites) {
-        this.prerequisites = prerequisites;
+    public void setAttachments(Collection<Artifact> attachments) {
+        this.attachments = attachments;
     }
 
     @OneToOne(fetch = FetchType.LAZY)
@@ -206,9 +185,23 @@ public class WorkUnit extends WorkItem {
         this.activity = activity;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Number: " + number + "\n";
+    @ManyToOne(fetch = FetchType.LAZY)
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    @ManyToMany
+    @JoinTable(name = "WorkUnit_Watcher", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"))
+    public Collection<Person> getWatchers() {
+        return watchers;
+    }
+
+    public void setWatchers(Collection<Person> watchers) {
+        this.watchers = watchers;
     }
 }

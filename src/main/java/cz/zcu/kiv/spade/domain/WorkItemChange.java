@@ -2,9 +2,7 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
 public class WorkItemChange extends DescribedEntity {
@@ -12,11 +10,7 @@ public class WorkItemChange extends DescribedEntity {
     private WorkItem changedItem;
 
     public WorkItemChange() {
-    }
-
-    public WorkItemChange(long id, String externalId, String name, String description, WorkItem changedItem) {
-        super(id, externalId, name, description);
-        this.changedItem = changedItem;
+        super();
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
