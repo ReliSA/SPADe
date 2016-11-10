@@ -4,10 +4,10 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 
 @Entity
+@Table(name = "work_item_change")
 public class WorkItemChange extends DescribedEntity {
 
     private WorkItem changedItem;
@@ -18,6 +18,7 @@ public class WorkItemChange extends DescribedEntity {
         fieldChanges = new LinkedHashSet<>();
     }
 
+    @JoinColumn(name = "workItemId")
     @ManyToOne(fetch = FetchType.LAZY)
     public WorkItem getChangedItem() {
         return changedItem;
@@ -28,7 +29,7 @@ public class WorkItemChange extends DescribedEntity {
     }
 
     @OneToMany
-    @JoinColumn(name = "item_change_id")
+    @JoinColumn(name = "workItemChangeId")
     public Collection<FieldChange> getFieldChanges() {
         return fieldChanges;
     }

@@ -4,10 +4,10 @@ import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 
 import javax.persistence.*;
 import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedHashSet;
 
 @Entity
+@Table(name = "project")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Project extends ProjectSegment {
 
@@ -15,20 +15,14 @@ public class Project extends ProjectSegment {
     protected Collection<Configuration> configurations;
 
     public Project() {
+        super();
         this.watchers = new LinkedHashSet<>();
         this.configurations = new LinkedHashSet<>();
     }
 
-    public Project(long id, String externalId, String name, String description, DevelopmentProgram program, Date startDate, Date endDate,
-                   Collection<Person> watchers, Collection<Configuration> configurations) {
-        super(id, externalId, name, description, program, startDate, endDate);
-        this.watchers = watchers;
-        this.configurations = configurations;
-    }
-
     @ManyToMany
-    @JoinTable(name = "Project_Watcher", joinColumns = @JoinColumn(name = "project_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "member_id", referencedColumnName = "id"))
+    @JoinTable(name = "project_watcher", joinColumns = @JoinColumn(name = "projectId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "watcherId", referencedColumnName = "id"))
     public Collection<Person> getWatchers() {
         return watchers;
     }
@@ -38,7 +32,7 @@ public class Project extends ProjectSegment {
     }
 
     @OneToMany
-    @JoinColumn(name = "project_id")
+    @JoinColumn(name = "projectId")
     public Collection<Configuration> getConfigurations() {
         return configurations;
     }

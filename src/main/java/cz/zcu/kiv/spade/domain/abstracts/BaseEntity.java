@@ -15,11 +15,6 @@ public abstract class BaseEntity {
         this.id = 0;
     }
 
-    public BaseEntity(long id, String externalId) {
-        this.id = id;
-        this.externalId = externalId;
-    }
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     public long getId() {
@@ -38,9 +33,4 @@ public abstract class BaseEntity {
         this.externalId = externalId;
     }
 
-    @Override
-    public String toString() {
-        return "ID: " + id + "\n" +
-                "External ID: " + externalId + "\n";
-    }
 }

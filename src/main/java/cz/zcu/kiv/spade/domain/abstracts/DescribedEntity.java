@@ -8,11 +8,7 @@ public abstract class DescribedEntity extends NamedEntity {
     protected String description;
 
     public DescribedEntity() {
-    }
-
-    public DescribedEntity(long id, String externalId, String name, String description) {
-        super(id, externalId, name);
-        this.description = description;
+        super();
     }
 
     public String getDescription() {
@@ -23,9 +19,4 @@ public abstract class DescribedEntity extends NamedEntity {
         this.description = description;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Description: " + description + "\n";
-    }
 }

@@ -3,9 +3,11 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
-public class FieldChange extends NamedEntity{
+@Table(name = "field_change")
+public class FieldChange extends NamedEntity {
 
     private String oldValue;
     private String newValue;

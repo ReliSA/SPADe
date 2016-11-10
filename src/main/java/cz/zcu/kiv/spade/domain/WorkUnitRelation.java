@@ -7,6 +7,7 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationSuperclass;
 import javax.persistence.*;
 
 @Entity
+@Table(name = "work_unit_relation")
 public class WorkUnitRelation extends DescribedEntity {
 
     private WorkUnitRelationClass relationClass;
@@ -15,15 +16,7 @@ public class WorkUnitRelation extends DescribedEntity {
     private WorkUnit rightUnit;
 
     public WorkUnitRelation() {
-
-    }
-
-    public WorkUnitRelation(long id, String externalId, String name, String description, WorkUnitRelationClass relationClass, WorkUnitRelationSuperclass relationSuperclass, WorkUnit leftUnit, WorkUnit rightUnit) {
-        super(id, externalId, name, description);
-        this.relationClass = relationClass;
-        this.relationSuperclass = relationSuperclass;
-        this.leftUnit = leftUnit;
-        this.rightUnit = rightUnit;
+        super();
     }
 
     @Enumerated(value = EnumType.STRING)
@@ -44,6 +37,7 @@ public class WorkUnitRelation extends DescribedEntity {
         this.relationSuperclass = relationSuperclass;
     }
 
+    @JoinColumn(name = "leftUnitId")
     @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnit getLeftUnit() {
         return leftUnit;
@@ -53,6 +47,7 @@ public class WorkUnitRelation extends DescribedEntity {
         this.leftUnit = leftUnit;
     }
 
+    @JoinColumn(name = "rightUnitId")
     @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnit getRightUnit() {
         return rightUnit;

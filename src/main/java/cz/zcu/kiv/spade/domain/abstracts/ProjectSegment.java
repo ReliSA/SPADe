@@ -13,16 +13,10 @@ public abstract class ProjectSegment extends DescribedEntity {
     protected Date endDate;
 
     public ProjectSegment() {
+        super();
     }
 
-    public ProjectSegment(long id, String externalId, String name, String description,
-                          Project project, Date startDate, Date endDate) {
-        super(id, externalId, name, description);
-        this.project = project;
-        this.startDate = startDate;
-        this.endDate = endDate;
-    }
-
+    @JoinColumn(name = "superProjectId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Project getProject() {
         return project;
@@ -50,12 +44,4 @@ public abstract class ProjectSegment extends DescribedEntity {
         this.endDate = endDate;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Start date: " + startDate + "\n" +
-                "End date: " + endDate + "\n" +
-                "Project: " + project + "\n";
-
-    }
 }

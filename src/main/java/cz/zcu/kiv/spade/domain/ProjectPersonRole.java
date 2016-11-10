@@ -2,13 +2,10 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "Project_Person_Role")
+@Table(name = "project_person_role")
 public class ProjectPersonRole extends BaseEntity {
 
     private Project project;
@@ -16,15 +13,10 @@ public class ProjectPersonRole extends BaseEntity {
     private Role role;
 
     public ProjectPersonRole() {
+        super();
     }
 
-    public ProjectPersonRole(long id, String externalId, Project project, Person person, Role role) {
-        super(id, externalId);
-        this.project = project;
-        this.person = person;
-        this.role = role;
-    }
-
+    @JoinColumn(name = "projectId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Project getProject() {
         return project;
@@ -34,6 +26,7 @@ public class ProjectPersonRole extends BaseEntity {
         this.project = project;
     }
 
+    @JoinColumn(name = "personId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Person getPerson() {
         return person;
@@ -43,6 +36,7 @@ public class ProjectPersonRole extends BaseEntity {
         this.person = person;
     }
 
+    @JoinColumn(name = "roleId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Role getRole() {
         return role;

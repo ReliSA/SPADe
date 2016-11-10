@@ -6,20 +6,17 @@ import cz.zcu.kiv.spade.domain.enums.Tool;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "tool_instance")
 public class ToolInstance extends BaseEntity {
 
     private Tool tool;
     private String version;
 
     public ToolInstance() {
-    }
-
-    public ToolInstance(long id, String externalId, Tool tool, String version) {
-        super(id, externalId);
-        this.tool = tool;
-        this.version = version;
+        super();
     }
 
     @Enumerated(value = EnumType.STRING)
@@ -39,10 +36,4 @@ public class ToolInstance extends BaseEntity {
         this.version = version;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Tool: " + tool.name() + "\n" +
-                "Version: " + version + "\n";
-    }
 }

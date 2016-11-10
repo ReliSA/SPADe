@@ -2,11 +2,10 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 
 @Entity
+@Table(name = "project_instance")
 public class ProjectInstance extends DescribedEntity {
 
     private ToolInstance toolInstance;
@@ -14,15 +13,10 @@ public class ProjectInstance extends DescribedEntity {
     private String url;
 
     public ProjectInstance() {
+        super();
     }
 
-    public ProjectInstance(long id, String externalId, String name, String description, ToolInstance toolInstance, Project project, String url) {
-        super(id, externalId, name, description);
-        this.toolInstance = toolInstance;
-        this.project = project;
-        this.url = url;
-    }
-
+    @JoinColumn(name = "toolInstanceId")
     @ManyToOne(fetch = FetchType.LAZY)
     public ToolInstance getToolInstance() {
         return toolInstance;
@@ -32,6 +26,7 @@ public class ProjectInstance extends DescribedEntity {
         this.toolInstance = toolInstance;
     }
 
+    @JoinColumn(name = "projectId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Project getProject() {
         return project;
@@ -49,17 +44,4 @@ public class ProjectInstance extends DescribedEntity {
         this.url = url;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "URL: " + url + "\n" +
-                "Tool Instance:\n" +
-                "<----------------------------------------\n" +
-                toolInstance.toString() +
-                ">----------------------------------------\n" +
-                "Project:\n" +
-                "<----------------------------------------\n" +
-                project.toString() +
-                ">----------------------------------------\n";
-    }
 }

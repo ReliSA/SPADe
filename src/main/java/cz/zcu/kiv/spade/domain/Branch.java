@@ -3,18 +3,16 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "branch")
 public class Branch extends NamedEntity {
 
     private boolean isMain;
 
     public Branch() {
-    }
-
-    public Branch(long id, String externalId, String name, boolean isMain) {
-        super(id, externalId, name);
-        this.isMain = isMain;
+        super();
     }
 
     public boolean getIsMain() {

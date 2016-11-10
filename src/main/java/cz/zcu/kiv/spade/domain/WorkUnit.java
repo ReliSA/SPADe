@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 
 @Entity
+@Table(name = "work_unit")
 public class WorkUnit extends WorkItem {
 
     private int number;
@@ -42,7 +43,8 @@ public class WorkUnit extends WorkItem {
         this.number = number;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "typeId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitType getType() {
         return type;
     }
@@ -51,7 +53,8 @@ public class WorkUnit extends WorkItem {
         this.type = type;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "priorityId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitPriority getPriority() {
         return priority;
     }
@@ -60,7 +63,8 @@ public class WorkUnit extends WorkItem {
         this.priority = priority;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "severityId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitSeverity getSeverity() {
         return severity;
     }
@@ -103,7 +107,8 @@ public class WorkUnit extends WorkItem {
         this.dueDate = dueDate;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "statusId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitStatus getStatus() {
         return status;
     }
@@ -112,7 +117,8 @@ public class WorkUnit extends WorkItem {
         this.status = status;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resolutionId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitResolution getResolution() {
         return resolution;
     }
@@ -129,6 +135,7 @@ public class WorkUnit extends WorkItem {
         this.progress = progress;
     }
 
+    @JoinColumn(name = "assigneeId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Person getAssignee() {
         return assignee;
@@ -139,8 +146,8 @@ public class WorkUnit extends WorkItem {
     }
 
     @ManyToMany
-    @JoinTable(name = "WorkUnit_Attachment", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "artifact_id", referencedColumnName = "id"))
+    @JoinTable(name = "work_unit_attachment", joinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "attachmentId", referencedColumnName = "id"))
     public Collection<Artifact> getAttachments() {
         return attachments;
     }
@@ -149,7 +156,8 @@ public class WorkUnit extends WorkItem {
         this.attachments = attachments;
     }
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryId")
+    @ManyToOne(fetch = FetchType.LAZY)
     public WorkUnitCategory getCategory() {
         return category;
     }
@@ -158,6 +166,7 @@ public class WorkUnit extends WorkItem {
         this.category = category;
     }
 
+    @JoinColumn(name = "iterationId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Iteration getIteration() {
         return iteration;
@@ -167,6 +176,7 @@ public class WorkUnit extends WorkItem {
         this.iteration = iteration;
     }
 
+    @JoinColumn(name = "phaseId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Phase getPhase() {
         return phase;
@@ -176,6 +186,7 @@ public class WorkUnit extends WorkItem {
         this.phase = phase;
     }
 
+    @JoinColumn(name = "activityId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Activity getActivity() {
         return activity;
@@ -185,6 +196,7 @@ public class WorkUnit extends WorkItem {
         this.activity = activity;
     }
 
+    @JoinColumn(name = "projectId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Project getProject() {
         return project;
@@ -195,8 +207,8 @@ public class WorkUnit extends WorkItem {
     }
 
     @ManyToMany
-    @JoinTable(name = "WorkUnit_Watcher", joinColumns = @JoinColumn(name = "work_unit_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"))
+    @JoinTable(name = "work_unit_watcher", joinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "watcherId", referencedColumnName = "id"))
     public Collection<Person> getWatchers() {
         return watchers;
     }

@@ -7,24 +7,20 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 @Entity
+@Table(name = "person")
 public class Person extends NamedEntity {
 
     private Collection<Identity> identities;
     private Collection<Competency> competencies;
 
     public Person() {
+        super();
         this.identities = new LinkedHashSet<>();
         this.competencies = new LinkedHashSet<>();
     }
 
-    public Person(long id, String externalId, String name, Collection<Identity> identities, Collection<Competency> competencies) {
-        super(id, externalId, name);
-        this.identities = identities;
-        this.competencies = competencies;
-    }
-
     @OneToMany
-    @JoinColumn(name = "person_id")
+    @JoinColumn(name = "personId")
     public Collection<Identity> getIdentities() {
         return identities;
     }
@@ -34,8 +30,8 @@ public class Person extends NamedEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "Person_Competency", joinColumns = @JoinColumn(name = "person_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "competency_id", referencedColumnName = "id"))
+    @JoinTable(name = "person_competency", joinColumns = @JoinColumn(name = "personId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "competencyId", referencedColumnName = "id"))
     public Collection<Competency> getCompetencies() {
         return competencies;
     }

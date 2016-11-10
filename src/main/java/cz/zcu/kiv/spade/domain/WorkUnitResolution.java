@@ -10,19 +10,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Resolution")
+@Table(name = "resolution")
 public class WorkUnitResolution extends DescribedEntity {
 
     private WorkUnitResolutionClass resolutionClass;
     private WorkUnitResolutionSuperclass resolutionSuperclass;
 
     public WorkUnitResolution() {
-    }
-
-    public WorkUnitResolution(long id, String externalId, String name, String description, WorkUnitResolutionClass resolutionClass, WorkUnitResolutionSuperclass resolutionSuperclass) {
-        super(id, externalId, name, description);
-        this.resolutionClass = resolutionClass;
-        this.resolutionSuperclass = resolutionSuperclass;
+        super();
     }
 
     @Enumerated(value = EnumType.STRING)

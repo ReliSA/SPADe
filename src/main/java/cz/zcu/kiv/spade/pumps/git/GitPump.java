@@ -72,7 +72,9 @@ public class GitPump extends DataPump {
     public void mineData() {
         loadRootObject();
 
-        ToolInstance ti = new ToolInstance(1L, getServer(), Tool.GIT, "");
+        ToolInstance ti = new ToolInstance();
+        ti.setExternalId(getServer());
+        ti.setTool(Tool.GIT);
         Project project = new Project();
         project.setName(projectName);
         ProjectInstance pi = new ProjectInstance();
@@ -86,7 +88,7 @@ public class GitPump extends DataPump {
         project.setConfigurations(list);
         project.setStartDate(list.get(0).getCreated());
 
-        for (ProjectPersonRole ppr : people){
+        for (ProjectPersonRole ppr : people) {
             ppr.setProject(project);
         }
 

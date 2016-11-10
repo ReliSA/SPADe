@@ -5,9 +5,10 @@ import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.Date;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "artifact")
 public class Artifact extends WorkItem {
 
     private ArtifactClass artifactClass;
@@ -15,14 +16,7 @@ public class Artifact extends WorkItem {
     private long size;
 
     public Artifact() {
-    }
-
-    public Artifact(long id, String externalId, String name, String description, Date created, Person author, String url,
-                    ArtifactClass artifactClass, String mimeType, long size) {
-        super(id, externalId, name, description, created, author, url);
-        this.artifactClass = artifactClass;
-        this.mimeType = mimeType;
-        this.size = size;
+        super();
     }
 
     @Enumerated(value = EnumType.STRING)

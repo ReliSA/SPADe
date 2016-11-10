@@ -3,17 +3,16 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "identity")
 public class Identity extends DescribedEntity {
 
     private String email;
 
     public Identity() {
-    }
-
-    public Identity(long id, String externalId, String name, String description) {
-        super(id, externalId, name, description);
+        super();
     }
 
     public String getEmail() {

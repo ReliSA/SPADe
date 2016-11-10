@@ -5,10 +5,10 @@ import cz.zcu.kiv.spade.domain.enums.ProgramClass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import java.util.Collection;
-import java.util.Date;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "program")
 public class DevelopmentProgram extends Project {
 
     private ProgramClass programClass;

@@ -12,12 +12,7 @@ public abstract class AuthoredEntity extends DescribedEntity {
     protected Person author;
 
     public AuthoredEntity() {
-    }
-
-    public AuthoredEntity(long id, String externalId, String name, String description, Date created, Person author) {
-        super(id, externalId, name, description);
-        this.created = created;
-        this.author = author;
+        super();
     }
 
     @Temporal(TemporalType.TIMESTAMP)
@@ -29,6 +24,7 @@ public abstract class AuthoredEntity extends DescribedEntity {
         this.created = created;
     }
 
+    @JoinColumn(name = "authorId")
     @ManyToOne(fetch = FetchType.LAZY)
     public Person getAuthor() {
         return author;
@@ -38,10 +34,4 @@ public abstract class AuthoredEntity extends DescribedEntity {
         this.author = author;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Author:\n" +
-                author + "\n";
-    }
 }

@@ -6,18 +6,16 @@ import cz.zcu.kiv.spade.domain.enums.WorkUnitTypeClass;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 @Entity
+@Table(name = "work_unit_type")
 public class WorkUnitType extends DescribedEntity {
 
     private WorkUnitTypeClass typeClass;
 
     public WorkUnitType() {
-    }
-
-    public WorkUnitType(long id, String externalId, String name, String description, WorkUnitTypeClass typeClass) {
-        super(id, externalId, name, description);
-        this.typeClass = typeClass;
+        super();
     }
 
     @Enumerated(value = EnumType.STRING)

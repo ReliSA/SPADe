@@ -6,13 +6,10 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "Category")
+@Table(name = "category")
 public class WorkUnitCategory extends DescribedEntity {
 
     public WorkUnitCategory() {
-    }
-
-    public WorkUnitCategory(long id, String externalId, String name, String description) {
-        super(id, externalId, name, description);
+        super();
     }
 }

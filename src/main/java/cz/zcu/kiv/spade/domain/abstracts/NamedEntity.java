@@ -8,11 +8,7 @@ public abstract class NamedEntity extends BaseEntity {
     protected String name;
 
     public NamedEntity() {
-    }
-
-    public NamedEntity(long id, String externalId, String name) {
-        super(id, externalId);
-        this.name = name;
+        super();
     }
 
     public String getName() {
@@ -23,9 +19,4 @@ public abstract class NamedEntity extends BaseEntity {
         this.name = name;
     }
 
-    @Override
-    public String toString() {
-        return super.toString() +
-                "Name: " + name + "\n";
-    }
 }

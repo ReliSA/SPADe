@@ -1,7 +1,7 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
 import cz.zcu.kiv.spade.domain.Configuration;
-import cz.zcu.kiv.spade.domain.Project;
+import javax.persistence.JoinColumn;
 
 import javax.persistence.FetchType;
 import javax.persistence.MappedSuperclass;
@@ -15,12 +15,7 @@ public abstract class DefinedProjectSegment extends ProjectSegment {
     protected Configuration configuration;
 
     public DefinedProjectSegment() {
-    }
-
-    public DefinedProjectSegment(long id, String externalId, String name, String description, Project project, Date startDate, Date endDate, Date created, Configuration configuration) {
-        super(id, externalId, name, description, project, startDate, endDate);
-        this.created = created;
-        this.configuration = configuration;
+        super();
     }
 
     public Date getCreated() {
@@ -31,6 +26,7 @@ public abstract class DefinedProjectSegment extends ProjectSegment {
         this.created = created;
     }
 
+    @JoinColumn(name = "configurationId")
     @OneToOne(fetch = FetchType.LAZY)
     public Configuration getConfiguration() {
         return configuration;
