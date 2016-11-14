@@ -3,14 +3,13 @@ package cz.zcu.kiv.spade.pumps;
 import cz.zcu.kiv.spade.domain.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.*;
 
 /**
  * Generic data pump
  */
-public abstract class DataPump {
+public abstract class DataPump<E extends Object> {
 
     /**
      * temporary directory to transfer necessary data into
@@ -21,10 +20,6 @@ public abstract class DataPump {
      * URL of the project
      */
     protected String projectHandle;
-    /**
-     * name of the project
-     */
-    protected String projectName;
 
     /**
      * username for authenticated login
@@ -40,10 +35,6 @@ public abstract class DataPump {
     protected String privateKeyLoc;
 
     /**
-     * project personnel gathered from this project instance in a form of Project-Person-Role relation collection
-     */
-    protected Collection<ProjectPersonRole> people = new HashSet<>();
-    /**
      * project configurations gathered from this project instance using SHA/revision number as key
      */
     protected Map<String, Configuration> configurations = new HashMap<>();
@@ -54,7 +45,6 @@ public abstract class DataPump {
      */
     public DataPump(String projectHandle) {
         this.projectHandle = projectHandle;
-        this.projectName = projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
     }
 
     /**
@@ -64,7 +54,6 @@ public abstract class DataPump {
      */
     public DataPump(String projectHandle, String username, String password) {
         this.projectHandle = projectHandle;
-        this.projectName = projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
         this.username = username;
         this.password = password;
     }
@@ -75,7 +64,6 @@ public abstract class DataPump {
      */
     public DataPump(String projectHandle, String privateKeyLoc) {
         this.projectHandle = projectHandle;
-        this.projectName = projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
         this.privateKeyLoc = privateKeyLoc;
     }
 
@@ -87,7 +75,6 @@ public abstract class DataPump {
      */
     public DataPump(String projectHandle, String privateKeyLoc, String username, String password) {
         this.projectHandle = projectHandle;
-        this.projectName = projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
         this.privateKeyLoc = privateKeyLoc;
         this.username = username;
         this.password = password;
@@ -111,14 +98,16 @@ public abstract class DataPump {
     }
 
     /**
-     * gathers all data needed from project instance and stores it in private fields
+     * gathers all data needed from project instance
+     *
+     * @return ProjectInstrance with all data
      */
-    public abstract void mineData();
+    public abstract ProjectInstance mineData();
 
     /**
      * loads root object of the project's representation in a tool (repository/project)
      */
-    protected abstract void loadRootObject();
+    protected abstract E loadRootObject();
 
     /**
      * loads a map using commit's external ID as a key and a set of associated tags as a value
@@ -135,15 +124,16 @@ public abstract class DataPump {
     protected abstract void mineCommits(Branch branch);
 
     /**
-     * adds either a new Project-Person-Role to a private collection or a new identity to an existing person based on name and email
+     * adds either a new Project-Person-Role to a collection or a new identity to an existing person based on name and email
      *
-     * @param name  person's name
-     * @param email person's email
+     * @param peopleColl collection to check for existence of a person/identity
+     * @param name       person's name
+     * @param email      person's email
      * @return added person or identified or enhanced (added identity) priviosly existing one
      */
-    protected Person addPerson(String name, String email) {
+    protected Person addPerson(Collection<ProjectPersonRole> peopleColl, String name, String email) {
         // TODO disambiguation - heuristic for aggregating people based on name and email
-        for (ProjectPersonRole triad : people) {
+        for (ProjectPersonRole triad : peopleColl) {
             Person person = triad.getPerson();
             for (Identity identity : person.getIdentities()) {
                 if (identity.getEmail().equals(email)) {
@@ -169,7 +159,7 @@ public abstract class DataPump {
 
         ProjectPersonRole ppr = new ProjectPersonRole();
         ppr.setPerson(newPerson);
-        people.add(ppr);
+        peopleColl.add(ppr);
         return newPerson;
     }
 
@@ -218,113 +208,165 @@ public abstract class DataPump {
     }
 
     /**
+     * analyzes artifacts present in each configuration and links them to their WorkItemChange instances
+     *
+     * @param list list of configurations to by analyzed
+     * @return list after analysis and corrections
+     */
+    protected List<Configuration> linkCorrectArtifacts(List<Configuration> list) {
+        for (int i = 0; i < list.size(); i++) {
+            Configuration curr = list.get(i);
+            Configuration prev = i > 0 ? list.get(i - 1) : null;
+
+            for (WorkItemChange change : curr.getChanges()) {
+                for (Artifact artifact : curr.getArtifacts()) {
+                    if (artifact.getUrl().equals(change.getChangedItem().getUrl())) {
+                        change.setChangedItem(artifact);
+                        break;
+                    }
+                }
+                if (prev != null && change.getName().equals("DELETE")) {
+                    for (Artifact artifact : prev.getArtifacts()) {
+                        boolean breakBool = false;
+                        for (FieldChange fChange : change.getFieldChanges()) {
+                            if (artifact.getUrl().equals(fChange.getOldValue())) {
+                                change.setChangedItem(artifact);
+                                breakBool = true;
+                            }
+                        }
+                        if (breakBool) break;
+                    }
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
      * prints data report to an output text file
      *
-     * @param pi project instance with all the necessary data
+     * @param pi     project instance with all the necessary data
+     * @param stream print destination
      */
-    protected void printReport(ProjectInstance pi) {
-        try {
-            PrintStream stream = new PrintStream("D:/reports/" + projectName + ".txt");
+    public void printReport(ProjectInstance pi, PrintStream stream) {
 
-            stream.println();
-            stream.println("Project: " + pi.getProject().getName());
-            stream.println("Start date: " + pi.getProject().getStartDate());
-            stream.println("Tool: " + pi.getToolInstance().getTool() + " (" + pi.getToolInstance().getExternalId() + ")");
-            stream.println("URL: " + pi.getUrl());
-            stream.println("Personnel: " + people.size());
-            for (ProjectPersonRole triad : people) {
-                Person person = triad.getPerson();
-                String personString = "\t" + person.getName() + " (";
-                for (Identity identity : person.getIdentities()) {
-                    personString += identity.getEmail() + ", ";
-                }
-                stream.println(personString.substring(0, personString.length() - 2) + ")");
+        stream.println();
+        stream.println("Project: " + pi.getProject().getName());
+        stream.println("Start date: " + pi.getProject().getStartDate());
+        stream.println("Tool: " + pi.getToolInstance().getTool() + " (" + pi.getToolInstance().getExternalId() + ")");
+        stream.println("URL: " + pi.getUrl());
+
+        Collection<String> tags = new LinkedHashSet<>();
+        Collection<String> branches = new LinkedHashSet<>();
+        Collection<ProjectPersonRole> people = new LinkedHashSet<>();
+
+        stream.println("Configurations: " + pi.getProject().getConfigurations().size());
+        for (Configuration conf : pi.getProject().getConfigurations()) {
+            stream.println("\tSHA: " + conf.getName().substring(0, 7));
+            for (Identity identity : conf.getAuthor().getIdentities()) {
+                Person author = addPerson(people, identity.getName(), identity.getEmail());
+                conf.setAuthor(author);
             }
-
-            Set<String> tags = new HashSet<>();
-            Set<String> branches = new HashSet<>();
-
-            stream.println("Configurations: " + pi.getProject().getConfigurations().size());
-            for (Configuration conf : pi.getProject().getConfigurations()) {
-                stream.println("\tSHA: " + conf.getName().substring(0, 7));
-                stream.println("\tAuthor: " + conf.getAuthor().getName());
-                stream.println("\tCreated: " + conf.getCreated());
-                stream.println("\tCommitted: " + conf.getCommitted());
-                String tagList = "\tTags: ";
-                for (VCSTag tag : conf.getTags()) {
-                    tagList = tagList.concat(tag.getName());
-                    tagList = tagList.concat(", ");
-                    tags.add(tag.getName());
-                }
-                if (tagList.endsWith(", ")) stream.println(tagList.substring(0, tagList.length() - 2));
-                String branchList = "\tBranches: ";
-                for (Branch branch : conf.getBranches()) {
-                    branchList = branchList.concat(branch.getName());
-                    if (branch.getIsMain()) {
-                        branchList = branchList.concat(" (default)");
-                        branches.add(branch.getName() + " (default)");
-                    } else {
-                        branches.add(branch.getName());
-                    }
-                    branchList = branchList.concat(", ");
-                }
-                stream.println(branchList.substring(0, branchList.length() - 2));
-                String formatted = conf.getDescription().replaceAll("\n\n", "\n").replaceAll("\n", "\n\t\t");
-                stream.println("\tMsg: " + formatted.trim());
-                stream.println("\tAssociated people:");
-                for (ConfigPersonRelation rel : conf.getRelations()) {
-                    stream.println("\t\t" + rel.getName() + ": " + rel.getPerson().getName());
-                }
-                String workUnitsList = "\tAssociated work units: ";
-                for (WorkUnit wu : conf.getWorkUnits()) {
-                    workUnitsList = workUnitsList.concat(wu.getNumber() + ", ");
-                }
-                if (workUnitsList.endsWith(", ")) {
-                    workUnitsList = workUnitsList.substring(0, workUnitsList.length() - 2);
-                }
-                stream.println(workUnitsList);
-                stream.println("\tArtifacts: " + conf.getArtifacts().size());
-                stream.println("\tChanged files: " + conf.getChanges().size());
-                for (WorkItemChange change : conf.getChanges()) {
-                    stream.println("\t\t" + change.getName() + " " + change.getChangedItem().getName());
-                    stream.println("\t\t\t" + "File path: " + change.getChangedItem().getUrl());
-                    for (FieldChange field : change.getFieldChanges()) {
-                        stream.println("\t\t\t" + field.getName() + " changed from: " + field.getOldValue() + " to: " + field.getNewValue());
-                    }
-                    stream.println("\t\t\t" + change.getDescription().replaceAll("\n", "\n\t\t\t"));
-                }
-                stream.println();
+            stream.println("\tAuthor: " + conf.getAuthor().getName());
+            stream.println("\tCreated: " + conf.getCreated());
+            stream.println("\tCommitted: " + conf.getCommitted());
+            String tagList = "\tTags: ";
+            for (VCSTag tag : conf.getTags()) {
+                tagList = tagList.concat(tag.getName());
+                tagList = tagList.concat(", ");
+                tags.add(tag.getName());
             }
-            stream.println("Tags: " + tags.size() + " " + tags.toString());
-            stream.println("Branches: " + branches.size() + " " + branches.toString());
-
-            stream.println();
-
-            Map<String, Integer> brs = new HashMap<>();
-            int i = 1;
-            for (String b : branches) {
-                brs.put(b, i);
-                stream.println(i + " - " + b);
-                i++;
+            if (tagList.endsWith(", ")) stream.println(tagList.substring(0, tagList.length() - 2));
+            String branchList = "\tBranches: ";
+            for (Branch branch : conf.getBranches()) {
+                branchList = branchList.concat(branch.getName());
+                if (branch.getIsMain()) {
+                    branchList = branchList.concat(" (default)");
+                    branches.add(branch.getName() + " (default)");
+                } else {
+                    branches.add(branch.getName());
+                }
+                branchList = branchList.concat(", ");
+            }
+            stream.println(branchList.substring(0, branchList.length() - 2));
+            String formatted = conf.getDescription().replaceAll("\n\n", "\n").replaceAll("\n", "\n\t\t");
+            stream.println("\tMsg: " + formatted.trim());
+            stream.println("\tAssociated people:");
+            for (ConfigPersonRelation rel : conf.getRelations()) {
+                for (Identity identity : rel.getPerson().getIdentities()) {
+                    Person person = addPerson(people, identity.getName(), identity.getEmail());
+                    rel.setPerson(person);
+                }
+                stream.println("\t\t" + rel.getName() + ": " + rel.getPerson().getName());
+            }
+            String workUnitsList = "\tAssociated work units: ";
+            for (WorkUnit wu : conf.getWorkUnits()) {
+                workUnitsList = workUnitsList.concat(wu.getNumber() + ", ");
+            }
+            if (workUnitsList.endsWith(", ")) {
+                workUnitsList = workUnitsList.substring(0, workUnitsList.length() - 2);
+            }
+            stream.println(workUnitsList);
+            stream.println("\tArtifacts: " + conf.getArtifacts().size());
+            stream.println("\tChanged files: " + conf.getChanges().size());
+            for (WorkItemChange change : conf.getChanges()) {
+                stream.println("\t\t" + change.getName() + " " + change.getChangedItem().getName());
+                stream.println("\t\t\t" + "File path: " + change.getChangedItem().getUrl());
+                for (FieldChange field : change.getFieldChanges()) {
+                    stream.println("\t\t\t" + field.getName() + " changed from: " + field.getOldValue() + " to: " + field.getNewValue());
+                }
+                stream.println("\t\t\t" + change.getDescription().replaceAll("\n", "\n\t\t\t"));
             }
             stream.println();
-
-            for (Configuration conf : pi.getProject().getConfigurations()) {
-                for (Map.Entry<String, Integer> b : brs.entrySet()) {
-                    boolean found = false;
-                    for (Branch br : conf.getBranches()) {
-                        if (b.getKey().contains(br.getName())) found = true;
-                    }
-                    if (found) stream.print("x ");
-                    else stream.print("  ");
-                }
-                stream.println(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
-            }
-
-            stream.flush();
-            stream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
         }
+        stream.println("Tags: " + tags.size() + " " + tags.toString());
+        stream.println("Branches: " + branches.size() + " " + branches.toString());
+        stream.println("Personnel: " + people.size());
+        for (ProjectPersonRole triad : people) {
+            triad.setProject(pi.getProject());
+            Person person = triad.getPerson();
+            String personString = "\t" + person.getName() + " (";
+            for (Identity identity : person.getIdentities()) {
+                personString += identity.getEmail() + ", ";
+            }
+            stream.println(personString.substring(0, personString.length() - 2) + ")");
+        }
+
+        stream.println();
+
+        Map<String, Integer> brs = new HashMap<>();
+        int i = 1;
+        for (String b : branches) {
+            brs.put(b, i);
+            stream.println(i + " - " + b);
+            i++;
+        }
+        stream.println();
+
+
+        for (Configuration conf : pi.getProject().getConfigurations()) {
+            for (Map.Entry<String, Integer> b : brs.entrySet()) {
+                boolean found = false;
+                for (Branch br : conf.getBranches()) {
+                    if (b.getKey().contains(br.getName())) found = true;
+                }
+                if (found) stream.print("x ");
+                else stream.print("  ");
+            }
+            stream.println(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
+        }
+
+        stream.flush();
+        stream.close();
     }
+
+    /**
+     * gets project name
+     *
+     * @return project name
+     */
+    public String getProjectName() {
+        return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
+    }
+
 }

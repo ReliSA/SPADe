@@ -27,7 +27,7 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.*;
 
-public class GitPump extends DataPump {
+public class GitPump extends DataPump<Repository> {
 
     /**
      * JGit root object for mining data
@@ -68,29 +68,28 @@ public class GitPump extends DataPump {
         super(projectHandle, privateKeyLoc, username, password);
     }
 
+
     @Override
-    public void mineData() {
-        loadRootObject();
+    public ProjectInstance mineData() {
+        repository = loadRootObject();
 
         ToolInstance ti = new ToolInstance();
         ti.setExternalId(getServer());
         ti.setTool(Tool.GIT);
         Project project = new Project();
-        project.setName(projectName);
+        project.setName(getProjectName());
         ProjectInstance pi = new ProjectInstance();
-        pi.setName(projectName);
+        pi.setName(getProjectName());
         pi.setUrl(projectHandle);
         pi.setToolInstance(ti);
 
         mineBranches();
 
         List<Configuration> list = sortConfigsByDate();
+        list = linkCorrectArtifacts(list);
         project.setConfigurations(list);
-        project.setStartDate(list.get(0).getCreated());
 
-        for (ProjectPersonRole ppr : people) {
-            ppr.setProject(project);
-        }
+        project.setStartDate(list.get(0).getCreated());
 
         for (Configuration conf : project.getConfigurations()) {
             for (WorkUnit unit : conf.getWorkUnits()) {
@@ -100,7 +99,10 @@ public class GitPump extends DataPump {
 
         pi.setProject(project);
 
-        printReport(pi);
+        repository.close();
+        deleteTempDir(new File(ROOT_TEMP_DIR));
+
+        return pi;
     }
 
     /**
@@ -230,7 +232,12 @@ public class GitPump extends DataPump {
      * @return configuration object with commit's data
      */
     private Configuration mineCommit(RevCommit commit) {
-        Person author = addPerson(commit.getAuthorIdent().getName(), commit.getAuthorIdent().getEmailAddress());
+        Identity authorIdent = new Identity();
+        authorIdent.setName(commit.getAuthorIdent().getName());
+        authorIdent.setEmail(commit.getAuthorIdent().getEmailAddress());
+
+        Person author = new Person();
+        author.getIdentities().add(authorIdent);
 
         Configuration configuration = new Configuration();
         configuration.setExternalId(commit.getId().toString());
@@ -296,7 +303,12 @@ public class GitPump extends DataPump {
     private Collection<ConfigPersonRelation> getRelatedPeople(RevCommit commit) {
         Set<ConfigPersonRelation> relations = new HashSet<>();
 
-        Person committer = addPerson(commit.getCommitterIdent().getName(), commit.getCommitterIdent().getEmailAddress());
+        Identity committerIdent = new Identity();
+        committerIdent.setName(commit.getCommitterIdent().getName());
+        committerIdent.setEmail(commit.getCommitterIdent().getEmailAddress());
+
+        Person committer = new Person();
+        committer.getIdentities().add(committerIdent);
 
         ConfigPersonRelation relation = new ConfigPersonRelation();
         relation.setPerson(committer);
@@ -309,10 +321,16 @@ public class GitPump extends DataPump {
                 String name = parts[0].trim();
                 String email = null;
                 if (parts.length > 1) email = parts[1].substring(0, parts[1].length() - 1);
-                addPerson(name, email);
+
+                Identity identity = new Identity();
+                identity.setName(name);
+                identity.setEmail(email);
+
+                Person person = new Person();
+                person.getIdentities().add(identity);
 
                 relation = new ConfigPersonRelation();
-                relation.setPerson(addPerson(name, email));
+                relation.setPerson(person);
                 relation.setName(line.getKey());
 
                 relations.add(relation);
@@ -397,44 +415,41 @@ public class GitPump extends DataPump {
         String oldFileName = stripFileName(diff.getOldPath());
         String oldFileDir = diff.getOldPath().substring(0, diff.getOldPath().lastIndexOf(oldFileName));
 
+        artifact.setName(newFileName);
+        artifact.setUrl(projectHandle + "/" + diff.getNewPath());
+
         switch (type) {
             case "DELETE":
-                artifact.setName(oldFileName);
-                artifact.setUrl(projectHandle + "/" + diff.getOldPath());
+                FieldChange delete = new FieldChange();
+                delete.setName("url");
+                delete.setOldValue(projectHandle + "/" + diff.getOldPath());
+                delete.setNewValue(diff.getNewPath());
+                change.getFieldChanges().add(delete);
                 break;
-            case "MODIFY":
-            case "ADD":
-                artifact.setName(newFileName);
-                artifact.setUrl(projectHandle + "/" + diff.getNewPath());
-                break;
-            default:
-                if (type.equals("RENAME")) {
-                    if (newFileName.equals(oldFileName)) type = "MOVE";
-                    else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
-
-                    if (type.contains("RENAME")) {
-                        FieldChange rename = new FieldChange();
-                        rename.setName("name");
-                        rename.setOldValue(oldFileName);
-                        rename.setNewValue(newFileName);
-                        change.getFieldChanges().add(rename);
-                    }
-                    if (type.contains("MOVE")) {
-                        FieldChange move = new FieldChange();
-                        move.setName("directory");
-                        move.setOldValue(oldFileDir);
-                        move.setNewValue(newFileDir);
-                        change.getFieldChanges().add(move);
-                    }
+            case "RENAME":
+                if (newFileName.equals(oldFileName)) type = "MOVE";
+                else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
+                if (type.contains("RENAME")) {
+                    FieldChange rename = new FieldChange();
+                    rename.setName("name");
+                    rename.setOldValue(oldFileName);
+                    rename.setNewValue(newFileName);
+                    change.getFieldChanges().add(rename);
                 }
-                if (type.equals("COPY")) {
-                    desc += "copied from: " + diff.getOldPath() + "\n";
+                if (type.contains("MOVE")) {
+                    FieldChange move = new FieldChange();
+                    move.setName("directory");
+                    move.setOldValue(oldFileDir);
+                    move.setNewValue(newFileDir);
+                    change.getFieldChanges().add(move);
                 }
                 if (diff.getScore() < 100) type += " AND MODIFY";
                 desc += "score: " + diff.getScore() + "\n";
-
-                artifact.setName(newFileName);
-                artifact.setUrl(projectHandle + "/" + diff.getNewPath());
+                break;
+            case "COPY":
+                desc += "copied from: " + diff.getOldPath() + "\n";
+                if (diff.getScore() < 100) type += " AND MODIFY";
+                desc += "score: " + diff.getScore() + "\n";
                 break;
         }
 
@@ -453,9 +468,10 @@ public class GitPump extends DataPump {
     }
 
     @Override
-    protected void loadRootObject() {
+    protected Repository loadRootObject() {
+        Repository repo = null;
+
         File file = new File(ROOT_TEMP_DIR + getProjectDir());
-        if (file.exists()) DataPump.deleteTempDir(file);
 
         CloneCommand cloneCommand = Git.cloneRepository()
                 .setBare(true)
@@ -469,10 +485,11 @@ public class GitPump extends DataPump {
 
         try {
             Git git = cloneCommand.call();
-            repository = git.getRepository();
+            repo = git.getRepository();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
+        return repo;
     }
 
     /**
