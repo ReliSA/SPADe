@@ -16,11 +16,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        /*EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         EntityManager em = factory.createEntityManager();
 
-        em.close();
-
+        em.close();*/
 
         GitPump gitPump =
                 new GitPump("https://github.com/ReliSA/SPADe.git");
@@ -41,5 +40,6 @@ public class Main {
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
+        //gitPump.printWorkItemHistories(pi, System.out);
     }
 }

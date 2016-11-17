@@ -208,36 +208,49 @@ public abstract class DataPump<E extends Object> {
     }
 
     /**
-     * analyzes artifacts present in each configuration and links them to their WorkItemChange instances
+     * attaches correct artifacts, authors and dates to artifact changes and generates artifact external IDs unique inside a project
      *
-     * @param list list of configurations to by analyzed
-     * @return list after analysis and corrections
+     * @param list list of configurations to by cleaned up
+     * @return list after clean up
      */
-    protected List<Configuration> linkCorrectArtifacts(List<Configuration> list) {
-        for (int i = 0; i < list.size(); i++) {
-            Configuration curr = list.get(i);
-            Configuration prev = i > 0 ? list.get(i - 1) : null;
+    protected List<Configuration> cleanUpConfList(List<Configuration> list) {
+        long externalId = 0;
+        Map<String, Artifact> artifacts = new TreeMap<>();
+        Map<String, Artifact> artsInConf = new TreeMap<>();
 
-            for (WorkItemChange change : curr.getChanges()) {
-                for (Artifact artifact : curr.getArtifacts()) {
-                    if (artifact.getUrl().equals(change.getChangedItem().getUrl())) {
-                        change.setChangedItem(artifact);
-                        break;
-                    }
-                }
-                if (prev != null && change.getName().equals("DELETE")) {
-                    for (Artifact artifact : prev.getArtifacts()) {
-                        boolean breakBool = false;
-                        for (FieldChange fChange : change.getFieldChanges()) {
-                            if (artifact.getUrl().equals(fChange.getOldValue())) {
-                                change.setChangedItem(artifact);
-                                breakBool = true;
+        for (Configuration conf : list) {
+            for (WorkItemChange change : conf.getChanges()) {
+
+                Artifact changed = (Artifact) change.getChangedItem();
+                changed.setAuthor(conf.getAuthor());
+                changed.setCreated(conf.getCreated());
+
+                if (change.getName().equals("ADD") || change.getName().contains("COPY")) {
+                    changed.setExternalId(Long.toString(externalId));
+                    externalId++;
+                    artifacts.put(changed.getUrl(), changed);
+                    artsInConf.put(changed.getExternalId(), changed);
+
+                } else {
+                    for (FieldChange fChange : change.getFieldChanges()) {
+                        if (fChange.getName().equals("url")) {
+                            Artifact oldVersion = artifacts.get(fChange.getOldValue());
+                            if (!change.getName().equals("DELETE")) {
+                                oldVersion.setUrl(changed.getUrl());
+                                oldVersion.setName(changed.getName());
+                                artsInConf.put(oldVersion.getExternalId(), oldVersion);
+                            } else {
+                                artsInConf.remove(oldVersion.getExternalId());
                             }
+                            artifacts.remove(changed.getUrl());
+                            artifacts.put(oldVersion.getUrl(), oldVersion);
+                            change.setChangedItem(oldVersion);
                         }
-                        if (breakBool) break;
                     }
                 }
             }
+            conf.getArtifacts().addAll(artsInConf.values());
+            System.out.println(conf.getArtifacts().size());
         }
         return list;
     }
@@ -369,4 +382,34 @@ public abstract class DataPump<E extends Object> {
         return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
     }
 
+    public void printWorkItemHistories(ProjectInstance pi, PrintStream stream) {
+        Map<String, Artifact> artifacts = new TreeMap<>();
+        for (Configuration conf : pi.getProject().getConfigurations()) {
+            for (WorkItemChange change : conf.getChanges()) {
+                if (!artifacts.containsKey(change.getChangedItem().getExternalId())) {
+                    artifacts.put(change.getChangedItem().getExternalId(), (Artifact) change.getChangedItem());
+                }
+            }
+        }
+        Map<String, List<String>> artifactHistories = new TreeMap<>();
+        for (String id : artifacts.keySet()) {
+            artifactHistories.put(id, new ArrayList<>());
+        }
+        for (String artifactId : artifacts.keySet()) {
+            for (Configuration conf : pi.getProject().getConfigurations()) {
+                for (WorkItemChange change : conf.getChanges()) {
+                    Artifact changedArtifact = (Artifact) change.getChangedItem();
+                    if (artifactId.equals(changedArtifact.getExternalId())) {
+                        artifactHistories.get(artifactId).add(conf.getCommitted() + "\t" + change.getName());
+                    }
+                }
+            }
+        }
+        for (Artifact artifact : artifacts.values()) {
+            stream.println(artifact.getName() + "\t" + artifact.getExternalId());
+            for (String history : artifactHistories.get(artifact.getExternalId())) {
+                stream.println("\t" + history);
+            }
+        }
+    }
 }

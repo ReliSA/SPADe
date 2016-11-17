@@ -18,7 +18,6 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.transport.*;
-import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
@@ -86,7 +85,7 @@ public class GitPump extends DataPump<Repository> {
         mineBranches();
 
         List<Configuration> list = sortConfigsByDate();
-        list = linkCorrectArtifacts(list);
+        list = cleanUpConfList(list);
         project.setConfigurations(list);
 
         project.setStartDate(list.get(0).getCreated());
@@ -248,50 +247,9 @@ public class GitPump extends DataPump<Repository> {
         configuration.setAuthor(author);
         configuration.setWorkUnits(getAssociatedWorkUnits(commit));
         configuration.setChanges(mineChanges(commit));
-        configuration.setArtifacts(getArtifactsInConf(commit));
         configuration.setRelations(getRelatedPeople(commit));
 
         return configuration;
-    }
-
-    /**
-     * gets all the files present in repository in time of a given commit
-     *
-     * @param commit commit to mine
-     * @return all files in the commit
-     */
-    private Collection<Artifact> getArtifactsInConf(RevCommit commit) {
-        Collection<Artifact> artifacts = new HashSet<>();
-        TreeWalk treeWalk = new TreeWalk(repository);
-
-        try {
-
-            treeWalk.addTree(commit.getTree());
-            treeWalk.setRecursive(true);
-            while (treeWalk.next()) {
-                String id = treeWalk.getObjectId(0).getName();
-
-                Artifact artifact = new Artifact();
-                String fileName = treeWalk.getNameString();
-                artifact.setExternalId(id);
-                artifact.setArtifactClass(ArtifactClass.FILE);
-                artifact.setName(fileName);
-                artifact.setUrl(projectHandle + "/" + treeWalk.getPathString());
-                if (fileName.contains(".")) {
-                    artifact.setMimeType(URLConnection.guessContentTypeFromName(fileName));
-                    if (artifact.getMimeType() == null) {
-                        artifact.setMimeType(fileName.substring(fileName.lastIndexOf(".") + 1));
-                    }
-                }
-
-                artifacts.add(artifact);
-            }
-            treeWalk.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return artifacts;
     }
 
     /**
@@ -416,41 +374,28 @@ public class GitPump extends DataPump<Repository> {
         String oldFileDir = diff.getOldPath().substring(0, diff.getOldPath().lastIndexOf(oldFileName));
 
         artifact.setName(newFileName);
-        artifact.setUrl(projectHandle + "/" + diff.getNewPath());
+        artifact.setUrl(diff.getNewPath());
+        artifact.setArtifactClass(ArtifactClass.FILE);
+        if (artifact.getName().contains(".")) {
+            artifact.setMimeType(URLConnection.guessContentTypeFromName(artifact.getName()));
+            if (artifact.getMimeType() == null) {
+                artifact.setMimeType(artifact.getName().substring(artifact.getName().lastIndexOf(".") + 1));
+            }
+        }
 
-        switch (type) {
-            case "DELETE":
-                FieldChange delete = new FieldChange();
-                delete.setName("url");
-                delete.setOldValue(projectHandle + "/" + diff.getOldPath());
-                delete.setNewValue(diff.getNewPath());
-                change.getFieldChanges().add(delete);
-                break;
-            case "RENAME":
+        FieldChange fChange = new FieldChange();
+        fChange.setName("url");
+        fChange.setOldValue(diff.getOldPath());
+        fChange.setNewValue(diff.getNewPath());
+        change.getFieldChanges().add(fChange);
+
+        if (type.equals("RENAME") || type.equals("COPY")) {
+            if (type.equals("RENAME")) {
                 if (newFileName.equals(oldFileName)) type = "MOVE";
                 else if (!newFileDir.equals(oldFileDir)) type += " AND MOVE";
-                if (type.contains("RENAME")) {
-                    FieldChange rename = new FieldChange();
-                    rename.setName("name");
-                    rename.setOldValue(oldFileName);
-                    rename.setNewValue(newFileName);
-                    change.getFieldChanges().add(rename);
-                }
-                if (type.contains("MOVE")) {
-                    FieldChange move = new FieldChange();
-                    move.setName("directory");
-                    move.setOldValue(oldFileDir);
-                    move.setNewValue(newFileDir);
-                    change.getFieldChanges().add(move);
-                }
-                if (diff.getScore() < 100) type += " AND MODIFY";
-                desc += "score: " + diff.getScore() + "\n";
-                break;
-            case "COPY":
-                desc += "copied from: " + diff.getOldPath() + "\n";
-                if (diff.getScore() < 100) type += " AND MODIFY";
-                desc += "score: " + diff.getScore() + "\n";
-                break;
+            }
+            if (diff.getScore() < 100) type += " AND MODIFY";
+            desc += "score: " + diff.getScore() + "\n";
         }
 
         change.setChangedItem(artifact);
