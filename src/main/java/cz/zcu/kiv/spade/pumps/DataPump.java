@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.pumps;
 
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.enums.WorkUnitPriorityClass;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -9,18 +10,20 @@ import java.util.*;
 /**
  * Generic data pump
  */
-public abstract class DataPump<E extends Object> {
+public abstract class DataPump<RootObjectType extends Object> {
 
     /**
      * temporary directory to transfer necessary data into
      */
     protected static final String ROOT_TEMP_DIR = "D:/repos/";
-
+    /**
+     * root object of the project's representation in a tool (repository/project)
+     */
+    protected RootObjectType rootObject;
     /**
      * URL of the project
      */
     protected String projectHandle;
-
     /**
      * username for authenticated login
      */
@@ -45,6 +48,7 @@ public abstract class DataPump<E extends Object> {
      */
     public DataPump(String projectHandle) {
         this.projectHandle = projectHandle;
+        this.rootObject = init();
     }
 
     /**
@@ -56,6 +60,7 @@ public abstract class DataPump<E extends Object> {
         this.projectHandle = projectHandle;
         this.username = username;
         this.password = password;
+        this.rootObject = init();
     }
 
     /**
@@ -65,6 +70,7 @@ public abstract class DataPump<E extends Object> {
     public DataPump(String projectHandle, String privateKeyLoc) {
         this.projectHandle = projectHandle;
         this.privateKeyLoc = privateKeyLoc;
+        this.rootObject = init();
     }
 
     /**
@@ -78,6 +84,7 @@ public abstract class DataPump<E extends Object> {
         this.privateKeyLoc = privateKeyLoc;
         this.username = username;
         this.password = password;
+        this.rootObject = init();
     }
 
     /**
@@ -107,21 +114,7 @@ public abstract class DataPump<E extends Object> {
     /**
      * loads root object of the project's representation in a tool (repository/project)
      */
-    protected abstract E loadRootObject();
-
-    /**
-     * loads a map using commit's external ID as a key and a set of associated tags as a value
-     *
-     * @return map of tags per commit ID
-     */
-    protected abstract Map<String, Set<VCSTag>> loadTags();
-
-    /**
-     * mines data from all commits associated with a particular branch
-     *
-     * @param branch branch to mine commits from
-     */
-    protected abstract void mineCommits(Branch branch);
+    protected abstract RootObjectType init();
 
     /**
      * adds either a new Project-Person-Role to a collection or a new identity to an existing person based on name and email
@@ -216,7 +209,6 @@ public abstract class DataPump<E extends Object> {
     protected List<Configuration> cleanUpConfList(List<Configuration> list) {
         long externalId = 0;
         Map<String, Artifact> artifacts = new TreeMap<>();
-        Map<String, Artifact> artsInConf = new TreeMap<>();
 
         for (Configuration conf : list) {
             for (WorkItemChange change : conf.getChanges()) {
@@ -229,7 +221,6 @@ public abstract class DataPump<E extends Object> {
                     changed.setExternalId(Long.toString(externalId));
                     externalId++;
                     artifacts.put(changed.getUrl(), changed);
-                    artsInConf.put(changed.getExternalId(), changed);
 
                 } else {
                     for (FieldChange fChange : change.getFieldChanges()) {
@@ -238,9 +229,6 @@ public abstract class DataPump<E extends Object> {
                             if (!change.getName().equals("DELETE")) {
                                 oldVersion.setUrl(changed.getUrl());
                                 oldVersion.setName(changed.getName());
-                                artsInConf.put(oldVersion.getExternalId(), oldVersion);
-                            } else {
-                                artsInConf.remove(oldVersion.getExternalId());
                             }
                             artifacts.remove(changed.getUrl());
                             artifacts.put(oldVersion.getUrl(), oldVersion);
@@ -249,8 +237,6 @@ public abstract class DataPump<E extends Object> {
                     }
                 }
             }
-            conf.getArtifacts().addAll(artsInConf.values());
-            System.out.println(conf.getArtifacts().size());
         }
         return list;
     }
@@ -320,7 +306,6 @@ public abstract class DataPump<E extends Object> {
                 workUnitsList = workUnitsList.substring(0, workUnitsList.length() - 2);
             }
             stream.println(workUnitsList);
-            stream.println("\tArtifacts: " + conf.getArtifacts().size());
             stream.println("\tChanged files: " + conf.getChanges().size());
             for (WorkItemChange change : conf.getChanges()) {
                 stream.println("\t\t" + change.getName() + " " + change.getChangedItem().getName());
@@ -411,5 +396,12 @@ public abstract class DataPump<E extends Object> {
                 stream.println("\t" + history);
             }
         }
+    }
+
+    /**
+     * performs the steps necessary to successfully close the instance in a clean way
+     */
+    public void close() {
+        deleteTempDir(new File(ROOT_TEMP_DIR));
     }
 }

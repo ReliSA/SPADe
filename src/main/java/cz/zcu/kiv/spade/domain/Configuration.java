@@ -15,7 +15,6 @@ public class Configuration extends AuthoredEntity {
     private Date committed;
     private Collection<WorkItemChange> changes;
     private boolean isRelease;
-    private Collection<Artifact> artifacts;
     private Collection<WorkUnit> workUnits;
     private Collection<Branch> branches;
     private Collection<VCSTag> tags;
@@ -24,7 +23,6 @@ public class Configuration extends AuthoredEntity {
     public Configuration() {
         super();
         this.changes = new LinkedHashSet<>();
-        this.artifacts = new LinkedHashSet<>();
         this.workUnits = new LinkedHashSet<>();
         this.tags = new LinkedHashSet<>();
         this.branches = new LinkedHashSet<>();
@@ -65,17 +63,6 @@ public class Configuration extends AuthoredEntity {
 
     public void setIsRelease(boolean isRelease) {
         this.isRelease = isRelease;
-    }
-
-    @ManyToMany
-    @JoinTable(name = "configuration_artifact", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "artifactId", referencedColumnName = "id"))
-    public Collection<Artifact> getArtifacts() {
-        return artifacts;
-    }
-
-    public void setArtifacts(Collection<Artifact> artifacts) {
-        this.artifacts = artifacts;
     }
 
     @ManyToMany

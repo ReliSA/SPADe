@@ -7,6 +7,7 @@ import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.DataPump;
+import cz.zcu.kiv.spade.pumps.VCSPump;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
@@ -26,12 +27,10 @@ import java.io.IOException;
 import java.net.URLConnection;
 import java.util.*;
 
-public class GitPump extends DataPump<Repository> {
-
-    /**
-     * JGit root object for mining data
-     */
-    private Repository repository;
+/**
+ * data pump specific for mining Git repositories
+ */
+public class GitPump extends DataPump<Repository> implements VCSPump{
 
     /**
      * @param projectHandle URL of the project instance
@@ -70,8 +69,6 @@ public class GitPump extends DataPump<Repository> {
 
     @Override
     public ProjectInstance mineData() {
-        repository = loadRootObject();
-
         ToolInstance ti = new ToolInstance();
         ti.setExternalId(getServer());
         ti.setTool(Tool.GIT);
@@ -98,9 +95,6 @@ public class GitPump extends DataPump<Repository> {
 
         pi.setProject(project);
 
-        repository.close();
-        deleteTempDir(new File(ROOT_TEMP_DIR));
-
         return pi;
     }
 
@@ -109,7 +103,7 @@ public class GitPump extends DataPump<Repository> {
      */
     private void mineBranches() {
         List<Ref> branches = new LinkedList<>();
-        Git git = new Git(repository);
+        Git git = new Git(rootObject);
 
         try {
             branches = git.branchList().call();
@@ -159,16 +153,16 @@ public class GitPump extends DataPump<Repository> {
     }
 
     @Override
-    protected Map<String, Set<VCSTag>> loadTags() {
+    public Map<String, Set<VCSTag>> loadTags() {
         Map<String, Set<VCSTag>> tags = new HashMap<>();
-        RevWalk walk = new RevWalk(repository);
+        RevWalk walk = new RevWalk(rootObject);
 
-        for (Map.Entry<String, Ref> entry : repository.getTags().entrySet()) {
+        for (Map.Entry<String, Ref> entry : rootObject.getTags().entrySet()) {
             VCSTag tag = new VCSTag();
             tag.setName(entry.getKey());
 
             try {
-                Ref tagRef = repository.findRef(entry.getKey());
+                Ref tagRef = rootObject.findRef(entry.getKey());
                 RevObject any = walk.parseAny(tagRef.getObjectId());
                 tag.setExternalId(any.getId().toString());
 
@@ -194,13 +188,13 @@ public class GitPump extends DataPump<Repository> {
     }
 
     @Override
-    protected void mineCommits(Branch branch) {
+    public void mineCommits(Branch branch) {
         // TODO branch determination
         Map<String, Set<VCSTag>> tags = loadTags();
-        RevWalk revWalk = new RevWalk(repository);
+        RevWalk revWalk = new RevWalk(rootObject);
 
         try {
-            ObjectId commitId = repository.resolve(branch.getName());
+            ObjectId commitId = rootObject.resolve(branch.getName());
             revWalk.markStart(revWalk.parseCommit(commitId));
         } catch (IOException e) {
             e.printStackTrace();
@@ -338,7 +332,7 @@ public class GitPump extends DataPump<Repository> {
             if (commit.getParentCount() != 0) parentTree = commit.getParent(0).getTree();
 
             DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-            df.setRepository(repository);
+            df.setRepository(rootObject);
             df.setDiffComparator(RawTextComparator.DEFAULT);
             df.setDetectRenames(true);
 
@@ -413,7 +407,7 @@ public class GitPump extends DataPump<Repository> {
     }
 
     @Override
-    protected Repository loadRootObject() {
+    protected Repository init() {
         Repository repo = null;
 
         File file = new File(ROOT_TEMP_DIR + getProjectDir());
@@ -465,5 +459,11 @@ public class GitPump extends DataPump<Repository> {
             }
         });
         return cloneCommand;
+    }
+
+    @Override
+    public void close() {
+        rootObject.close();
+        super.close();
     }
 }
