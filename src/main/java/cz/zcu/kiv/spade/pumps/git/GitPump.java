@@ -243,6 +243,12 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         configuration.setChanges(mineChanges(commit));
         configuration.setRelations(getRelatedPeople(commit));
 
+        /*for (RevCommit parentCommit : commit.getParents()) {
+            Configuration parent = new Configuration();
+            parent.setExternalId(parentCommit.getId().toString());
+            configuration.getParents().add(parent);
+        }*/
+
         return configuration;
     }
 

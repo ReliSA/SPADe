@@ -1,7 +1,6 @@
 package cz.zcu.kiv.spade.pumps;
 
 import cz.zcu.kiv.spade.domain.*;
-import cz.zcu.kiv.spade.domain.enums.WorkUnitPriorityClass;
 
 import java.io.File;
 import java.io.PrintStream;
@@ -237,6 +236,16 @@ public abstract class DataPump<RootObjectType extends Object> {
                     }
                 }
             }
+
+            /*Collection<Configuration> parents = new LinkedHashSet<>();
+            for (Configuration parent : conf.getParents()) {
+                Configuration trueParent = configurations.get(parent.getExternalId());
+                trueParent.raiseChildrenCont();
+                if (trueParent.getChildrenCont() > 1) trueParent.setBranchPoint(true);
+                parents.add(trueParent);
+            }
+            conf.setParents(parents);
+            if (conf.getParents().size() > 1) conf.setMergePoint(true);*/
         }
         return list;
     }
@@ -342,17 +351,23 @@ public abstract class DataPump<RootObjectType extends Object> {
         stream.println();
 
 
-        for (Configuration conf : pi.getProject().getConfigurations()) {
+        /*for (Configuration conf : pi.getProject().getConfigurations()) {
             for (Map.Entry<String, Integer> b : brs.entrySet()) {
                 boolean found = false;
                 for (Branch br : conf.getBranches()) {
-                    if (b.getKey().contains(br.getName())) found = true;
+                    if (b.getKey().contains(br.getName())) {
+                        found = true;
+                        break;
+                    }
                 }
                 if (found) stream.print("x ");
                 else stream.print("  ");
             }
-            stream.println(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
-        }
+            stream.print(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
+            //if (conf.isMergePoint()) stream.print(" merge");
+            //if (conf.isBranchPoint()) stream.print(" branch");
+            stream.println();
+        }*/
 
         stream.flush();
         stream.close();
