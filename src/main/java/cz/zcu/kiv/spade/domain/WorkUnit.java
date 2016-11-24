@@ -27,12 +27,12 @@ public class WorkUnit extends WorkItem {
     private Phase phase;
     private Activity activity;
     private Project project;
-    private Collection<Person> watchers;
+    //private Collection<Person> watchers;
 
     public WorkUnit() {
         super();
         this.attachments = new LinkedHashSet<>();
-        this.watchers = new LinkedHashSet<>();
+        //this.watchers = new LinkedHashSet<>();
     }
 
     public int getNumber() {
@@ -206,7 +206,7 @@ public class WorkUnit extends WorkItem {
         this.project = project;
     }
 
-    @ManyToMany
+    /*@ManyToMany
     @JoinTable(name = "work_unit_watcher", joinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "watcherId", referencedColumnName = "id"))
     public Collection<Person> getWatchers() {
@@ -215,5 +215,5 @@ public class WorkUnit extends WorkItem {
 
     public void setWatchers(Collection<Person> watchers) {
         this.watchers = watchers;
-    }
+    }*/
 }

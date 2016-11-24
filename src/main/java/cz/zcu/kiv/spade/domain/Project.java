@@ -11,16 +11,16 @@ import java.util.LinkedHashSet;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Project extends ProjectSegment {
 
-    protected Collection<Person> watchers;
+    //protected Collection<Person> watchers;
     protected Collection<Configuration> configurations;
 
     public Project() {
         super();
-        this.watchers = new LinkedHashSet<>();
+        //this.watchers = new LinkedHashSet<>();
         this.configurations = new LinkedHashSet<>();
     }
 
-    @ManyToMany
+    /*@ManyToMany
     @JoinTable(name = "project_watcher", joinColumns = @JoinColumn(name = "projectId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "watcherId", referencedColumnName = "id"))
     public Collection<Person> getWatchers() {
@@ -29,7 +29,7 @@ public class Project extends ProjectSegment {
 
     public void setWatchers(Collection<Person> watchers) {
         this.watchers = watchers;
-    }
+    }*/
 
     @OneToMany
     @JoinColumn(name = "projectId")

@@ -72,7 +72,7 @@ public class Configuration extends AuthoredEntity {
     }
 
     @ManyToMany
-    @JoinTable(name = "configuration_workUnit", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
+    @JoinTable(name = "configuration_work_unit", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"))
     public Collection<WorkUnit> getWorkUnits() {
         return workUnits;

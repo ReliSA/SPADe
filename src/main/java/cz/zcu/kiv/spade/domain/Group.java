@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 
 @Entity
-@Table(name = "actor_group")
+@Table(name = "people_group")
 public class Group extends DescribedEntity {
 
     private Collection<Person> members;
