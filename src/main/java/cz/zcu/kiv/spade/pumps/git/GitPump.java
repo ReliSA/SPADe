@@ -6,17 +6,13 @@ import com.jcraft.jsch.Session;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
-import cz.zcu.kiv.spade.pumps.DataPump;
-import cz.zcu.kiv.spade.pumps.VCSPump;
+import cz.zcu.kiv.spade.pumps.abstracts.VCSPump;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TransportConfigCallback;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.*;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.*;
 import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
@@ -30,31 +26,7 @@ import java.util.*;
 /**
  * data pump specific for mining Git repositories
  */
-public class GitPump extends DataPump<Repository> implements VCSPump{
-
-    /**
-     * @param projectHandle URL of the project instance
-     */
-    public GitPump(String projectHandle) {
-        super(projectHandle);
-    }
-
-    /**
-     * @param projectHandle URL of the project instance
-     * @param username      username for authenticated login
-     * @param password      password for authenticated login
-     */
-    public GitPump(String projectHandle, String username, String password) {
-        super(projectHandle, username, password);
-    }
-
-    /**
-     * @param projectHandle URL of the project instance
-     * @param privateKeyLoc private key location for authenticated login
-     */
-    public GitPump(String projectHandle, String privateKeyLoc) {
-        super(projectHandle, privateKeyLoc);
-    }
+public class GitPump extends VCSPump<Repository> {
 
     /**
      * @param projectHandle URL of the project instance
@@ -66,6 +38,30 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         super(projectHandle, privateKeyLoc, username, password);
     }
 
+    @Override
+    protected Repository init() {
+        Repository repo = null;
+
+        File file = new File(ROOT_TEMP_DIR + getProjectDir());
+
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setBare(true)
+                .setURI(projectHandle)
+                .setGitDir(file);
+
+        if (username != null)
+            cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+
+        if (privateKeyLoc != null) cloneCommand = authenticate(cloneCommand);
+
+        try {
+            Git git = cloneCommand.call();
+            repo = git.getRepository();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+        return repo;
+    }
 
     @Override
     public ProjectInstance mineData() {
@@ -79,9 +75,10 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         pi.setUrl(projectHandle);
         pi.setToolInstance(ti);
 
-        mineBranches();
+        Map<String, Configuration> configurationMap = mineBranches();
+        addTags(configurationMap);
 
-        List<Configuration> list = sortConfigsByDate();
+        List<Configuration> list = sortConfigsByDate(configurationMap.values());
         list = cleanUpConfList(list);
         project.setConfigurations(list);
 
@@ -98,63 +95,27 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         return pi;
     }
 
-    /**
-     * mines data one branch after another while storing date in private fields
-     */
-    private void mineBranches() {
+    @Override
+    public Map<String, Configuration> mineBranches() {
         List<Ref> branches = new LinkedList<>();
-        Git git = new Git(rootObject);
-
         try {
+            Git git = new Git(rootObject);
             branches = git.branchList().call();
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
 
+        Map<String, Configuration> configurationMap = new HashMap<>();
         for (Ref branchRef : branches) {
-            Branch branch = getBranch(branchRef);
-            mineCommits(branch);
+            Branch branch = generateBranch(branchRef);
+            mineCommits(configurationMap, branch);
         }
-    }
 
-    /**
-     * returns configurations in a form of a list sorted by date from earliest
-     *
-     * @return sorted list of configurations
-     */
-    private List<Configuration> sortConfigsByDate() {
-        List<Configuration> list = new ArrayList<>();
-        list.addAll(configurations.values());
-        list.sort(new Comparator<Configuration>() {
-            @Override
-            public int compare(Configuration o1, Configuration o2) {
-                int ret = o1.getCommitted().compareTo(o2.getCommitted());
-                if (ret != 0) return ret;
-                else return o1.getCreated().compareTo(o2.getCreated());
-            }
-        });
-        return list;
-    }
-
-    /**
-     * get SPADe branch object from Git branch reference
-     *
-     * @param branchRef branch reference from Git
-     * @return branch object from SPADe
-     */
-    private Branch getBranch(Ref branchRef) {
-        Branch branch = new Branch();
-        branch.setExternalId(branchRef.getName());
-        branch.setName(stripFileName(branchRef.getName()));
-        if (branchRef.getName().endsWith("master")) {
-            branch.setIsMain(true);
-        }
-        return branch;
+        return configurationMap;
     }
 
     @Override
-    public Map<String, Set<VCSTag>> loadTags() {
-        Map<String, Set<VCSTag>> tags = new HashMap<>();
+    public void addTags(Map<String, Configuration> configurationMap) {
         RevWalk walk = new RevWalk(rootObject);
 
         for (Map.Entry<String, Ref> entry : rootObject.getTags().entrySet()) {
@@ -175,22 +136,30 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
                     commitSHA = any.getId().getName();
                 }
 
-                if (!tags.containsKey(commitSHA)) {
-                    tags.put(commitSHA, new HashSet<>());
-                }
-                tags.get(commitSHA).add(tag);
+                Configuration config = configurationMap.get(commitSHA);
+                config.setIsRelease(true);
+                config.getTags().add(tag);
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         walk.dispose();
-        return tags;
     }
 
     @Override
-    public void mineCommits(Branch branch) {
+    public void close() {
+        rootObject.close();
+        super.close();
+    }
+
+    /**
+     * mines data from all commits associated with a particular branch
+     *
+     * @param branch branch to mine commits from
+     */
+    private void mineCommits(Map<String, Configuration> configurationMap, Branch branch) {
         // TODO branch determination
-        Map<String, Set<VCSTag>> tags = loadTags();
         RevWalk revWalk = new RevWalk(rootObject);
 
         try {
@@ -200,18 +169,13 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
             e.printStackTrace();
         }
 
-
         for (RevCommit commit : revWalk) {
             Configuration configuration;
-            if (!configurations.containsKey(commit.getId().toString())) {
+            if (!configurationMap.containsKey(commit.getId().getName())) {
                 configuration = mineCommit(commit);
-                if (tags.containsKey(configuration.getName())) {
-                    configuration.getTags().addAll(tags.get(configuration.getName()));
-                    configuration.setIsRelease(true);
-                }
-                configurations.put(commit.getId().toString(), configuration);
+                configurationMap.put(commit.getId().getName(), configuration);
             } else {
-                configuration = configurations.get(commit.getId().toString());
+                configuration = configurationMap.get(commit.getId().getName());
             }
             configuration.getBranches().add(branch);
         }
@@ -225,23 +189,17 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
      * @return configuration object with commit's data
      */
     private Configuration mineCommit(RevCommit commit) {
-        Identity authorIdent = new Identity();
-        authorIdent.setName(commit.getAuthorIdent().getName());
-        authorIdent.setEmail(commit.getAuthorIdent().getEmailAddress());
-
-        Person author = new Person();
-        author.getIdentities().add(authorIdent);
-
         Configuration configuration = new Configuration();
+
         configuration.setExternalId(commit.getId().toString());
         configuration.setName(commit.getId().getName());
         configuration.setDescription(commit.getFullMessage());
         configuration.setCommitted(commit.getCommitterIdent().getWhen());
         configuration.setCreated(commit.getAuthorIdent().getWhen());
-        configuration.setAuthor(author);
-        configuration.setWorkUnits(getAssociatedWorkUnits(commit));
+        configuration.setAuthor(generatePerson(commit.getAuthorIdent()));
         configuration.setChanges(mineChanges(commit));
-        configuration.setRelations(getRelatedPeople(commit));
+        configuration.setWorkUnits(collectAssociatedWorkUnits(commit));
+        configuration.setRelations(collectRelatedPeople(commit));
 
         /*for (RevCommit parentCommit : commit.getParents()) {
             Configuration parent = new Configuration();
@@ -253,86 +211,13 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
     }
 
     /**
-     * gets all relations of people (except for the author) involved in a commit based on commit message analysis
-     *
-     * @param commit commit to be analysed
-     * @return collection of relations of people to the commit
-     */
-    private Collection<ConfigPersonRelation> getRelatedPeople(RevCommit commit) {
-        Set<ConfigPersonRelation> relations = new HashSet<>();
-
-        Identity committerIdent = new Identity();
-        committerIdent.setName(commit.getCommitterIdent().getName());
-        committerIdent.setEmail(commit.getCommitterIdent().getEmailAddress());
-
-        Person committer = new Person();
-        committer.getIdentities().add(committerIdent);
-
-        ConfigPersonRelation relation = new ConfigPersonRelation();
-        relation.setPerson(committer);
-        relation.setName("Committed-by");
-        relations.add(relation);
-
-        for (FooterLine line : commit.getFooterLines()) {
-            if (line.getKey().endsWith("-by") || line.getKey().equals("CC")) {
-                String[] parts = line.getValue().split("<");
-                String name = parts[0].trim();
-                String email = null;
-                if (parts.length > 1) email = parts[1].substring(0, parts[1].length() - 1);
-
-                Identity identity = new Identity();
-                identity.setName(name);
-                identity.setEmail(email);
-
-                Person person = new Person();
-                person.getIdentities().add(identity);
-
-                relation = new ConfigPersonRelation();
-                relation.setPerson(person);
-                relation.setName(line.getKey());
-
-                relations.add(relation);
-            }
-        }
-        return relations;
-    }
-
-    /**
-     * mines work units mentioned in a commit message
-     *
-     * @param commit commit to be analysed
-     * @return collection of mentioned work units
-     */
-    private Collection<WorkUnit> getAssociatedWorkUnits(RevCommit commit) {
-        Set<WorkUnit> units = new HashSet<>();
-
-        if (commit.getFullMessage().contains("#")) {
-            String[] parts = commit.getFullMessage().split("#");
-            for (int i = 1; i < parts.length; i++) {
-                String mention = "";
-                for (int j = 0; j < parts[i].length(); j++) {
-                    if (Character.isDigit(parts[i].charAt(j)))
-                        mention += parts[i].charAt(j);
-                    else break;
-                }
-                if (!mention.isEmpty()) {
-                    WorkUnit wu = new WorkUnit();
-                    wu.setNumber(Integer.parseInt(mention));
-                    units.add(wu);
-                }
-            }
-        }
-        return units;
-    }
-
-    /**
      * mines all individual file changes in a given commit
      *
      * @param commit commit to be mined
      * @return changes associated with the commit
      */
-    private Collection<WorkItemChange> mineChanges(RevCommit commit) {
-        Set<WorkItemChange> changes = new LinkedHashSet<>();
+    private List<WorkItemChange> mineChanges(RevCommit commit) {
+        List<WorkItemChange> changes = new ArrayList<>();
         try {
             RevTree parentTree = null;
             if (commit.getParentCount() != 0) parentTree = commit.getParent(0).getTree();
@@ -412,29 +297,91 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         return change;
     }
 
-    @Override
-    protected Repository init() {
-        Repository repo = null;
+    /**
+     * mines work units mentioned in a commit message
+     *
+     * @param commit commit to be analysed
+     * @return collection of mentioned work units
+     */
+    private Collection<WorkUnit> collectAssociatedWorkUnits(RevCommit commit) {
+        Set<WorkUnit> units = new HashSet<>();
 
-        File file = new File(ROOT_TEMP_DIR + getProjectDir());
-
-        CloneCommand cloneCommand = Git.cloneRepository()
-                .setBare(true)
-                .setURI(projectHandle)
-                .setGitDir(file);
-
-        if (username != null)
-            cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
-
-        if (privateKeyLoc != null) cloneCommand = authenticate(cloneCommand);
-
-        try {
-            Git git = cloneCommand.call();
-            repo = git.getRepository();
-        } catch (GitAPIException e) {
-            e.printStackTrace();
+        if (commit.getFullMessage().contains("#")) {
+            String[] parts = commit.getFullMessage().split("#");
+            for (int i = 1; i < parts.length; i++) {
+                String mention = "";
+                for (int j = 0; j < parts[i].length(); j++) {
+                    if (Character.isDigit(parts[i].charAt(j)))
+                        mention += parts[i].charAt(j);
+                    else break;
+                }
+                if (!mention.isEmpty()) {
+                    WorkUnit wu = new WorkUnit();
+                    wu.setNumber(Integer.parseInt(mention));
+                    units.add(wu);
+                }
+            }
         }
-        return repo;
+        return units;
+    }
+
+    /**
+     * gets all relations of people (except for the author) involved in a commit based on commit message analysis
+     *
+     * @param commit commit to be analysed
+     * @return collection of relations of people to the commit
+     */
+    private Collection<ConfigPersonRelation> collectRelatedPeople(RevCommit commit) {
+        Set<ConfigPersonRelation> relations = new HashSet<>();
+
+        ConfigPersonRelation relation = new ConfigPersonRelation();
+        relation.setPerson(generatePerson(commit.getCommitterIdent()));
+        relation.setName("Committed-by");
+        relations.add(relation);
+
+        for (FooterLine line : commit.getFooterLines()) {
+            if (line.getKey().endsWith("-by") || line.getKey().equals("CC")) {
+                String[] parts = line.getValue().split("<");
+                String name = parts[0].trim();
+                String email = "";
+                if (parts.length > 1) email = parts[1].substring(0, parts[1].length() - 1);
+
+                relation = new ConfigPersonRelation();
+                relation.setPerson(generatePerson(new PersonIdent(name, email)));
+                relation.setName(line.getKey());
+
+                relations.add(relation);
+            }
+        }
+        return relations;
+    }
+
+    /**
+     * get SPADe branch object from Git branch reference
+     *
+     * @param branchRef branch reference from Git
+     * @return branch object from SPADe
+     */
+    private Branch generateBranch(Ref branchRef) {
+        Branch branch = new Branch();
+        branch.setExternalId(branchRef.getName());
+        branch.setName(stripFileName(branchRef.getName()));
+        if (branchRef.getName().endsWith("master")) {
+            branch.setIsMain(true);
+        }
+        return branch;
+    }
+
+    private Person generatePerson(PersonIdent user) {
+        if (user == null) return null;
+
+        Identity identity = new Identity();
+        identity.setName(user.getName());
+        identity.setEmail(user.getEmailAddress());
+
+        Person person = new Person();
+        person.getIdentities().add(identity);
+        return person;
     }
 
     /**
@@ -467,9 +414,12 @@ public class GitPump extends DataPump<Repository> implements VCSPump{
         return cloneCommand;
     }
 
-    @Override
-    public void close() {
-        rootObject.close();
-        super.close();
+    /**
+     * gets project name
+     *
+     * @return project name
+     */
+    public String getProjectName() {
+        return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
     }
 }

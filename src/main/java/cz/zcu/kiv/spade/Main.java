@@ -1,7 +1,9 @@
 package cz.zcu.kiv.spade;
 
 import cz.zcu.kiv.spade.domain.ProjectInstance;
+import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.git.GitPump;
+import cz.zcu.kiv.spade.pumps.github.GitHubPump;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -11,33 +13,40 @@ import java.io.PrintStream;
 public class Main {
 
     private static final String PERSISTENCE_UNIT = "cz.zcu.kiv.spade";
+    private static final String GIT_SUFFIX = ".git";
+    private static final String GITHUB_PREFIX = "http://github.com/";
 
     public static void main(String[] args) {
 
-        /*EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT);
         EntityManager em = factory.createEntityManager();
 
-        em.close();*/
+        em.close();
 
-        GitPump gitPump =
-                new GitPump("https://github.com/ReliSA/SPADe.git");
-                //new GitPump("https://github.com/ReliSA/crce.git");
-                //new GitPump("https://github.com/ReliSA/crce-jacc.git");
-                //new GitPump("https://github.com/ReliSA/crce-client.git");
-                //new GitPump("https://github.com/ReliSA/multijar-to-graphml.git");
-                //new GitPump("https://github.com/ReliSA/jar-api-representation.git");
+        String url =
+                //"https://github.com/ReliSA/SPADe.git";
+                //"https://github.com/ReliSA/crce.git";
+                //"https://github.com/ReliSA/crce-jacc.git";
+                //"https://github.com/ReliSA/crce-client.git";
+                //"https://github.com/ReliSA/multijar-to-graphml.git";
+                //"https://github.com/ReliSA/jar-api-representation.git";
+                "https://github.com/grimoirelab/perceval.git";
+                //"https://github.com/siemens/codeface.git";
 
-                //new GitPump("https://github.com/grimoirelab/perceval.git");
-                //new GitPump("https://github.com/siemens/codeface.git");
+        //if (url.startsWith(GITHUB_PREFIX)) {
+            DataPump pump = new GitHubPump(url, null, , );
+        /*} else if (url.endsWith(GIT_SUFFIX)) {
+            pump = new GitPump(url, null, null, null);
+        }*/
 
         try {
-            ProjectInstance pi = gitPump.mineData();
-            gitPump.printReport(pi, new PrintStream("D:/reports/" + gitPump.getProjectName() + ".txt", "UTF-8"));
-            //gitPump.printWorkItemHistories(pi, System.out);
+            ProjectInstance pi = pump.mineData();
+            //pump.printReport(pi, new PrintStream("D:/reports/" + pump.getProjectName() + ".txt", "UTF-8"));
+            //pump.printWorkItemHistories(pi, System.out);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            gitPump.close();
+            pump.close();
         }
     }
 }

@@ -3,9 +3,7 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.AuthoredEntity;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 @Entity
 @Table(name = "configuration")
@@ -13,7 +11,7 @@ public class Configuration extends AuthoredEntity {
 
     private int number;
     private Date committed;
-    private Collection<WorkItemChange> changes;
+    private List<WorkItemChange> changes;
     private boolean isRelease;
     private Collection<WorkUnit> workUnits;
     private Collection<Branch> branches;
@@ -25,7 +23,7 @@ public class Configuration extends AuthoredEntity {
 
     public Configuration() {
         super();
-        this.changes = new LinkedHashSet<>();
+        this.changes = new ArrayList<>();
         this.workUnits = new LinkedHashSet<>();
         this.tags = new LinkedHashSet<>();
         this.branches = new LinkedHashSet<>();
@@ -55,11 +53,11 @@ public class Configuration extends AuthoredEntity {
     @OneToMany
     @JoinTable(name = "configuration_change", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "changeId", referencedColumnName = "id"))
-    public Collection<WorkItemChange> getChanges() {
+    public List<WorkItemChange> getChanges() {
         return changes;
     }
 
-    public void setChanges(Collection<WorkItemChange> changes) {
+    public void setChanges(List<WorkItemChange> changes) {
         this.changes = changes;
     }
 

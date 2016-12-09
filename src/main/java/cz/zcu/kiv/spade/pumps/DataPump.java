@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Generic data pump
  */
-public abstract class DataPump<RootObjectType extends Object> {
+public abstract class DataPump<RootObjectType> {
 
     /**
      * temporary directory to transfer necessary data into
@@ -37,42 +37,6 @@ public abstract class DataPump<RootObjectType extends Object> {
     protected String privateKeyLoc;
 
     /**
-     * project configurations gathered from this project instance using SHA/revision number as key
-     */
-    protected Map<String, Configuration> configurations = new HashMap<>();
-
-
-    /**
-     * @param projectHandle URL of the project instance
-     */
-    public DataPump(String projectHandle) {
-        this.projectHandle = projectHandle;
-        this.rootObject = init();
-    }
-
-    /**
-     * @param projectHandle URL of the project instance
-     * @param username      username for authenticated login
-     * @param password      password for authenticated login
-     */
-    public DataPump(String projectHandle, String username, String password) {
-        this.projectHandle = projectHandle;
-        this.username = username;
-        this.password = password;
-        this.rootObject = init();
-    }
-
-    /**
-     * @param projectHandle URL of the project instance
-     * @param privateKeyLoc private key location for authenticated login
-     */
-    public DataPump(String projectHandle, String privateKeyLoc) {
-        this.projectHandle = projectHandle;
-        this.privateKeyLoc = privateKeyLoc;
-        this.rootObject = init();
-    }
-
-    /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
      * @param username      username for authenticated login
@@ -91,17 +55,35 @@ public abstract class DataPump<RootObjectType extends Object> {
      *
      * @param file temporary directory
      */
-    protected static void deleteTempDir(File file) {
-        if (file.isDirectory()) {
-            File[] fileList = file.listFiles();
-            if (fileList != null) {
-                for (File f : fileList) {
-                    deleteTempDir(f);
+    private static void deleteTempDir(File file) {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                File[] fileList = file.listFiles();
+                if (fileList != null) {
+                    for (File f : fileList) {
+                        deleteTempDir(f);
+                    }
                 }
             }
+            if (!file.delete()) System.out.println("Delete TMP DIR !!!");
         }
-        file.delete();
     }
+
+    private static Comparator<Configuration> getConfigurationByDateComparator() {
+        return new Comparator<Configuration>() {
+            @Override
+            public int compare(Configuration o1, Configuration o2) {
+                int ret = o1.getCommitted().compareTo(o2.getCommitted());
+                if (ret != 0) return ret;
+                else return o1.getCreated().compareTo(o2.getCreated());
+            }
+        };
+    }
+
+    /**
+     * loads root object of the project's representation in a tool (repository/project)
+     */
+    protected abstract RootObjectType init();
 
     /**
      * gathers all data needed from project instance
@@ -111,9 +93,11 @@ public abstract class DataPump<RootObjectType extends Object> {
     public abstract ProjectInstance mineData();
 
     /**
-     * loads root object of the project's representation in a tool (repository/project)
+     * performs the steps necessary to successfully close the instance in a clean way
      */
-    protected abstract RootObjectType init();
+    public void close() {
+        deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
+    }
 
     /**
      * adds either a new Project-Person-Role to a collection or a new identity to an existing person based on name and email
@@ -123,7 +107,7 @@ public abstract class DataPump<RootObjectType extends Object> {
      * @param email      person's email
      * @return added person or identified or enhanced (added identity) priviosly existing one
      */
-    protected Person addPerson(Collection<ProjectPersonRole> peopleColl, String name, String email) {
+    private Person addPerson(Collection<ProjectPersonRole> peopleColl, String name, String email) {
         // TODO disambiguation - heuristic for aggregating people based on name and email
         for (ProjectPersonRole triad : peopleColl) {
             Person person = triad.getPerson();
@@ -156,47 +140,15 @@ public abstract class DataPump<RootObjectType extends Object> {
     }
 
     /**
-     * cuts off the path part of the file path
+     * returns configurations in a form of a list sorted by date from earliest
      *
-     * @param path path of the file
-     * @return simple name of the file
+     * @return sorted list of configurations
      */
-    protected String stripFileName(String path) {
-        if (path.contains("/")) return path.substring(path.lastIndexOf("/") + 1);
-        else return path;
-    }
-
-    /**
-     * returns a temporary directory location of this project instance data
-     *
-     * @return project's temporary directory
-     */
-    protected String getProjectDir() {
-        String cut = cutProtocolAndUser();
-        String withoutPort = getServer().split(":")[0] + cut.substring(cut.indexOf('/'));
-        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
-    }
-
-    /**
-     * cuts a server name from project handle
-     *
-     * @return server the project is mined from
-     */
-    protected String getServer() {
-        String cut = cutProtocolAndUser();
-        return cut.substring(0, cut.indexOf('/'));
-    }
-
-    /**
-     * cuts protocol and username (e.g. "ppicha@...") from project handle
-     *
-     * @return project URL without protocol and username
-     */
-    private String cutProtocolAndUser() {
-        String withoutProtocol = projectHandle;
-        if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
-        if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
-        return withoutProtocol;
+    protected List<Configuration> sortConfigsByDate(Collection<Configuration> configurations) {
+        List<Configuration> list = new ArrayList<>();
+        list.addAll(configurations);
+        list.sort(getConfigurationByDateComparator());
+        return list;
     }
 
     /**
@@ -251,6 +203,59 @@ public abstract class DataPump<RootObjectType extends Object> {
     }
 
     /**
+     * cuts off the path part of the file path
+     *
+     * @param path path of the file
+     * @return simple name of the file
+     */
+    protected String stripFileName(String path) {
+        if (path.contains("/")) return path.substring(path.lastIndexOf("/") + 1);
+        else return path;
+    }
+
+    /**
+     * cuts protocol and username (e.g. "ppicha@...") from project handle
+     *
+     * @return project URL without protocol and username
+     */
+    private String cutProtocolAndUser() {
+        String withoutProtocol = projectHandle;
+        if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
+        if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
+        return withoutProtocol;
+    }
+
+    /**
+     * returns a temporary directory location of this project instance data
+     *
+     * @return project's temporary directory
+     */
+    protected String getProjectDir() {
+        String cut = cutProtocolAndUser();
+        String withoutPort = getServer().split(":")[0] + cut.substring(cut.indexOf('/'));
+        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
+    }
+
+    /**
+     * cuts a server name from project handle
+     *
+     * @return server the project is mined from
+     */
+    protected String getServer() {
+        String cut = cutProtocolAndUser();
+        return cut.substring(0, cut.indexOf('/'));
+    }
+
+    /**
+     * gets project name
+     *
+     * @return project name
+     */
+    public String getProjectName() {
+        return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
+    }
+
+    /**
      * prints data report to an output text file
      *
      * @param pi     project instance with all the necessary data
@@ -260,9 +265,10 @@ public abstract class DataPump<RootObjectType extends Object> {
 
         stream.println();
         stream.println("Project: " + pi.getProject().getName());
-        stream.println("Start date: " + pi.getProject().getStartDate());
         stream.println("Tool: " + pi.getToolInstance().getTool() + " (" + pi.getToolInstance().getExternalId() + ")");
         stream.println("URL: " + pi.getUrl());
+        stream.println("Description: " + pi.getProject().getDescription());
+        stream.println("Start date: " + pi.getProject().getStartDate());
 
         Collection<String> tags = new LinkedHashSet<>();
         Collection<String> branches = new LinkedHashSet<>();
@@ -341,7 +347,7 @@ public abstract class DataPump<RootObjectType extends Object> {
 
         stream.println();
 
-        Map<String, Integer> brs = new HashMap<>();
+        /*Map<String, Integer> brs = new HashMap<>();
         int i = 1;
         for (String b : branches) {
             brs.put(b, i);
@@ -351,7 +357,7 @@ public abstract class DataPump<RootObjectType extends Object> {
         stream.println();
 
 
-        /*for (Configuration conf : pi.getProject().getConfigurations()) {
+        for (Configuration conf : pi.getProject().getConfigurations()) {
             for (Map.Entry<String, Integer> b : brs.entrySet()) {
                 boolean found = false;
                 for (Branch br : conf.getBranches()) {
@@ -371,15 +377,6 @@ public abstract class DataPump<RootObjectType extends Object> {
 
         stream.flush();
         stream.close();
-    }
-
-    /**
-     * gets project name
-     *
-     * @return project name
-     */
-    public String getProjectName() {
-        return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
     }
 
     public void printWorkItemHistories(ProjectInstance pi, PrintStream stream) {
@@ -411,12 +408,5 @@ public abstract class DataPump<RootObjectType extends Object> {
                 stream.println("\t" + history);
             }
         }
-    }
-
-    /**
-     * performs the steps necessary to successfully close the instance in a clean way
-     */
-    public void close() {
-        deleteTempDir(new File(ROOT_TEMP_DIR));
     }
 }
