@@ -10,11 +10,11 @@ import java.util.LinkedHashSet;
 public class WorkUnit extends WorkItem {
 
     private int number;
-    private String priority;
-    private String severity;
-    private String type;
-    private String status;
-    private String resolution;
+    private Priority priority;
+    private Severity severity;
+    private WorkUnitType type;
+    private Status status;
+    private Resolution resolution;
     private String category;
     private double estimatedTime;
     private double spentTime;
@@ -31,11 +31,11 @@ public class WorkUnit extends WorkItem {
 
     public WorkUnit() {
         super();
-        this.priority = "unassigned";
-        this.severity = "unassigned";
-        this.type = "unassigned";
-        this.status = "unassigned";
-        this.resolution = "unassigned";
+        this.priority = new Priority();
+        this.severity = new Severity();
+        this.type = new WorkUnitType();
+        this.status = new Status();
+        this.resolution = new Resolution();
         this.attachments = new LinkedHashSet<>();
         //this.watchers = new LinkedHashSet<>();
     }
@@ -48,28 +48,54 @@ public class WorkUnit extends WorkItem {
         this.number = number;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public String getPriority() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "priorityId")
+    public Priority getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(Priority priority) {
         this.priority = priority;
     }
 
-    public String getSeverity() {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "severityId")
+    public Severity getSeverity() {
         return severity;
     }
 
-    public void setSeverity(String severity) {
+    public void setSeverity(Severity severity) {
         this.severity = severity;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "wuTypeId")
+    public WorkUnitType getType() {
+        return type;
+    }
+
+    public void setType(WorkUnitType type) {
+        this.type = type;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "statusId")
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "resolutionId")
+    public Resolution getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(Resolution resolution) {
+        this.resolution = resolution;
     }
 
     public double getEstimatedTime() {
@@ -104,22 +130,6 @@ public class WorkUnit extends WorkItem {
 
     public void setDueDate(Date dueDate) {
         this.dueDate = dueDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getResolution() {
-        return resolution;
-    }
-
-    public void setResolution(String resolution) {
-        this.resolution = resolution;
     }
 
     public int getProgress() {

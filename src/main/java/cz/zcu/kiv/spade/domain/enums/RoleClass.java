@@ -11,6 +11,5 @@ public enum RoleClass {
     DOCUMENTER,
     STAKEHOLDER,
     MENTOR,
-    NON_MEMBER,
-    OTHER
+    NON_MEMBER
 }

@@ -376,7 +376,11 @@ public class GitPump extends VCSPump<Repository> {
         if (user == null) return null;
 
         Identity identity = new Identity();
-        identity.setName(user.getName());
+        if (user.getName() != null && !user.getName().isEmpty()){
+            identity.setName(user.getName());
+        } else {
+            identity.setName(user.getEmailAddress().split("@")[0]);
+        }
         identity.setEmail(user.getEmailAddress());
 
         Person person = new Person();

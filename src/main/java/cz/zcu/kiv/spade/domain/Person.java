@@ -12,11 +12,13 @@ public class Person extends NamedEntity {
 
     private Collection<Identity> identities;
     private Collection<Competency> competencies;
+    private Collection<Role> roles;
 
     public Person() {
         super();
         this.identities = new LinkedHashSet<>();
         this.competencies = new LinkedHashSet<>();
+        this.roles = new LinkedHashSet<>();
     }
 
     @OneToMany
@@ -40,4 +42,14 @@ public class Person extends NamedEntity {
         this.competencies = competencies;
     }
 
+    @ManyToMany
+    @JoinTable(name = "person_role", joinColumns = @JoinColumn(name = "personId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "roleId", referencedColumnName = "id"))
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
+    }
 }

@@ -1,6 +1,6 @@
 package cz.zcu.kiv.spade.domain.enums;
 
-public enum WorkUnitRelationSuperclass {
+public enum WorkUnitRelationSuperClass {
     GENERAL,
     SIMILARITY,
     TEMPORAL,

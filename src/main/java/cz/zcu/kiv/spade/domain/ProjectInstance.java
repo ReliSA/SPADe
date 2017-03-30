@@ -1,9 +1,7 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
-import cz.zcu.kiv.spade.domain.enums.EnumClass;
-import cz.zcu.kiv.spade.domain.enums.EnumField;
-import cz.zcu.kiv.spade.domain.enums.EnumSuperClass;
+import cz.zcu.kiv.spade.domain.enums.*;
 
 import javax.persistence.*;
 import java.util.*;
@@ -15,16 +13,26 @@ public class ProjectInstance extends DescribedEntity {
     private ToolInstance toolInstance;
     private Project project;
     private String url;
-    private Collection<EnumKeyword> keywords;
+    private Collection<Priority> priorities;
+    private Collection<Severity> severities;
+    private Collection<Status> statuses;
+    private Collection<Resolution> resolutions;
+    private Collection<WorkUnitType> wuTypes;
+    private Collection<Role> roles;
 
     public ProjectInstance() {
         super();
-        this.keywords = new LinkedHashSet<>();
-        setDefaultKeywords();
+        this.priorities = new LinkedHashSet<>();
+        this.severities = new LinkedHashSet<>();
+        this.statuses = new LinkedHashSet<>();
+        this.resolutions = new LinkedHashSet<>();
+        this.wuTypes = new LinkedHashSet<>();
+        this.roles = new LinkedHashSet<>();
+        setDefaultEnumValues();
     }
 
-    @JoinColumn(name = "toolInstanceId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "toolInstanceId")
     public ToolInstance getToolInstance() {
         return toolInstance;
     }
@@ -33,8 +41,8 @@ public class ProjectInstance extends DescribedEntity {
         this.toolInstance = toolInstance;
     }
 
-    @JoinColumn(name = "projectId")
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "projectId")
     public Project getProject() {
         return project;
     }
@@ -51,158 +59,304 @@ public class ProjectInstance extends DescribedEntity {
         this.url = url;
     }
 
-    @ManyToMany
-    @JoinTable(name = "project_instance_keyword", joinColumns = @JoinColumn(name = "projectInstanceId", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "keywordId", referencedColumnName = "id"))
-    public Collection<EnumKeyword> getKeywords() {
-        return keywords;
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Priority> getPriorities() {
+        return priorities;
     }
 
-    public void setKeywords(Collection<EnumKeyword> keywords) {
-        this.keywords = keywords;
+    public void setPriorities(Collection<Priority> priorities) {
+        this.priorities = priorities;
     }
 
-    @Transient
-    public Map<String, Map<EnumField, EnumClass>> getKeywordsMap() {
-        Map<String, Map<EnumField, EnumClass>> keywordsMap = new HashMap<>();
-        for (EnumKeyword enumKeyword : keywords) {
-            keywordsMap.put(enumKeyword.getName(), new HashMap<>());
-            for (FieldAndClass fac : enumKeyword.getFieldsAndClasses()) {
-                keywordsMap.get(enumKeyword.getName()).put(fac.getEnumField(), fac.getEnumClass());
-            }
-        }
-        return keywordsMap;
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Severity> getSeverities() {
+        return severities;
     }
 
-    @Transient
-    public EnumSuperClass getSuperClass(String keyword, EnumField field) {
-        EnumClass enumClass = getEnumClass(keyword, field);
-
-        if (field.equals(EnumField.RESOLUTION)) {
-
-            if (enumClass.equals(EnumClass.INCOMPLETE) || enumClass.equals(EnumClass.WORKS_FOR_ME))
-                return EnumSuperClass.UNFINISHED;
-            else
-                return EnumSuperClass.FINISHED;
-
-        } else if (field.equals(EnumField.SEVERITY)) {
-
-            if (enumClass.equals(EnumClass.MINOR) || enumClass.equals(EnumClass.TRIVIAL))
-                return EnumSuperClass.MINOR;
-            else if (enumClass.equals(EnumClass.CRITICAL) || enumClass.equals(EnumClass.MAJOR))
-                return EnumSuperClass.MAJOR;
-            else
-                return EnumSuperClass.NORMAL;
-
-        } else if (field.equals(EnumField.PRIORITY)) {
-
-            if (enumClass.equals(EnumClass.LOW) || enumClass.equals(EnumClass.LOWEST))
-                return EnumSuperClass.LOW;
-            else if (enumClass.equals(EnumClass.HIGH) || enumClass.equals(EnumClass.HIGHEST))
-                return EnumSuperClass.HIGH;
-            else
-                return EnumSuperClass.NORMAL;
-
-        } else if (field.equals(EnumField.STATUS)) {
-
-            if (enumClass.equals(EnumClass.DONE) || enumClass.equals(EnumClass.INVALID))
-                return EnumSuperClass.CLOSED;
-            else
-                return EnumSuperClass.OPEN;
-
-        } else return null;
+    public void setSeverities(Collection<Severity> severities) {
+        this.severities = severities;
     }
 
-    @Transient
-    public EnumClass getEnumClass(String keyword, EnumField field) {
-        if (!getKeywordsMap().isEmpty()
-                && getKeywordsMap().containsKey(keyword)
-                && getKeywordsMap().get(keyword).containsKey(field))
-            return getKeywordsMap().get(keyword).get(field);
-        else return null;
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Status> getStatuses() {
+        return statuses;
+    }
+
+
+    public void setStatuses(Collection<Status> statuses) {
+        this.statuses = statuses;
+    }
+
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Resolution> getResolutions() {
+        return resolutions;
+    }
+
+    public void setResolutions(Collection<Resolution> resolutions) {
+        this.resolutions = resolutions;
+    }
+
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<WorkUnitType> getWuTypes() {
+        return wuTypes;
+    }
+
+    public void setWuTypes(Collection<WorkUnitType> wuTypes) {
+        this.wuTypes = wuTypes;
+    }
+
+    @OneToMany
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
     }
 
     @Transient
-    public void addKeyword(EnumField field, EnumClass enumClass, String keyword) {
-        boolean found = false;
-        for (EnumKeyword enumKeyword : keywords) {
-            if (enumKeyword.equals(field)) {
-                enumKeyword.getFieldsAndClasses().add(new FieldAndClass(field, enumClass));
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            EnumKeyword enumKeyword = new EnumKeyword();
-            enumKeyword.setName(keyword);
-            List<FieldAndClass> facs = new ArrayList<>();
-            facs.add(new FieldAndClass(field, enumClass));
-            enumKeyword.setFieldsAndClasses(facs);
-        }
+    private void setDefaultEnumValues() {
+        setDefaultWUTypes();
+        setDefaultResolutions();
+        setDefaultSeverities();
+        setDefaultPriorities();
+        setDeafultStatuses();
+        setDefaultRoles();
     }
 
     @Transient
-    private void setDefaultKeywords() {
-        addKeyword(EnumField.TYPE, EnumClass.BUG, "bug");
-        addKeyword(EnumField.TYPE, EnumClass.BUG, "defect");
-        addKeyword(EnumField.TYPE, EnumClass.TASK, "task");
-        addKeyword(EnumField.TYPE, EnumClass.ENHANCEMENT, "enhancement");
-        addKeyword(EnumField.TYPE, EnumClass.ENHANCEMENT, "improvement");
-        addKeyword(EnumField.TYPE, EnumClass.FEATURE, "feature");
-        addKeyword(EnumField.TYPE, EnumClass.FEATURE, "newfeature");
+    private void setDefaultRoles() {
+        RoleClass role;
 
-        addKeyword(EnumField.RESOLUTION, EnumClass.INVALID, "invalid");
-        addKeyword(EnumField.RESOLUTION, EnumClass.DUPLICATE, "duplicate");
-        addKeyword(EnumField.RESOLUTION, EnumClass.WONT_FIX, "wontfix");
-        addKeyword(EnumField.RESOLUTION, EnumClass.WONT_FIX, "wontdo");
-        addKeyword(EnumField.RESOLUTION, EnumClass.FIXED, "fixed");
-        addKeyword(EnumField.RESOLUTION, EnumClass.FIXED, "done");
-        addKeyword(EnumField.RESOLUTION, EnumClass.FIXED, "fixedupstream");
-        addKeyword(EnumField.RESOLUTION, EnumClass.WORKS_AS_DESIGNED, "worksasdesigned");
-        addKeyword(EnumField.RESOLUTION, EnumClass.WORKS_FOR_ME, "worksforme");
-        addKeyword(EnumField.RESOLUTION, EnumClass.INCOMPLETE, "incomplete");
-        addKeyword(EnumField.RESOLUTION, EnumClass.INCOMPLETE, "cannotreproduce");
+        role = RoleClass.ANALYST;
+        addRole(role, "analyst");
+        addRole(role, "bussinessanalyst");
 
-        addKeyword(EnumField.SEVERITY, EnumClass.TRIVIAL, "trivial");
-        addKeyword(EnumField.SEVERITY, EnumClass.MINOR, "minor");
-        addKeyword(EnumField.SEVERITY, EnumClass.MINOR, "small");
-        addKeyword(EnumField.SEVERITY, EnumClass.NORMAL, "normal");
-        addKeyword(EnumField.SEVERITY, EnumClass.NORMAL, "moderate");
-        addKeyword(EnumField.SEVERITY, EnumClass.NORMAL, "common");
-        addKeyword(EnumField.SEVERITY, EnumClass.MAJOR, "major");
-        addKeyword(EnumField.SEVERITY, EnumClass.MAJOR, "big");
-        addKeyword(EnumField.SEVERITY, EnumClass.CRITICAL, "critical");
-        addKeyword(EnumField.SEVERITY, EnumClass.CRITICAL, "blocker");
+        role = RoleClass.DESIGNER;
+        addRole(role, "designer");
+        addRole(role, "architect");
+        addRole(role, "systemarchitect");
+        addRole(role, "uxdesigner");
 
-        addKeyword(EnumField.PRIORITY, EnumClass.LOWEST, "lowest");
-        addKeyword(EnumField.PRIORITY, EnumClass.LOW, "low");
-        addKeyword(EnumField.PRIORITY, EnumClass.NORMAL, "normal");
-        addKeyword(EnumField.PRIORITY, EnumClass.NORMAL, "medium");
-        addKeyword(EnumField.PRIORITY, EnumClass.HIGH, "high");
-        addKeyword(EnumField.PRIORITY, EnumClass.HIGHEST, "highest");
-        addKeyword(EnumField.PRIORITY, EnumClass.HIGHEST, "immediate");
-        addKeyword(EnumField.PRIORITY, EnumClass.HIGHEST, "urgent");
+        role = RoleClass.DEVELOPER;
+        addRole(role, "developer");
 
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "new");
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "todo");
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "unconfirmed");
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "funnel");
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "analysis");
-        addKeyword(EnumField.STATUS, EnumClass.NEW, "open");
-        addKeyword(EnumField.STATUS, EnumClass.ACCEPTED, "accepted");
-        addKeyword(EnumField.STATUS, EnumClass.ACCEPTED, "assigned");
-        addKeyword(EnumField.STATUS, EnumClass.ACCEPTED, "backlog");
-        addKeyword(EnumField.STATUS, EnumClass.IN_PROGRESS, "inprogress");
-        addKeyword(EnumField.STATUS, EnumClass.RESOLVED, "resolved");
-        addKeyword(EnumField.STATUS, EnumClass.RESOLVED, "test");
-        addKeyword(EnumField.STATUS, EnumClass.VERIFIED, "verified");
-        addKeyword(EnumField.STATUS, EnumClass.VERIFIED, "feedback");
-        addKeyword(EnumField.STATUS, EnumClass.DONE, "done");
-        addKeyword(EnumField.STATUS, EnumClass.DONE, "closed");
-        addKeyword(EnumField.STATUS, EnumClass.DONE, "fixed");
-        addKeyword(EnumField.STATUS, EnumClass.DONE, "approved");
-        addKeyword(EnumField.STATUS, EnumClass.INVALID, "invalid");
-        addKeyword(EnumField.STATUS, EnumClass.INVALID, "cancelled");
-        addKeyword(EnumField.STATUS, EnumClass.INVALID, "rejected");
+        role = RoleClass.DOCUMENTER;
+        addRole(role, "documenter");
+
+        role = RoleClass.MENTOR;
+        addRole(role, "mentor");
+        addRole(role, "scrummaster");
+
+        role = RoleClass.NON_MEMBER;
+        addRole(role, "nonmember");
+        addRole(role, "anonymous");
+
+        role = RoleClass.PROJECT_MANAGER;
+        addRole(role, "projectmanager");
+        addRole(role, "manager");
+        addRole(role, "owner");
+        addRole(role, "productmanager");
+        addRole(role, "projectlead");
+        addRole(role, "projectleader");
+        addRole(role, "administrator");
+        addRole(role, "tempoprojectmanager");
+    }
+
+    private void addRole(RoleClass aClass, String keyword) {
+        Role role = new Role();
+        role.setName(keyword);
+        role.setAClass(aClass);
+        this.roles.add(role);
+    }
+
+    @Transient
+    private void setDeafultStatuses() {
+        StatusClass status;
+
+        status = StatusClass.NEW;
+        addStatus(status, "new");
+        addStatus(status, "todo");
+        addStatus(status, "unconfirmed");
+        addStatus(status, "funnel");
+        addStatus(status, "analysis");
+        addStatus(status, "open");
+
+        status = StatusClass.ACCEPTED;
+        addStatus(status, "accepted");
+        addStatus(status, "assigned");
+        addStatus(status, "backlog");
+
+        status = StatusClass.IN_PROGRESS;
+        addStatus(status, "inprogress");
+
+        status = StatusClass.RESOLVED;
+        addStatus(status, "resolved");
+        addStatus(status, "test");
+
+        status = StatusClass.VERIFIED;
+        addStatus(status, "verified");
+        addStatus(status, "feedback");
+
+        status = StatusClass.DONE;
+        addStatus(status, "done");
+        addStatus(status, "closed");
+        addStatus(status, "fixed");
+        addStatus(status, "approved");
+
+        status = StatusClass.INVALID;
+        addStatus(status, "invalid");
+        addStatus(status, "cancelled");
+        addStatus(status, "rejected");
+    }
+
+    private void addStatus(StatusClass aClass, String keyword) {
+        Status status = new Status();
+        status.setName(keyword);
+        status.setAClass(aClass);
+        this.statuses.add(status);
+    }
+
+    @Transient
+    private void setDefaultPriorities() {
+        PriorityClass priority;
+
+        priority = PriorityClass.LOWEST;
+        addPriority(priority, "lowest");
+
+        priority = PriorityClass.LOW;
+        addPriority(priority, "low");
+
+        priority = PriorityClass.NORMAL;
+        addPriority(priority, "normal");
+        addPriority(priority, "medium");
+        addPriority(priority, "standard");
+        addPriority(priority, "moderate");
+        addPriority(priority, "common");
+
+        priority = PriorityClass.HIGH;
+        addPriority(priority, "high");
+
+        priority = PriorityClass.HIGHEST;
+        addPriority(priority, "highest");
+        addPriority(priority, "immediate");
+        addPriority(priority, "urgent");
+    }
+
+    private void addPriority(PriorityClass aClass, String keyword) {
+        Priority priority = new Priority();
+        priority.setName(keyword);
+        priority.setAClass(aClass);
+        this.priorities.add(priority);
+    }
+
+    @Transient
+    private void setDefaultSeverities() {
+        SeverityClass severity;
+
+        severity = SeverityClass.TRIVIAL;
+        addSeverity(severity, "trivial");
+
+        severity = SeverityClass.MINOR;
+        addSeverity(severity, "minor");
+        addSeverity(severity, "small");
+
+        severity = SeverityClass.NORMAL;
+        addSeverity(severity, "normal");
+        addSeverity(severity, "moderate");
+        addSeverity(severity, "common");
+        addSeverity(severity, "standard");
+        addSeverity(severity, "medium");
+
+        severity = SeverityClass.MAJOR;
+        addSeverity(severity, "major");
+        addSeverity(severity, "big");
+
+        severity = SeverityClass.CRITICAL;
+        addSeverity(severity, "critical");
+        addSeverity(severity, "blocker");
+    }
+
+    private void addSeverity(SeverityClass aClass, String keyword) {
+        Severity severity = new Severity();
+        severity.setName(keyword);
+        severity.setAClass(aClass);
+        this.severities.add(severity);
+    }
+
+    @Transient
+    private void setDefaultResolutions() {
+        ResolutionClass resolution;
+
+        resolution = ResolutionClass.INVALID;
+        addResolution(resolution, "invalid");
+
+        resolution = ResolutionClass.DUPLICATE;
+        addResolution(resolution, "duplicate");
+
+        resolution = ResolutionClass.WONT_FIX;
+        addResolution(resolution, "wontfix");
+        addResolution(resolution, "wontdo");
+
+        resolution = ResolutionClass.FIXED;
+        addResolution(resolution, "fixed");
+        addResolution(resolution, "done");
+        addResolution(resolution, "fixedupstream");
+
+        resolution = ResolutionClass.WORKS_AS_DESIGNED;
+        addResolution(resolution, "worksasdesigned");
+
+        resolution = ResolutionClass.FINISHED;
+        addResolution(resolution, "finished");
+
+        resolution = ResolutionClass.WORKS_FOR_ME;
+        addResolution(resolution, "worksforme");
+
+        resolution = ResolutionClass.INCOMPLETE;
+        addResolution(resolution, "incomplete");
+        addResolution(resolution, "cannotreproduce");
+
+        resolution = ResolutionClass.UNFINISHED;
+        addResolution(resolution, "unfinished");
+    }
+
+    private void addResolution(ResolutionClass aClass, String keyword) {
+        Resolution resolution = new Resolution();
+        resolution.setName(keyword);
+        resolution.setAClass(aClass);
+        this.resolutions.add(resolution);
+    }
+
+    @Transient
+    private void setDefaultWUTypes() {
+        WorkUnitTypeClass type;
+
+        type = WorkUnitTypeClass.BUG;
+        addWUType(type, "bug");
+        addWUType(type, "defect");
+
+        type = WorkUnitTypeClass.TASK;
+        addWUType(type, "task");
+
+        type = WorkUnitTypeClass.ENHANCEMENT;
+        addWUType(type, "enhancement");
+        addWUType(type, "improvement");
+
+        type = WorkUnitTypeClass.ENHANCEMENT;
+        addWUType(type, "feature");
+        addWUType(type, "newfeature");
+    }
+
+    private void addWUType(WorkUnitTypeClass aClass, String keyword) {
+        WorkUnitType wuType = new WorkUnitType();
+        wuType.setName(keyword);
+        wuType.setAClass(aClass);
+        this.wuTypes.add(wuType);
     }
 }

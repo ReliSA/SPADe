@@ -23,7 +23,7 @@ public class Main {
 
         em.close();
 
-        String url =
+        /*String url =
                 //"https://github.com/ReliSA/SPADe.git";
                 //"https://github.com/ReliSA/crce.git";
                 //"https://github.com/ReliSA/crce-jacc.git";
@@ -34,10 +34,10 @@ public class Main {
                 //"https://github.com/siemens/codeface.git";
 
         //if (url.startsWith(GITHUB_PREFIX)) {
-            DataPump pump = new GitHubPump(url, null, , );
-        /*} else if (url.endsWith(GIT_SUFFIX)) {
+            DataPump pump = new GitHubPump(url, null, "ppicha", "RATMKoRn48");
+        } else if (url.endsWith(GIT_SUFFIX)) {
             pump = new GitPump(url, null, null, null);
-        }*/
+        }
 
         try {
             ProjectInstance pi = pump.mineData();
@@ -47,6 +47,6 @@ public class Main {
             e.printStackTrace();
         } finally {
             pump.close();
-        }
+        }*/
     }
 }

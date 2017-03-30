@@ -1,8 +1,6 @@
 package cz.zcu.kiv.spade.pumps.github;
 
 import cz.zcu.kiv.spade.domain.*;
-import cz.zcu.kiv.spade.domain.enums.EnumClass;
-import cz.zcu.kiv.spade.domain.enums.EnumField;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.abstracts.ComplexPump;
@@ -90,7 +88,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             unit.setDescription(issue.getBody());
             unit.setAuthor(generatePerson(issue.getUser()));
             unit.setAssignee(generatePerson(issue.getAssignee()));
-            unit.setStatus(issue.getState().name());
+
+            Status status = new Status();
+            status.setName(issue.getState().name());
+            unit.setStatus(status);
             //TODO issue.getMilestone();
             try {
                 unit.setCreated(issue.getCreatedAt());
@@ -254,43 +255,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         String newCategory = "";
 
         for (String label : labels) {
-
-            String normLabel = "";
-            for (int i = 0; i < label.length(); i++) {
-                if (Character.isLetter(label.charAt(i))) {
-                    normLabel += Character.toLowerCase(label.charAt(i));
-                }
-            }
-
-            boolean found = false;
-
-            for (EnumKeyword keyword : pi.getKeywords()) {
-                if (normLabel.equals(keyword.getName())) {
-                    if (keyword.getFieldsAndClasses().size() == 1) {
-                        FieldAndClass fac = keyword.getFieldsAndClasses().get(0);
-                        if (fac.getEnumField().equals(EnumField.TYPE)) {
-                            unit.setType(label);
-                            found = true;
-                        } else if (fac.getEnumField().equals(EnumField.RESOLUTION)) {
-                            unit.setResolution(label);
-                            found = true;
-                        } else if (fac.getEnumField().equals(EnumField.SEVERITY) && !fac.getEnumClass().equals(EnumClass.NORMAL)) {
-                            unit.setSeverity(label);
-                            found = true;
-                        } else if (fac.getEnumField().equals(EnumField.PRIORITY) && !fac.getEnumClass().equals(EnumClass.NORMAL)) {
-                            unit.setPriority(label);
-                            found = true;
-                        }
-                    }
-                    //TODO N:N keywords
-                }
-                if (found) break;
-            }
-
-            if (!found) {
-                newCategory += label + ";";
-                //TODO prompt new keyword assignment
-            }
+            newCategory += label + ";";
         }
         if (newCategory.isEmpty()) unit.setCategory(null);
         else unit.setCategory(newCategory.substring(0, newCategory.length() - 1));

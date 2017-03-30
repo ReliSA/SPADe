@@ -12,11 +12,14 @@ import java.util.LinkedHashSet;
 public class Project extends ProjectSegment {
 
     //protected Collection<Person> watchers;
+    protected Collection<Person> people;
     protected Collection<Configuration> configurations;
+
 
     public Project() {
         super();
         //this.watchers = new LinkedHashSet<>();
+        this.people = new LinkedHashSet<>();
         this.configurations = new LinkedHashSet<>();
     }
 
@@ -30,6 +33,16 @@ public class Project extends ProjectSegment {
     public void setWatchers(Collection<Person> watchers) {
         this.watchers = watchers;
     }*/
+
+    @OneToMany
+    @JoinColumn(name = "projectId")
+    public Collection<Person> getPeople() {
+        return people;
+    }
+
+    public void setPeople(Collection<Person> people) {
+        this.people = people;
+    }
 
     @OneToMany
     @JoinColumn(name = "projectId")

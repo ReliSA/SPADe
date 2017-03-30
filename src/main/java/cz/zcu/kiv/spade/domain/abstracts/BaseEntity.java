@@ -12,7 +12,6 @@ public abstract class BaseEntity {
     protected String externalId;
 
     public BaseEntity() {
-        this.id = 0;
     }
 
     @Id

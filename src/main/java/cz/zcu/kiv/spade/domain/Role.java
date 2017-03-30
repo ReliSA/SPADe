@@ -4,37 +4,41 @@ import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.domain.enums.RoleSuperclass;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "role")
 public class Role extends DescribedEntity {
 
-    private RoleClass roleClass;
-    private RoleSuperclass roleSuperclass;
+    private RoleClassification classification;
 
     public Role() {
         super();
+        this.classification = new RoleClassification();
     }
 
-    @Enumerated(value = EnumType.STRING)
-    public RoleClass getRoleClass() {
-        return roleClass;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classId")
+    public RoleClassification getClassification() {
+        return classification;
     }
 
-    public void setRoleClass(RoleClass roleClass) {
-        this.roleClass = roleClass;
+    public void setClassification(RoleClassification classification) {
+        this.classification = classification;
     }
 
-    @Enumerated(value = EnumType.STRING)
-    public RoleSuperclass getRoleSuperclass() {
-        return roleSuperclass;
+    @Transient
+    public RoleClass getAClass() {
+        return classification.getaClass();
     }
 
-    public void setRoleSuperclass(RoleSuperclass roleSuperclass) {
-        this.roleSuperclass = roleSuperclass;
+    @Transient
+    public RoleSuperclass getSuperClass() {
+        return classification.getSuperClass();
     }
+
+    public void setAClass(RoleClass newClass){
+        this.classification.setaClass(newClass);
+    }
+
 }

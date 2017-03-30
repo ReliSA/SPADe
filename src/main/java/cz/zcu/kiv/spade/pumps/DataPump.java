@@ -103,39 +103,47 @@ public abstract class DataPump<RootObjectType> {
      * adds either a new Project-Person-Role to a collection or a new identity to an existing person based on name and email
      *
      * @param peopleColl collection to check for existence of a person/identity
-     * @param name       person's name
-     * @param email      person's email
+     * @param identity   person's identity
      * @return added person or identified or enhanced (added identity) priviosly existing one
      */
-    private Person addPerson(Collection<ProjectPersonRole> peopleColl, String name, String email) {
+    private Person addPerson(Collection<Person> peopleColl, Identity identity) {
         // TODO disambiguation - heuristic for aggregating people based on name and email
-        for (ProjectPersonRole triad : peopleColl) {
-            Person person = triad.getPerson();
-            for (Identity identity : person.getIdentities()) {
-                if (identity.getEmail().equals(email)) {
+        /*
+        prijmeni, krestni|k. [stredni|s.] = *, * [*] = contains ","; 2/3 parts
+        prijmeni krestni s.|k. s.|k. = * *.* = ends with "."; 2/3 parts
+        krestni|k. [stredni|s.] prijmeni = * [*] * = else
+        */
+        /*
+        kspp
+        ppks
+        pp
+        kksp
+        */
+        for (Person person : peopleColl) {
+            for (Identity ident : person.getIdentities()) {
+
+                if (ident.getEmail().equals(identity.getEmail())) {
                     return person;
                 }
             }
-            if (person.getName().equals(name)) {
-                Identity identity = new Identity();
-                identity.setName(name);
-                identity.setEmail(email);
-                person.getIdentities().add(identity);
+            if (person.getName().equals(identity.getName())) {
+                Identity ident = new Identity();
+                ident.setName(identity.getName());
+                ident.setEmail(identity.getEmail());
+                person.getIdentities().add(ident);
                 return person;
             }
         }
 
-        Identity identity = new Identity();
-        identity.setName(name);
-        identity.setEmail(email);
+        Identity ident = new Identity();
+        ident.setName(identity.getName());
+        ident.setEmail(identity.getEmail());
 
         Person newPerson = new Person();
-        newPerson.setName(identity.getName());
-        newPerson.getIdentities().add(identity);
+        newPerson.setName(ident.getName());
+        newPerson.getIdentities().add(ident);
 
-        ProjectPersonRole ppr = new ProjectPersonRole();
-        ppr.setPerson(newPerson);
-        peopleColl.add(ppr);
+        peopleColl.add(newPerson);
         return newPerson;
     }
 
@@ -272,13 +280,13 @@ public abstract class DataPump<RootObjectType> {
 
         Collection<String> tags = new LinkedHashSet<>();
         Collection<String> branches = new LinkedHashSet<>();
-        Collection<ProjectPersonRole> people = new LinkedHashSet<>();
+        Collection<Person> people = new LinkedHashSet<>();
 
         stream.println("Configurations: " + pi.getProject().getConfigurations().size());
         for (Configuration conf : pi.getProject().getConfigurations()) {
             stream.println("\tSHA: " + conf.getName().substring(0, 7));
             for (Identity identity : conf.getAuthor().getIdentities()) {
-                Person author = addPerson(people, identity.getName(), identity.getEmail());
+                Person author = addPerson(people, identity);
                 conf.setAuthor(author);
             }
             stream.println("\tAuthor: " + conf.getAuthor().getName());
@@ -308,7 +316,7 @@ public abstract class DataPump<RootObjectType> {
             stream.println("\tAssociated people:");
             for (ConfigPersonRelation rel : conf.getRelations()) {
                 for (Identity identity : rel.getPerson().getIdentities()) {
-                    Person person = addPerson(people, identity.getName(), identity.getEmail());
+                    Person person = addPerson(people, identity);
                     rel.setPerson(person);
                 }
                 stream.println("\t\t" + rel.getName() + ": " + rel.getPerson().getName());
@@ -335,9 +343,8 @@ public abstract class DataPump<RootObjectType> {
         stream.println("Tags: " + tags.size() + " " + tags.toString());
         stream.println("Branches: " + branches.size() + " " + branches.toString());
         stream.println("Personnel: " + people.size());
-        for (ProjectPersonRole triad : people) {
-            triad.setProject(pi.getProject());
-            Person person = triad.getPerson();
+        for (Person person : people) {
+            pi.getProject().getPeople().add(person);
             String personString = "\t" + person.getName() + " (";
             for (Identity identity : person.getIdentities()) {
                 personString += identity.getEmail() + ", ";

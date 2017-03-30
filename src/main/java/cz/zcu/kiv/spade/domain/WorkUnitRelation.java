@@ -2,39 +2,45 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationClass;
-import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationSuperclass;
+import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationSuperClass;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "work_unit_relation")
+@Table(name = "wu_relation")
 public class WorkUnitRelation extends DescribedEntity {
 
-    private WorkUnitRelationClass relationClass;
-    private WorkUnitRelationSuperclass relationSuperclass;
+    private WorkUnitRelationClassification classification;
     private WorkUnit leftUnit;
     private WorkUnit rightUnit;
 
     public WorkUnitRelation() {
         super();
+        this.classification = new WorkUnitRelationClassification();
     }
 
-    @Enumerated(value = EnumType.STRING)
-    public WorkUnitRelationClass getRelationClass() {
-        return relationClass;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classId")
+    public WorkUnitRelationClassification getClassification() {
+        return classification;
     }
 
-    public void setRelationClass(WorkUnitRelationClass relationClass) {
-        this.relationClass = relationClass;
+    public void setClassification(WorkUnitRelationClassification classification) {
+        this.classification = classification;
     }
 
-    @Enumerated(value = EnumType.STRING)
-    public WorkUnitRelationSuperclass getRelationSuperclass() {
-        return relationSuperclass;
+    @Transient
+    public WorkUnitRelationClass getAClass() {
+        return classification.getaClass();
     }
 
-    public void setRelationSuperclass(WorkUnitRelationSuperclass relationSuperclass) {
-        this.relationSuperclass = relationSuperclass;
+    @Transient
+    public WorkUnitRelationSuperClass getSuperClass() {
+        return classification.getSuperClass();
+    }
+
+    public void setAClass(WorkUnitRelationClass newClass) {
+        this.classification.setaClass(newClass);
     }
 
     @JoinColumn(name = "leftUnitId")
