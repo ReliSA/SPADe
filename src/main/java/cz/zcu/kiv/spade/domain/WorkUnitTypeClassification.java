@@ -24,6 +24,8 @@ public class WorkUnitTypeClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public WorkUnitTypeClass getaClass() {
         return aClass;
     }

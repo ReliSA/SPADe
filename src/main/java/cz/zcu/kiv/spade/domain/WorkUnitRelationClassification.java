@@ -27,6 +27,8 @@ public class WorkUnitRelationClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public WorkUnitRelationClass getaClass() {
         return aClass;
     }
@@ -45,6 +47,7 @@ public class WorkUnitRelationClassification {
             this.superClass = WorkUnitRelationSuperClass.CAUSAL;
     }
 
+    @Enumerated(EnumType.STRING)
     public WorkUnitRelationSuperClass getSuperClass() {
         return superClass;
     }

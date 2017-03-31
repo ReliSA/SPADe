@@ -27,6 +27,8 @@ public class SeverityClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public SeverityClass getaClass() {
         return aClass;
     }
@@ -41,6 +43,7 @@ public class SeverityClassification {
             this.superClass = SeveritySuperClass.MAJOR;
     }
 
+    @Enumerated(EnumType.STRING)
     public SeveritySuperClass getSuperClass() {
         return superClass;
     }

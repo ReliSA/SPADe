@@ -29,6 +29,8 @@ public class RoleClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public RoleClass getaClass() {
         return aClass;
     }
@@ -47,6 +49,7 @@ public class RoleClassification {
             this.superClass = RoleSuperclass.NON_MEMBER;
     }
 
+    @Enumerated(EnumType.STRING)
     public RoleSuperclass getSuperClass() {
         return superClass;
     }

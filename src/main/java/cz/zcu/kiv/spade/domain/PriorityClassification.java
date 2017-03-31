@@ -27,6 +27,8 @@ public class PriorityClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public PriorityClass getaClass() {
         return aClass;
     }
@@ -41,6 +43,7 @@ public class PriorityClassification {
             this.superClass = PrioritySuperClass.HIGH;
     }
 
+    @Enumerated(EnumType.STRING)
     public PrioritySuperClass getSuperClass() {
         return superClass;
     }

@@ -25,6 +25,8 @@ public class ResolutionClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public ResolutionClass getaClass() {
         return aClass;
     }
@@ -40,6 +42,7 @@ public class ResolutionClassification {
             this.superClass = ResolutionSuperClass.UNFINISHED;
     }
 
+    @Enumerated(EnumType.STRING)
     public ResolutionSuperClass getSuperClass() {
         return superClass;
     }

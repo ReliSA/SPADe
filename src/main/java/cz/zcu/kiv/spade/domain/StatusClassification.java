@@ -27,6 +27,8 @@ public class StatusClassification {
         this.id = id;
     }
 
+    @Column(name = "class")
+    @Enumerated(EnumType.STRING)
     public StatusClass getaClass() {
         return aClass;
     }
@@ -41,6 +43,7 @@ public class StatusClassification {
             this.superClass = StatusSuperClass.CLOSED;
     }
 
+    @Enumerated(EnumType.STRING)
     public StatusSuperClass getSuperClass() {
         return superClass;
     }
