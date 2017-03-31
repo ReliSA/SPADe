@@ -3,6 +3,7 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.PriorityClass;
 import cz.zcu.kiv.spade.domain.enums.PrioritySuperClass;
+import cz.zcu.kiv.spade.domain.enums.SeverityClass;
 
 import javax.persistence.*;
 
@@ -17,7 +18,14 @@ public class Priority extends DescribedEntity{
         this.classification = new PriorityClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public Priority(String name, PriorityClass aClass) {
+        super();
+        this.classification = new PriorityClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public PriorityClassification getClassification() {
         return classification;

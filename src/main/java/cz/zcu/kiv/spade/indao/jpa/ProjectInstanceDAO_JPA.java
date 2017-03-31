@@ -11,15 +11,15 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
         super(em, ProjectInstance.class);
     }
 
-    public ProjectInstance save(ProjectInstance tpi) {
+    public ProjectInstance save(ProjectInstance pi) {
         entityManager.getTransaction().begin();
 
         ProjectInstance ret;
-        if (tpi.getId() == 0) {
-            entityManager.persist(tpi);
-            ret = tpi;
+        if (pi.getId() == 0) {
+            entityManager.persist(pi);
+            ret = pi;
         } else {
-            ret = entityManager.merge(tpi);
+            ret = entityManager.merge(pi);
         }
 
         entityManager.getTransaction().commit();

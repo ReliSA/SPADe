@@ -21,7 +21,7 @@ public class Person extends NamedEntity {
         this.roles = new LinkedHashSet<>();
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "personId")
     public Collection<Identity> getIdentities() {
         return identities;
@@ -31,7 +31,7 @@ public class Person extends NamedEntity {
         this.identities = identities;
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "person_competency", joinColumns = @JoinColumn(name = "personId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "competencyId", referencedColumnName = "id"))
     public Collection<Competency> getCompetencies() {
@@ -42,7 +42,7 @@ public class Person extends NamedEntity {
         this.competencies = competencies;
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "person_role", joinColumns = @JoinColumn(name = "personId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "roleId", referencedColumnName = "id"))
     public Collection<Role> getRoles() {

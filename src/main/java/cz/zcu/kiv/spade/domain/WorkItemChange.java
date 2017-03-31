@@ -19,7 +19,7 @@ public class WorkItemChange extends DescribedEntity {
     }
 
     @JoinColumn(name = "workItemId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public WorkItem getChangedItem() {
         return changedItem;
     }
@@ -28,7 +28,7 @@ public class WorkItemChange extends DescribedEntity {
         this.changedItem = changedItem;
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "workItemChangeId")
     public Collection<FieldChange> getFieldChanges() {
         return fieldChanges;

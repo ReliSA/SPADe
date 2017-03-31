@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.ResolutionClass;
 import cz.zcu.kiv.spade.domain.enums.ResolutionSuperClass;
 
@@ -7,22 +8,13 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "resolution_classification")
-public class ResolutionClassification {
-    private long id;
+public class ResolutionClassification extends BaseEntity {
+
     private ResolutionClass aClass;
     private ResolutionSuperClass superClass;
 
     public ResolutionClassification() {
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
+        super();
     }
 
     @Column(name = "class")

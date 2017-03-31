@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
+import cz.zcu.kiv.spade.domain.enums.PriorityClass;
 import cz.zcu.kiv.spade.domain.enums.StatusClass;
 import cz.zcu.kiv.spade.domain.enums.StatusSuperClass;
 
@@ -17,7 +18,14 @@ public class Status extends DescribedEntity{
         this.classification = new StatusClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public Status(String name, StatusClass aClass) {
+        super();
+        this.classification = new StatusClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public StatusClassification getClassification() {
         return classification;

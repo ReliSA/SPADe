@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.StatusClass;
 import cz.zcu.kiv.spade.domain.enums.StatusSuperClass;
 
@@ -7,24 +8,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "status_classification")
-public class StatusClassification {
-    private long id;
+public class StatusClassification extends BaseEntity{
+
     private StatusClass aClass;
     private StatusSuperClass superClass;
 
     public StatusClassification() {
+        super();
         aClass = StatusClass.NEW;
         superClass = StatusSuperClass.OPEN;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     @Column(name = "class")

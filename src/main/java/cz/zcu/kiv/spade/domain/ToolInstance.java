@@ -1,6 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
-import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
+import cz.zcu.kiv.spade.domain.abstracts.ExternalEntity;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 
 import javax.persistence.Entity;
@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "tool_instance")
-public class ToolInstance extends BaseEntity {
+public class ToolInstance extends ExternalEntity {
 
     private Tool tool;
     private String version;

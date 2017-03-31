@@ -15,7 +15,7 @@ public class ConfigPersonRelation extends NamedEntity {
     }
 
     @JoinColumn(name = "personId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Person getPerson() {
         return person;
     }

@@ -3,6 +3,7 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.domain.enums.RoleSuperclass;
+import cz.zcu.kiv.spade.domain.enums.StatusClass;
 
 import javax.persistence.*;
 
@@ -17,7 +18,14 @@ public class Role extends DescribedEntity {
         this.classification = new RoleClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public Role(String name, RoleClass aClass) {
+        super();
+        this.classification = new RoleClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public RoleClassification getClassification() {
         return classification;

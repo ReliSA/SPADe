@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.domain.enums.RoleSuperclass;
 import cz.zcu.kiv.spade.domain.enums.SeverityClass;
@@ -9,24 +10,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "role_classification")
-public class RoleClassification {
-    private long id;
+public class RoleClassification extends BaseEntity {
+
     private RoleClass aClass;
     private RoleSuperclass superClass;
 
     public RoleClassification() {
+        super();
         aClass = RoleClass.TEAM_MEMBER;
         superClass = RoleSuperclass.TEAM_MEMBER;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     @Column(name = "class")

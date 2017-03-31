@@ -9,9 +9,9 @@ import javax.persistence.MappedSuperclass;
 public abstract class BaseEntity {
 
     protected long id;
-    protected String externalId;
 
     public BaseEntity() {
+        this.id = 0;
     }
 
     @Id
@@ -22,14 +22,6 @@ public abstract class BaseEntity {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
     }
 
 }

@@ -34,7 +34,7 @@ public class Project extends ProjectSegment {
         this.watchers = watchers;
     }*/
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "projectId")
     public Collection<Person> getPeople() {
         return people;
@@ -44,7 +44,7 @@ public class Project extends ProjectSegment {
         this.people = people;
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "projectId")
     public Collection<Configuration> getConfigurations() {
         return configurations;

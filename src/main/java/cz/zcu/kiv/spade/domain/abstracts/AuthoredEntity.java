@@ -25,7 +25,7 @@ public abstract class AuthoredEntity extends DescribedEntity {
     }
 
     @JoinColumn(name = "authorId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Person getAuthor() {
         return author;
     }

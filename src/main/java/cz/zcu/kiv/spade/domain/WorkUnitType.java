@@ -16,7 +16,14 @@ public class WorkUnitType extends DescribedEntity{
         this.classification = new WorkUnitTypeClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public WorkUnitType(String name, WorkUnitTypeClass aClass) {
+        super();
+        this.classification = new WorkUnitTypeClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public WorkUnitTypeClassification getClassification() {
         return classification;

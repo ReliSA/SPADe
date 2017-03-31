@@ -19,7 +19,7 @@ public class WorkUnitRelation extends DescribedEntity {
         this.classification = new WorkUnitRelationClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public WorkUnitRelationClassification getClassification() {
         return classification;
@@ -44,7 +44,7 @@ public class WorkUnitRelation extends DescribedEntity {
     }
 
     @JoinColumn(name = "leftUnitId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public WorkUnit getLeftUnit() {
         return leftUnit;
     }

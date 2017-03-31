@@ -3,6 +3,7 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.ResolutionClass;
 import cz.zcu.kiv.spade.domain.enums.ResolutionSuperClass;
+import cz.zcu.kiv.spade.domain.enums.WorkUnitTypeClass;
 
 import javax.persistence.*;
 
@@ -17,7 +18,14 @@ public class Resolution extends DescribedEntity{
         this.classification = new ResolutionClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public Resolution(String name, ResolutionClass aClass) {
+        super();
+        this.classification = new ResolutionClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public ResolutionClassification getClassification() {
         return classification;

@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.indao.jpa;
 
 import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
+import cz.zcu.kiv.spade.domain.abstracts.ExternalEntity;
 import cz.zcu.kiv.spade.indao.GenericDAO;
 
 import javax.persistence.EntityManager;

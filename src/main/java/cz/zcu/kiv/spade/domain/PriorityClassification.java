@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.PriorityClass;
 import cz.zcu.kiv.spade.domain.enums.PrioritySuperClass;
 
@@ -7,24 +8,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "priority_classification")
-public class PriorityClassification {
-    private long id;
+public class PriorityClassification extends BaseEntity {
+
     private PriorityClass aClass;
     private PrioritySuperClass superClass;
 
     public PriorityClassification() {
+        super();
         aClass = PriorityClass.NORMAL;
         superClass = PrioritySuperClass.NORMAL;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     @Column(name = "class")

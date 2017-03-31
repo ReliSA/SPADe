@@ -106,7 +106,7 @@ public abstract class DataPump<RootObjectType> {
      * @param identity   person's identity
      * @return added person or identified or enhanced (added identity) priviosly existing one
      */
-    private Person addPerson(Collection<Person> peopleColl, Identity identity) {
+    protected Person addPerson(Collection<Person> peopleColl, Identity identity) {
         // TODO disambiguation - heuristic for aggregating people based on name and email
         /*
         prijmeni, krestni|k. [stredni|s.] = *, * [*] = contains ","; 2/3 parts
@@ -120,28 +120,29 @@ public abstract class DataPump<RootObjectType> {
         kksp
         */
         for (Person person : peopleColl) {
+            boolean foundSimilar = false;
             for (Identity ident : person.getIdentities()) {
 
-                if (ident.getEmail().equals(identity.getEmail())) {
-                    return person;
+                boolean sameEmail = ident.getEmail().equals(identity.getEmail());
+                boolean sameName = ident.getName().equals(identity.getName());
+
+                if (sameName && sameEmail) return person;
+                if (sameName != sameEmail) {
+                    foundSimilar = true;
                 }
             }
-            if (person.getName().equals(identity.getName())) {
-                Identity ident = new Identity();
-                ident.setName(identity.getName());
-                ident.setEmail(identity.getEmail());
-                person.getIdentities().add(ident);
+            if (foundSimilar) {
+                person.getIdentities().add(identity);
+                if (identity.getName().length() > person.getName().length()) {
+                    person.setName(identity.getName());
+                }
                 return person;
             }
         }
 
-        Identity ident = new Identity();
-        ident.setName(identity.getName());
-        ident.setEmail(identity.getEmail());
-
         Person newPerson = new Person();
-        newPerson.setName(ident.getName());
-        newPerson.getIdentities().add(ident);
+        newPerson.setName(identity.getName());
+        newPerson.getIdentities().add(identity);
 
         peopleColl.add(newPerson);
         return newPerson;
@@ -269,7 +270,7 @@ public abstract class DataPump<RootObjectType> {
      * @param pi     project instance with all the necessary data
      * @param stream print destination
      */
-    public void printReport(ProjectInstance pi, PrintStream stream) {
+    public ProjectInstance printReport(ProjectInstance pi, PrintStream stream) {
 
         stream.println();
         stream.println("Project: " + pi.getProject().getName());
@@ -337,12 +338,17 @@ public abstract class DataPump<RootObjectType> {
                     stream.println("\t\t\t" + field.getName() + " changed from: " + field.getOldValue() + " to: " + field.getNewValue());
                 }
                 stream.println("\t\t\t" + change.getDescription().replaceAll("\n", "\n\t\t\t"));
+
+                if (change.getName().equals("ADD")) {
+                    change.getChangedItem().setAuthor(conf.getAuthor());
+                }
             }
             stream.println();
         }
         stream.println("Tags: " + tags.size() + " " + tags.toString());
         stream.println("Branches: " + branches.size() + " " + branches.toString());
         stream.println("Personnel: " + people.size());
+        pi.getProject().setPeople(people);
         for (Person person : people) {
             pi.getProject().getPeople().add(person);
             String personString = "\t" + person.getName() + " (";
@@ -384,6 +390,7 @@ public abstract class DataPump<RootObjectType> {
 
         stream.flush();
         stream.close();
+        return pi;
     }
 
     public void printWorkItemHistories(ProjectInstance pi, PrintStream stream) {

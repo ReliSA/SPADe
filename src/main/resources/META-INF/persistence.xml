@@ -11,10 +11,13 @@
             <property name="javax.persistence.jdbc.user" value="ppicha"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://students.kiv.zcu.cz:3306/ppicha"/>
 
+
             <!-- Hibernate-specific configuration -->
             <property name="hibernate.hbm2ddl.auto" value="create"/>
             <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect"/>
             <property name="hibernate.validator.apply_to_ddl" value="true"/>
+            <property name="hibernate.connection.useUnicode" value="true" />
+            <property name="hibernate.connection.characterEncoding" value="UTF-8" />
 
             <!-- Hibernate-C3P0 configuration -->
             <property name="connection.provider_class" value="org.hibernate.connection.C3P0ConnectionProvider"/>

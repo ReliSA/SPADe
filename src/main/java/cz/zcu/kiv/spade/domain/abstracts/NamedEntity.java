@@ -3,7 +3,7 @@ package cz.zcu.kiv.spade.domain.abstracts;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class NamedEntity extends BaseEntity {
+public abstract class NamedEntity extends ExternalEntity {
 
     protected String name;
 

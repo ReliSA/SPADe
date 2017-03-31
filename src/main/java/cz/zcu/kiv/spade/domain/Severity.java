@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
+import cz.zcu.kiv.spade.domain.enums.ResolutionClass;
 import cz.zcu.kiv.spade.domain.enums.SeverityClass;
 import cz.zcu.kiv.spade.domain.enums.SeveritySuperClass;
 
@@ -17,7 +18,14 @@ public class Severity extends DescribedEntity{
         this.classification = new SeverityClassification();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    public Severity(String name, SeverityClass aClass) {
+        super();
+        this.classification = new SeverityClassification();
+        this.setName(name);
+        this.setAClass(aClass);
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "classId")
     public SeverityClassification getClassification() {
         return classification;

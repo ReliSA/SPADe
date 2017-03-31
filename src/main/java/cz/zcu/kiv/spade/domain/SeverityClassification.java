@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.SeverityClass;
 import cz.zcu.kiv.spade.domain.enums.SeveritySuperClass;
 
@@ -7,24 +8,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "severity_classification")
-public class SeverityClassification {
+public class SeverityClassification extends BaseEntity {
     private long id;
     private SeverityClass aClass;
     private SeveritySuperClass superClass;
 
     public SeverityClassification() {
+        super();
         aClass = SeverityClass.NORMAL;
         superClass = SeveritySuperClass.NORMAL;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     @Column(name = "class")

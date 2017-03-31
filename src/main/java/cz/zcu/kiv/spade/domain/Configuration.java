@@ -50,7 +50,7 @@ public class Configuration extends AuthoredEntity {
         this.committed = committed;
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "configuration_change", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "changeId", referencedColumnName = "id"))
     public List<WorkItemChange> getChanges() {
@@ -69,7 +69,7 @@ public class Configuration extends AuthoredEntity {
         this.isRelease = isRelease;
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "configuration_work_unit", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"))
     public Collection<WorkUnit> getWorkUnits() {
@@ -80,7 +80,7 @@ public class Configuration extends AuthoredEntity {
         this.workUnits = workUnits;
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "configuration_branch", joinColumns = @JoinColumn(name = "configurationId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "branchId", referencedColumnName = "id"))
     public Collection<Branch> getBranches() {
@@ -91,7 +91,7 @@ public class Configuration extends AuthoredEntity {
         this.branches = branches;
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "configurationId")
     public Collection<VCSTag> getTags() {
         return tags;
@@ -101,7 +101,7 @@ public class Configuration extends AuthoredEntity {
         this.tags = tags;
     }
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "configurationId")
     public Collection<ConfigPersonRelation> getRelations() {
         return relations;

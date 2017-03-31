@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationClass;
 import cz.zcu.kiv.spade.domain.enums.WorkUnitRelationSuperClass;
 
@@ -7,24 +8,15 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "wu_relation_classification")
-public class WorkUnitRelationClassification {
-    private long id;
+public class WorkUnitRelationClassification extends BaseEntity {
+
     private WorkUnitRelationClass aClass;
     private WorkUnitRelationSuperClass superClass;
 
     public WorkUnitRelationClassification() {
+        super();
         aClass = WorkUnitRelationClass.RELATES_TO;
         superClass = WorkUnitRelationSuperClass.GENERAL;
-    }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     @Column(name = "class")
