@@ -25,7 +25,7 @@ public class SPADeGUI {
         mineTab.setClosable(false);
         TabPane tabPane = new TabPane(mineTab, chartTab, new TimelineTab());
 
-        Scene scene = new Scene(tabPane, 900, 700);
+        Scene scene = new Scene(tabPane, 1000, 650);
         stage.setScene(scene);
 
         stage.setOnCloseRequest(event -> app.close());

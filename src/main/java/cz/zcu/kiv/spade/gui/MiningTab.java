@@ -84,6 +84,7 @@ class MiningTab extends Tab {
         column3.setHalignment(HPos.RIGHT);
         grid.getColumnConstraints().add(column3);
         grid.getColumnConstraints().add(new ColumnConstraints(100));
+        grid.getColumnConstraints().add(new ColumnConstraints(450));
 
         // default settings
         ToggleGroup urlGroup = new ToggleGroup();
@@ -98,7 +99,7 @@ class MiningTab extends Tab {
 
         info.setVisible(false);
         progBar.setVisible(false);
-        progBar.setPrefWidth(650);
+        progBar.setPrefWidth(800);
         progInd.setVisible(false);
         progHBox.setAlignment(Pos.CENTER);
 
