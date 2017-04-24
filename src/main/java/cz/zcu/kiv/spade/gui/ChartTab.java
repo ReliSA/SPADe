@@ -12,10 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Text;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 class ChartTab extends Tab {
 
@@ -29,6 +26,7 @@ class ChartTab extends Tab {
     private ComboBox<String> prjSelect;
     private ComboBox<String> enumSelect;
     private ComboBox<String> fldSelect;
+    private CheckBox zeroBox;
     private CheckBox nullBox;
     private Text stats;
 
@@ -47,6 +45,7 @@ class ChartTab extends Tab {
         prjSelect = new ComboBox<>();
         enumSelect = new ComboBox<>();
         fldSelect = new ComboBox<>();
+        zeroBox = new CheckBox("Exclude zeros");
         nullBox = new CheckBox("Include null");
         ToggleGroup chartGroup = new ToggleGroup();
         RadioButton pieBtn = new RadioButton("pie chart");
@@ -58,11 +57,12 @@ class ChartTab extends Tab {
         grid.add(new Label("Field: "), 0, 1);
         grid.add(enumSelect, 1, 1);
         grid.add(fldSelect, 2, 1);
-        grid.add(nullBox, 3, 1);
+        grid.add(zeroBox, 3, 1);
+        grid.add(nullBox, 4, 1);
         grid.add(pieBtn, 0, 2, 2, 1);
         grid.add(barBtn, 0, 3, 2, 1);
         grid.add(stats, 0, 4, 2, 1);
-        grid.add(pieChart, 2, 2, 2, 3);
+        grid.add(pieChart, 2, 2, 3, 3);
 
         addRow(5, false);
         addRow(5, false);
@@ -73,9 +73,8 @@ class ChartTab extends Tab {
         grid.getColumnConstraints().add(new ColumnConstraints(45));
         grid.getColumnConstraints().add(new ColumnConstraints(120));
         grid.getColumnConstraints().add(new ColumnConstraints(100));
-        ColumnConstraints cc = new ColumnConstraints();
-        cc.setPercentWidth(63);
-        grid.getColumnConstraints().add(cc);
+        grid.getColumnConstraints().add(new ColumnConstraints(100));
+        grid.getColumnConstraints().add(new ColumnConstraints(500));
 
         pieBtn.setToggleGroup(chartGroup);
         pieBtn.setSelected(true);
@@ -102,6 +101,7 @@ class ChartTab extends Tab {
             else if (fldSelect.getItems().size() == 2) fldSelect.getItems().add("superclass");
         });
         fldSelect.setOnAction(prjSelect.getOnAction());
+        zeroBox.setOnAction(prjSelect.getOnAction());
         nullBox.setOnAction(prjSelect.getOnAction());
 
         pieBtn.setOnAction(event -> {
@@ -189,6 +189,7 @@ class ChartTab extends Tab {
         String enumer = getSelected(enumSelect);
         String column = getSelected(fldSelect);
         boolean includeNull = nullBox.isSelected();
+        boolean excludeZeros = zeroBox.isSelected();
 
         if (url.equals("ALL")) url = null;
 
@@ -222,6 +223,15 @@ class ChartTab extends Tab {
         if (includeNull) {
             count = app.getUnitCountWithNullEnum(url, enumer);
             data.put("null", count);
+        }
+        if (excludeZeros) {
+            List<String> zeros = new ArrayList<>();
+            for (Map.Entry<String, Integer> dataPoint : data.entrySet()) {
+                if (dataPoint.getValue() == 0) {
+                    zeros.add(dataPoint.getKey());
+                }
+            }
+            for (String zero : zeros) data.remove(zero);
         }
         return data;
     }
