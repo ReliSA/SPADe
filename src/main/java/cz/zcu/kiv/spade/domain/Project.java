@@ -3,10 +3,7 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 
 import javax.persistence.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "project")
@@ -81,12 +78,13 @@ public class Project extends ProjectSegment {
     @Transient
     public WorkUnit addUnit(WorkUnit unit) {
         if (containsUnit(unit.getNumber()) && (getUnit(unit.getNumber()).getCreated() != null)) {
-            getUnit(unit.getNumber()).getRelatedItems().addAll(unit.getRelatedItems());
+            replaceItem(unit, getUnit(unit.getNumber()));
             return getUnit(unit.getNumber());
         } else {
             WorkUnit oldUnit = units.put(unit.getNumber(), unit);
-            if (oldUnit != null)
-                unit.getRelatedItems().addAll(oldUnit.getRelatedItems());
+            if (oldUnit != null) {
+                replaceItem(oldUnit, unit);
+            }
             return unit;
         }
     }
@@ -104,12 +102,12 @@ public class Project extends ProjectSegment {
     @Transient
     public Commit addCommit(Commit commit) {
         if (containsCommit(commit.getIdentifier()) && (getCommit(commit.getIdentifier()).getCommitted() != null)) {
-            getCommit(commit.getIdentifier()).getRelatedItems().addAll(commit.getRelatedItems());
+            replaceItem(commit, getCommit(commit.getIdentifier()));
             return getCommit(commit.getIdentifier());
         } else {
             Commit oldCommit = commits.put(commit.getIdentifier(), commit);
             if (oldCommit != null) {
-                commit.getRelatedItems().addAll(oldCommit.getRelatedItems());
+                replaceItem(oldCommit, commit);
                 configurations.remove(oldCommit);
             }
             configurations.add(commit);
@@ -120,5 +118,37 @@ public class Project extends ProjectSegment {
     @Transient
     public Commit getCommit(String identifier) {
         return commits.get(identifier);
+    }
+
+    @Transient
+    public Set<WorkItem> getAllItems() {
+        Set<WorkItem> items = new LinkedHashSet<>();
+        for (WorkUnit unit : getUnits()) {
+            items.add(unit);
+            for (WorkItemRelation relation : unit.getRelatedItems()) {
+                items.add(relation.getRelatedItem());
+            }
+        }
+        for (Configuration configuration : getConfigurations()) {
+            items.add(configuration);
+            for (WorkItemRelation relation : configuration.getRelatedItems()) {
+                items.add(relation.getRelatedItem());
+            }
+            for (WorkItemChange change : configuration.getChanges()) {
+                items.add(change.getChangedItem());
+            }
+        }
+        return items;
+    }
+
+    private void replaceItem(WorkItem toBeReplaced, WorkItem replacement) {
+        replacement.getRelatedItems().addAll(toBeReplaced.getRelatedItems());
+        for (WorkItem item : getAllItems()) {
+            for (WorkItemRelation relation : item.getRelatedItems()) {
+                if (relation.getRelatedItem().equals(toBeReplaced)) {
+                    relation.setRelatedItem(replacement);
+                }
+            }
+        }
     }
 }
