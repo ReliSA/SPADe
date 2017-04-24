@@ -2,7 +2,7 @@ package cz.zcu.kiv.spade.pumps.impl;
 
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
-import cz.zcu.kiv.spade.domain.enums.Category;
+import cz.zcu.kiv.spade.domain.Category;
 import cz.zcu.kiv.spade.domain.enums.StatusClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.load.DBInitializer;

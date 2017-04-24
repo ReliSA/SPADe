@@ -1,7 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
-import cz.zcu.kiv.spade.domain.enums.Category;
 
 import javax.persistence.*;
 import java.util.Collection;
