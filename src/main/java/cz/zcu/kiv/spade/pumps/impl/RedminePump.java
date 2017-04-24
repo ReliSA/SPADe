@@ -288,6 +288,18 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             }
 
             mineAllMentionedItems(unit);
+
+            WorkItemChange change = new WorkItemChange();
+            change.setName("ADD");
+            change.setDescription("issue added");
+            change.setChangedItem(unit);
+
+            Configuration creation = new Configuration();
+            creation.setCreated(unit.getCreated());
+            creation.setAuthor(unit.getAuthor());
+            creation.getChanges().add(change);
+
+            pi.getProject().getConfigurations().add(creation);
         }
     }
 
