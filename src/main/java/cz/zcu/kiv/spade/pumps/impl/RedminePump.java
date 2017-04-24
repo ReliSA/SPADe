@@ -72,8 +72,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         minePeople();
         Collection<ProjectSegment> iterations = mineIterations();
 
-        //TODO changesets, relations, journals
-
         mineTickets();
 
         for (WorkUnit unit : pi.getProject().getUnits()) {
@@ -83,6 +81,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
                     if (iteration instanceof Iteration) {
                         Iteration i = (Iteration) iteration;
                         unit.setIteration(i);
+                        if (unit.getDueDate() == null) unit.setDueDate(iteration.getEndDate());
                     }
                     if (iteration instanceof Phase) {
                         Phase phase = (Phase) iteration;

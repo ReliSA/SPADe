@@ -69,6 +69,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     if (iteration instanceof Iteration) {
                         Iteration i = (Iteration) iteration;
                         unit.setIteration(i);
+                        if (unit.getDueDate() == null) unit.setDueDate(iteration.getEndDate());
                     }
                     if (iteration instanceof Phase) {
                         Phase phase = (Phase) iteration;
