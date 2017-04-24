@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "status_classification")
-public class StatusClassification extends BaseEntity{
+public class StatusClassification extends BaseEntity {
 
     private StatusClass aClass;
     private StatusSuperClass superClass;
@@ -19,6 +19,11 @@ public class StatusClassification extends BaseEntity{
         superClass = StatusSuperClass.OPEN;
     }
 
+    public StatusClassification(StatusClass aClass) {
+        super();
+        this.setaClass(aClass);
+    }
+
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
     public StatusClass getaClass() {
@@ -27,11 +32,14 @@ public class StatusClassification extends BaseEntity{
 
     public void setaClass(StatusClass aClass) {
         this.aClass = aClass;
+        if (aClass == StatusClass.UNASSIGNED)
+            this.superClass = StatusSuperClass.UNASSIGNED;
         if (aClass == StatusClass.NEW || aClass == StatusClass.ACCEPTED
-                || aClass == StatusClass.IN_PROGRESS || aClass == StatusClass.RESOLVED
-                || aClass == StatusClass.VERIFIED)
+                || aClass == StatusClass.INPROGRESS || aClass == StatusClass.RESOLVED
+                || aClass == StatusClass.VERIFIED || aClass == StatusClass.OPEN)
             this.superClass = StatusSuperClass.OPEN;
-        if (aClass == StatusClass.DONE || aClass == StatusClass.INVALID)
+        if (aClass == StatusClass.DONE || aClass == StatusClass.CLOSED
+                || aClass == StatusClass.INVALID || aClass == StatusClass.DELETED)
             this.superClass = StatusSuperClass.CLOSED;
     }
 

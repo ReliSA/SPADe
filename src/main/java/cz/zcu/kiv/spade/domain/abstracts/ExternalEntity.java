@@ -1,16 +1,11 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
-import com.fasterxml.jackson.databind.deser.Deserializers;
-
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public abstract class ExternalEntity extends BaseEntity{
+public abstract class ExternalEntity extends BaseEntity {
 
-    protected String externalId;
+    private String externalId;
 
     public ExternalEntity() {
         super();

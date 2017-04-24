@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -16,6 +17,7 @@ public class FieldChange extends NamedEntity {
         super();
     }
 
+    @Column(columnDefinition = "longtext")
     public String getOldValue() {
         return oldValue;
     }
@@ -24,6 +26,7 @@ public class FieldChange extends NamedEntity {
         this.oldValue = oldValue;
     }
 
+    @Column(columnDefinition = "longtext")
     public String getNewValue() {
         return newValue;
     }

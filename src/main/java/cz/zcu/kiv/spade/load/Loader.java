@@ -1,8 +1,8 @@
 package cz.zcu.kiv.spade.load;
 
+import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
+import cz.zcu.kiv.spade.dao.jpa.ProjectInstanceDAO_JPA;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
-import cz.zcu.kiv.spade.indao.ProjectInstanceDAO;
-import cz.zcu.kiv.spade.indao.jpa.ProjectInstanceDAO_JPA;
 
 import javax.persistence.EntityManager;
 

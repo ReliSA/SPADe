@@ -1,12 +1,12 @@
 package cz.zcu.kiv.spade.domain;
 
-import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
+import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "configuration_person_relation")
-public class ConfigPersonRelation extends NamedEntity {
+public class ConfigPersonRelation extends DescribedEntity {
 
     private Person person;
 

@@ -52,6 +52,12 @@
             <version>${hibernate.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>2.9.9</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
@@ -65,6 +71,14 @@
             <artifactId>github-api</artifactId>
             <version>1.80</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.taskadapter/redmine-java-api -->
+        <dependency>
+            <groupId>com.taskadapter</groupId>
+            <artifactId>redmine-java-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
 
     </dependencies>
 

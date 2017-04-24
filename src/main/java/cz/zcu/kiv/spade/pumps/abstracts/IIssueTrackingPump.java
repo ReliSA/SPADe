@@ -1,11 +1,14 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
-import cz.zcu.kiv.spade.domain.WorkUnit;
+import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 
-import java.util.Map;
+import java.util.Collection;
 
 public interface IIssueTrackingPump {
 
-    Map<Integer, WorkUnit> mineTickets();
+    void mineTickets();
 
+    Collection<ProjectSegment> mineIterations();
+
+    void mineEnums();
 }

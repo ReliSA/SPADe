@@ -2,13 +2,11 @@ package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
 @Table(name = "artifact")
+@DiscriminatorValue("ARTIFACT")
 public class Artifact extends WorkItem {
 
     private ArtifactClass artifactClass;

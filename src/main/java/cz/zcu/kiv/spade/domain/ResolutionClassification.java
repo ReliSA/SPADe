@@ -17,6 +17,11 @@ public class ResolutionClassification extends BaseEntity {
         super();
     }
 
+    public ResolutionClassification(ResolutionClass aClass) {
+        super();
+        this.setaClass(aClass);
+    }
+
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
     public ResolutionClass getaClass() {
@@ -25,11 +30,13 @@ public class ResolutionClassification extends BaseEntity {
 
     public void setaClass(ResolutionClass aClass) {
         this.aClass = aClass;
+        if (aClass == ResolutionClass.UNASSIGNED)
+            this.superClass = ResolutionSuperClass.UNASSIGNED;
         if (aClass == ResolutionClass.INVALID || aClass == ResolutionClass.DUPLICATE
-                || aClass == ResolutionClass.WONT_FIX || aClass == ResolutionClass.FIXED
-                || aClass == ResolutionClass.WORKS_AS_DESIGNED || aClass == ResolutionClass.FINISHED)
+                || aClass == ResolutionClass.WONTFIX || aClass == ResolutionClass.FIXED
+                || aClass == ResolutionClass.WORKSASDESIGNED || aClass == ResolutionClass.FINISHED)
             this.superClass = ResolutionSuperClass.FINISHED;
-        if (aClass == ResolutionClass.WORKS_FOR_ME || aClass == ResolutionClass.INCOMPLETE
+        if (aClass == ResolutionClass.WORKSFORME || aClass == ResolutionClass.INCOMPLETE
                 || aClass == ResolutionClass.UNFINISHED)
             this.superClass = ResolutionSuperClass.UNFINISHED;
     }

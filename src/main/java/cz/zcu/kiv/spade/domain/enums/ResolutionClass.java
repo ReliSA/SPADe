@@ -1,13 +1,14 @@
 package cz.zcu.kiv.spade.domain.enums;
 
 public enum ResolutionClass {
+    UNASSIGNED,
     INVALID,
     DUPLICATE,
-    WONT_FIX,
+    WONTFIX,
     FIXED,
-    WORKS_AS_DESIGNED,
+    WORKSASDESIGNED,
     FINISHED,
-    WORKS_FOR_ME,
+    WORKSFORME,
     INCOMPLETE,
     UNFINISHED
 }

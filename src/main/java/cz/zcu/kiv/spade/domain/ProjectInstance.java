@@ -1,9 +1,11 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
+import cz.zcu.kiv.spade.domain.enums.Category;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
 @Entity
 @Table(name = "project_instance")
@@ -18,18 +20,23 @@ public class ProjectInstance extends DescribedEntity {
     private Collection<Resolution> resolutions;
     private Collection<WorkUnitType> wuTypes;
     private Collection<Role> roles;
+    private Collection<Relation> relations;
+    private Collection<Category> categories;
 
     public ProjectInstance() {
         super();
-        this.priorities = Defaults.getDefaultPriorities();
-        this.severities = Defaults.getDefaultSeverities();
-        this.statuses = Defaults.getDeafultStatuses();
-        this.resolutions = Defaults.getDefaultResolutions();
-        this.wuTypes = Defaults.getDefaultWUTypes();
-        this.roles = Defaults.getDefaultRoles();
+        this.project = new Project();
+        this.priorities = new LinkedHashSet<>();
+        this.severities = new LinkedHashSet<>();
+        this.statuses = new LinkedHashSet<>();
+        this.resolutions = new LinkedHashSet<>();
+        this.wuTypes = new LinkedHashSet<>();
+        this.roles = new LinkedHashSet<>();
+        this.relations = new LinkedHashSet<>();
+        this.categories = new LinkedHashSet<>();
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "toolInstanceId")
     public ToolInstance getToolInstance() {
         return toolInstance;
@@ -118,4 +125,23 @@ public class ProjectInstance extends DescribedEntity {
         this.roles = roles;
     }
 
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Relation> getRelations() {
+        return relations;
+    }
+
+    public void setRelations(Collection<Relation> relations) {
+        this.relations = relations;
+    }
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Collection<Category> categories) {
+        this.categories = categories;
+    }
 }

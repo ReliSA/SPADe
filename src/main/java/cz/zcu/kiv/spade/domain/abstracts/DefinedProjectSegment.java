@@ -1,18 +1,15 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
-import cz.zcu.kiv.spade.domain.Configuration;
+import cz.zcu.kiv.spade.domain.Commit;
 
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 import java.util.Date;
 
 @MappedSuperclass
 public abstract class DefinedProjectSegment extends ProjectSegment {
 
     protected Date created;
-    protected Configuration configuration;
+    protected Commit commit;
 
     public DefinedProjectSegment() {
         super();
@@ -27,12 +24,12 @@ public abstract class DefinedProjectSegment extends ProjectSegment {
     }
 
     @JoinColumn(name = "configurationId")
-    @OneToOne(fetch = FetchType.LAZY)
-    public Configuration getConfiguration() {
-        return configuration;
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public Commit getCommit() {
+        return commit;
     }
 
-    public void setConfiguration(Configuration configuration) {
-        this.configuration = configuration;
+    public void setCommit(Commit commit) {
+        this.commit = commit;
     }
 }

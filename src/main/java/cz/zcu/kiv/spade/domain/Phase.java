@@ -15,7 +15,7 @@ public class Phase extends DefinedProjectSegment {
     }
 
     @JoinColumn(name = "milestoneId")
-    @OneToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Milestone getMilestone() {
         return milestone;
     }

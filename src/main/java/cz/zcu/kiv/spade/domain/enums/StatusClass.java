@@ -1,11 +1,15 @@
 package cz.zcu.kiv.spade.domain.enums;
 
 public enum StatusClass {
+    UNASSIGNED,
     NEW,
     ACCEPTED,
-    IN_PROGRESS,
+    INPROGRESS,
     RESOLVED,
     VERIFIED,
+    OPEN,
     DONE,
-    INVALID
+    CLOSED,
+    INVALID,
+    DELETED
 }

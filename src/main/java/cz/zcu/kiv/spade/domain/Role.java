@@ -3,7 +3,6 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.domain.enums.RoleSuperclass;
-import cz.zcu.kiv.spade.domain.enums.StatusClass;
 
 import javax.persistence.*;
 
@@ -18,14 +17,13 @@ public class Role extends DescribedEntity {
         this.classification = new RoleClassification();
     }
 
-    public Role(String name, RoleClass aClass) {
+    public Role(String name, RoleClassification classification) {
         super();
-        this.classification = new RoleClassification();
-        this.setName(name);
-        this.setAClass(aClass);
+        this.classification = classification;
+        this.name = name;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "classId")
     public RoleClassification getClassification() {
         return classification;
@@ -40,13 +38,13 @@ public class Role extends DescribedEntity {
         return classification.getaClass();
     }
 
+    public void setAClass(RoleClass newClass) {
+        this.classification.setaClass(newClass);
+    }
+
     @Transient
     public RoleSuperclass getSuperClass() {
         return classification.getSuperClass();
-    }
-
-    public void setAClass(RoleClass newClass){
-        this.classification.setaClass(newClass);
     }
 
 }

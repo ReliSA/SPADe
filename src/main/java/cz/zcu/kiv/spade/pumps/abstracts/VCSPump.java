@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
+import cz.zcu.kiv.spade.domain.Commit;
 import cz.zcu.kiv.spade.domain.Configuration;
 import cz.zcu.kiv.spade.pumps.DataPump;
 
@@ -18,9 +19,8 @@ public abstract class VCSPump<RootObjectType> extends DataPump<RootObjectType> i
     }
 
     @Override
-    public abstract void addTags(Map<String, Configuration> configurationMap);
+    public abstract void addTags();
 
     @Override
-    public abstract Map<String, Configuration> mineBranches();
-
+    public abstract void mineBranches();
 }

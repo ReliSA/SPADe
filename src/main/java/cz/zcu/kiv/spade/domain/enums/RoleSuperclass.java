@@ -1,8 +1,9 @@
 package cz.zcu.kiv.spade.domain.enums;
 
 public enum RoleSuperclass {
+    UNASSIGNED,
     MANAGEMENT,
-    TEAM_MEMBER,
+    TEAMMEMBER,
     STAKEHOLDER,
-    NON_MEMBER
+    NONMEMBER
 }

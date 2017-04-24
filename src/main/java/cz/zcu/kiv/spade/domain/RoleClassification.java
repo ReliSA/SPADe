@@ -3,8 +3,6 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.domain.enums.RoleSuperclass;
-import cz.zcu.kiv.spade.domain.enums.SeverityClass;
-import cz.zcu.kiv.spade.domain.enums.SeveritySuperClass;
 
 import javax.persistence.*;
 
@@ -17,8 +15,11 @@ public class RoleClassification extends BaseEntity {
 
     public RoleClassification() {
         super();
-        aClass = RoleClass.TEAM_MEMBER;
-        superClass = RoleSuperclass.TEAM_MEMBER;
+    }
+
+    public RoleClassification(RoleClass aClass) {
+        super();
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
@@ -29,16 +30,18 @@ public class RoleClassification extends BaseEntity {
 
     public void setaClass(RoleClass aClass) {
         this.aClass = aClass;
-        if (aClass == RoleClass.TEAM_MEMBER || aClass == RoleClass.ANALYST
+        if (aClass == RoleClass.UNASSIGNED)
+            this.superClass = RoleSuperclass.UNASSIGNED;
+        if (aClass == RoleClass.TEAMMEMBER || aClass == RoleClass.ANALYST
                 || aClass == RoleClass.DESIGNER || aClass == RoleClass.DEVELOPER
                 || aClass == RoleClass.TESTER || aClass == RoleClass.DOCUMENTER)
-            this.superClass = RoleSuperclass.TEAM_MEMBER;
-        if (aClass == RoleClass.PROJECT_MANAGER)
+            this.superClass = RoleSuperclass.TEAMMEMBER;
+        if (aClass == RoleClass.PROJECTMANAGER)
             this.superClass = RoleSuperclass.MANAGEMENT;
         if (aClass == RoleClass.STAKEHOLDER || aClass == RoleClass.MENTOR)
             this.superClass = RoleSuperclass.STAKEHOLDER;
-        if (aClass == RoleClass.NON_MEMBER)
-            this.superClass = RoleSuperclass.NON_MEMBER;
+        if (aClass == RoleClass.NONMEMBER)
+            this.superClass = RoleSuperclass.NONMEMBER;
     }
 
     @Enumerated(EnumType.STRING)

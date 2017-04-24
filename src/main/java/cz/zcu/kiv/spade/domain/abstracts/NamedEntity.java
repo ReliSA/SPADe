@@ -5,7 +5,7 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class NamedEntity extends ExternalEntity {
 
-    protected String name;
+    protected String name = "";
 
     public NamedEntity() {
         super();

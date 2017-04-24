@@ -9,14 +9,17 @@ import javax.persistence.*;
 @Entity
 @Table(name = "severity_classification")
 public class SeverityClassification extends BaseEntity {
-    private long id;
+
     private SeverityClass aClass;
     private SeveritySuperClass superClass;
 
     public SeverityClassification() {
         super();
-        aClass = SeverityClass.NORMAL;
-        superClass = SeveritySuperClass.NORMAL;
+    }
+
+    public SeverityClassification(SeverityClass aClass) {
+        super();
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
@@ -27,6 +30,8 @@ public class SeverityClassification extends BaseEntity {
 
     public void setaClass(SeverityClass aClass) {
         this.aClass = aClass;
+        if (aClass == SeverityClass.UNASSIGNED)
+            this.superClass = SeveritySuperClass.UNASSIGNED;
         if (aClass == SeverityClass.TRIVIAL || aClass == SeverityClass.MINOR)
             this.superClass = SeveritySuperClass.MINOR;
         if (aClass == SeverityClass.NORMAL)

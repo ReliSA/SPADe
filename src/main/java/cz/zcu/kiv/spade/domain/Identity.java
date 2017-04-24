@@ -9,7 +9,7 @@ import javax.persistence.Table;
 @Table(name = "identity")
 public class Identity extends DescribedEntity {
 
-    private String email;
+    private String email = "";
 
     public Identity() {
         super();

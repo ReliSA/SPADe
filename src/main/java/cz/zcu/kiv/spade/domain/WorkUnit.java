@@ -1,5 +1,7 @@
 package cz.zcu.kiv.spade.domain;
 
+import cz.zcu.kiv.spade.domain.enums.Category;
+
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.Date;
@@ -7,6 +9,7 @@ import java.util.LinkedHashSet;
 
 @Entity
 @Table(name = "work_unit")
+@DiscriminatorValue("WORK_UNIT")
 public class WorkUnit extends WorkItem {
 
     private int number;
@@ -15,28 +18,28 @@ public class WorkUnit extends WorkItem {
     private WorkUnitType type;
     private Status status;
     private Resolution resolution;
-    private String category;
+    private Collection<Category> categories;
     private double estimatedTime;
     private double spentTime;
     private Date startDate;
     private Date dueDate;
     private int progress;
     private Person assignee;
-    private Collection<Artifact> attachments;
     private Iteration iteration;
     private Phase phase;
     private Activity activity;
-    private Project project;
     //private Collection<Person> watchers;
 
     public WorkUnit() {
         super();
-        this.priority = new Priority();
-        this.severity = new Severity();
-        this.type = new WorkUnitType();
-        this.status = new Status();
-        this.resolution = new Resolution();
-        this.attachments = new LinkedHashSet<>();
+        this.categories = new LinkedHashSet<>();
+        //this.watchers = new LinkedHashSet<>();
+    }
+
+    public WorkUnit(int number) {
+        super();
+        this.categories = new LinkedHashSet<>();
+        this.number = number;
         //this.watchers = new LinkedHashSet<>();
     }
 
@@ -48,7 +51,7 @@ public class WorkUnit extends WorkItem {
         this.number = number;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "priorityId")
     public Priority getPriority() {
         return priority;
@@ -58,7 +61,7 @@ public class WorkUnit extends WorkItem {
         this.priority = priority;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "severityId")
     public Severity getSeverity() {
         return severity;
@@ -68,7 +71,7 @@ public class WorkUnit extends WorkItem {
         this.severity = severity;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "wuTypeId")
     public WorkUnitType getType() {
         return type;
@@ -78,7 +81,7 @@ public class WorkUnit extends WorkItem {
         this.type = type;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "statusId")
     public Status getStatus() {
         return status;
@@ -88,7 +91,7 @@ public class WorkUnit extends WorkItem {
         this.status = status;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "resolutionId")
     public Resolution getResolution() {
         return resolution;
@@ -141,7 +144,7 @@ public class WorkUnit extends WorkItem {
     }
 
     @JoinColumn(name = "assigneeId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Person getAssignee() {
         return assignee;
     }
@@ -150,27 +153,19 @@ public class WorkUnit extends WorkItem {
         this.assignee = assignee;
     }
 
-    @ManyToMany
-    @JoinTable(name = "work_unit_attachment", joinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "attachmentId", referencedColumnName = "id"))
-    public Collection<Artifact> getAttachments() {
-        return attachments;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "work_unit_category", joinColumns = @JoinColumn(name = "workUnitId", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "categoryId", referencedColumnName = "id"))
+    public Collection<Category> getCategories() {
+        return categories;
     }
 
-    public void setAttachments(Collection<Artifact> attachments) {
-        this.attachments = attachments;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
+    public void setCategories(Collection<Category> categories) {
+        this.categories = categories;
     }
 
     @JoinColumn(name = "iterationId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Iteration getIteration() {
         return iteration;
     }
@@ -180,7 +175,7 @@ public class WorkUnit extends WorkItem {
     }
 
     @JoinColumn(name = "phaseId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Phase getPhase() {
         return phase;
     }
@@ -190,23 +185,13 @@ public class WorkUnit extends WorkItem {
     }
 
     @JoinColumn(name = "activityId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Activity getActivity() {
         return activity;
     }
 
     public void setActivity(Activity activity) {
         this.activity = activity;
-    }
-
-    @JoinColumn(name = "projectId")
-    @ManyToOne(fetch = FetchType.LAZY)
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
     }
 
     /*@ManyToMany

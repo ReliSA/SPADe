@@ -7,7 +7,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "wu_type")
-public class WorkUnitType extends DescribedEntity{
+public class WorkUnitType extends DescribedEntity {
 
     private WorkUnitTypeClassification classification;
 
@@ -16,14 +16,13 @@ public class WorkUnitType extends DescribedEntity{
         this.classification = new WorkUnitTypeClassification();
     }
 
-    public WorkUnitType(String name, WorkUnitTypeClass aClass) {
+    public WorkUnitType(String name, WorkUnitTypeClassification classification) {
         super();
-        this.classification = new WorkUnitTypeClassification();
-        this.setName(name);
-        this.setAClass(aClass);
+        this.classification = classification;
+        this.name = name;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "classId")
     public WorkUnitTypeClassification getClassification() {
         return classification;
@@ -38,7 +37,7 @@ public class WorkUnitType extends DescribedEntity{
         return classification.getaClass();
     }
 
-    public void setAClass(WorkUnitTypeClass newClass){
+    public void setAClass(WorkUnitTypeClass newClass) {
         this.classification.setaClass(newClass);
     }
 }

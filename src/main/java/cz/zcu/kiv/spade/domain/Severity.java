@@ -1,7 +1,6 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
-import cz.zcu.kiv.spade.domain.enums.ResolutionClass;
 import cz.zcu.kiv.spade.domain.enums.SeverityClass;
 import cz.zcu.kiv.spade.domain.enums.SeveritySuperClass;
 
@@ -9,7 +8,7 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "severity")
-public class Severity extends DescribedEntity{
+public class Severity extends DescribedEntity {
 
     private SeverityClassification classification;
 
@@ -18,14 +17,13 @@ public class Severity extends DescribedEntity{
         this.classification = new SeverityClassification();
     }
 
-    public Severity(String name, SeverityClass aClass) {
+    public Severity(String name, SeverityClassification classification) {
         super();
-        this.classification = new SeverityClassification();
-        this.setName(name);
-        this.setAClass(aClass);
+        this.classification = classification;
+        this.name = name;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "classId")
     public SeverityClassification getClassification() {
         return classification;
@@ -40,12 +38,12 @@ public class Severity extends DescribedEntity{
         return classification.getaClass();
     }
 
+    public void setAClass(SeverityClass newClass) {
+        this.classification.setaClass(newClass);
+    }
+
     @Transient
     public SeveritySuperClass getSuperClass() {
         return classification.getSuperClass();
-    }
-
-    public void setAClass(SeverityClass newClass){
-        this.classification.setaClass(newClass);
     }
 }

@@ -1,21 +1,28 @@
 package cz.zcu.kiv.spade.domain;
 
-import cz.zcu.kiv.spade.domain.abstracts.AuthoredEntity;
+import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
+import org.hibernate.annotations.Polymorphism;
+import org.hibernate.annotations.PolymorphismType;
 
-import javax.persistence.Entity;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashSet;
 
 @Entity
 @Table(name = "work_item")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class WorkItem extends AuthoredEntity {
+@DiscriminatorColumn(name = "workItemType")
+public class WorkItem extends DescribedEntity {
 
-    protected String url;
+    protected Date created;
+    protected Person author;
+    protected String url = "";
+    protected Collection<WorkItemRelation> relatedItems;
 
     public WorkItem() {
         super();
+        relatedItems = new LinkedHashSet<>();
     }
 
     public String getUrl() {
@@ -26,4 +33,32 @@ public class WorkItem extends AuthoredEntity {
         this.url = url;
     }
 
+    @Temporal(TemporalType.TIMESTAMP)
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    @JoinColumn(name = "authorId")
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    public Person getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(Person author) {
+        this.author = author;
+    }
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "leftItemId")
+    public Collection<WorkItemRelation> getRelatedItems() {
+        return relatedItems;
+    }
+
+    public void setRelatedItems(Collection<WorkItemRelation> relatedItems) {
+        this.relatedItems = relatedItems;
+    }
 }

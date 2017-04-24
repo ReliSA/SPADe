@@ -17,7 +17,7 @@ public class Group extends DescribedEntity {
         this.members = new LinkedHashSet<>();
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "group_member", joinColumns = @JoinColumn(name = "groupId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "memberId", referencedColumnName = "id"))
     public Collection<Person> getMembers() {

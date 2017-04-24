@@ -1,9 +1,6 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
-import cz.zcu.kiv.spade.domain.Configuration;
 import cz.zcu.kiv.spade.pumps.DataPump;
-
-import java.util.Map;
 
 public abstract class ComplexPump<RootObject> extends DataPump<RootObject> implements IVCSPump, IIssueTrackingPump {
 
@@ -18,8 +15,14 @@ public abstract class ComplexPump<RootObject> extends DataPump<RootObject> imple
     }
 
     @Override
-    public abstract void addTags(Map<String, Configuration> configurationMap);
+    public abstract void addTags();
 
     @Override
-    public abstract Map<String, Configuration> mineBranches();
+    public abstract void mineBranches();
+
+    @Override
+    public abstract void mineTickets();
+
+    @Override
+    public abstract void mineEnums();
 }

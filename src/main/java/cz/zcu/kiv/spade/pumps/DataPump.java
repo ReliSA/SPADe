@@ -1,10 +1,25 @@
 package cz.zcu.kiv.spade.pumps;
 
+import cz.zcu.kiv.spade.App;
+import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
+import cz.zcu.kiv.spade.dao.RelationClassificationDAO;
+import cz.zcu.kiv.spade.dao.StatusClassificationDAO;
+import cz.zcu.kiv.spade.dao.ToolInstanceDAO;
+import cz.zcu.kiv.spade.dao.jpa.ProjectInstanceDAO_JPA;
+import cz.zcu.kiv.spade.dao.jpa.RelationClassificationDAO_JPA;
+import cz.zcu.kiv.spade.dao.jpa.StatusClassificationDAO_JPA;
+import cz.zcu.kiv.spade.dao.jpa.ToolInstanceDAO_JPA;
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.enums.RelationClass;
+import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
+import cz.zcu.kiv.spade.pumps.impl.GitPump;
 
+import javax.persistence.EntityManager;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Generic data pump
@@ -14,7 +29,9 @@ public abstract class DataPump<RootObjectType> {
     /**
      * temporary directory to transfer necessary data into
      */
-    protected static final String ROOT_TEMP_DIR = "D:/repos/";
+    protected static final String ROOT_TEMP_DIR = "repos\\";
+    private static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
+
     /**
      * root object of the project's representation in a tool (repository/project)
      */
@@ -36,6 +53,14 @@ public abstract class DataPump<RootObjectType> {
      */
     protected String privateKeyLoc;
 
+    protected ProjectInstance pi;
+
+    protected Tool tool;
+
+    private ToolInstanceDAO toolDao;
+    private RelationClassificationDAO relationDao;
+    protected StatusClassificationDAO statusDao;
+
     /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
@@ -49,6 +74,11 @@ public abstract class DataPump<RootObjectType> {
         this.password = password;
         this.rootObject = init();
     }
+
+    /**
+     * loads root object of the project's representation in a tool (repository/project)
+     */
+    protected abstract RootObjectType init();
 
     /**
      * deletes temporary directory
@@ -69,10 +99,101 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * gathers all data needed from project instance
+     *
+     * @return ProjectInstrance with all data
+     */
+    public ProjectInstance mineData(EntityManager em) {
+
+        ProjectInstanceDAO piDao = new ProjectInstanceDAO_JPA(em);
+        toolDao = new ToolInstanceDAO_JPA(em);
+        relationDao = new RelationClassificationDAO_JPA(em);
+        statusDao = new StatusClassificationDAO_JPA(em);
+
+        piDao.deleteByUrl(projectHandle);
+
+        pi = new ProjectInstance();
+        pi.setUrl(projectHandle);
+        pi.setName(getProjectName());
+        pi.getProject().setName(getProjectName());
+
+        return pi;
+    }
+
+    protected void setToolInstance() {
+        ToolInstance ti = toolDao.findByToolInstance(getServer(), tool);
+        if (ti == null) {
+            ti = new ToolInstance();
+            ti.setExternalId(getServer());
+            ti.setTool(tool);
+        }
+
+        pi.setToolInstance(ti);
+    }
+
+    /**
+     * gets project name
+     *
+     * @return project name
+     */
+    public String getProjectName() {
+        String ret;
+        if (projectHandle.endsWith(App.GIT_SUFFIX)) {
+            ret = projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(App.GIT_SUFFIX));
+        } else {
+            ret = projectHandle.substring(projectHandle.lastIndexOf("/") + 1);
+        }
+        return ret;
+    }
+
+    /**
+     * returns a temporary directory location of this project instance data
+     *
+     * @return project's temporary directory
+     */
+    protected String getProjectDir() {
+        String cut = cutProtocolAndUser();
+        String withoutPort = getServer().split(":")[0] + cut.substring(cut.indexOf('/'));
+        return withoutPort.substring(0, withoutPort.lastIndexOf(App.GIT_SUFFIX));
+    }
+
+    /**
+     * cuts protocol and username (e.g. "ppicha@...") from project handle
+     *
+     * @return project URL without protocol and username
+     */
+    private String cutProtocolAndUser() {
+        String withoutProtocol = projectHandle;
+        if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
+        if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
+        return withoutProtocol;
+    }
+
+    /**
+     * cuts a server name from project handle
+     *
+     * @return server the project is mined from
+     */
+    protected String getServer() {
+        String cut = cutProtocolAndUser();
+        return cut.substring(0, cut.indexOf('/'));
+    }
+
     private static Comparator<Configuration> getConfigurationByDateComparator() {
         return new Comparator<Configuration>() {
             @Override
             public int compare(Configuration o1, Configuration o2) {
+                if ((o1 instanceof Commit) && (o2 instanceof Commit)) {
+                    Commit c1 = (Commit) o1;
+                    Commit c2 = (Commit) o2;
+                    return compareCommits(c1, c2);
+                }
+                else return o1.getCreated().compareTo(o2.getCreated());
+            }
+
+            private int compareCommits(Commit o1, Commit o2) {
+
                 int ret = o1.getCommitted().compareTo(o2.getCommitted());
                 if (ret != 0) return ret;
                 else return o1.getCreated().compareTo(o2.getCreated());
@@ -80,54 +201,146 @@ public abstract class DataPump<RootObjectType> {
         };
     }
 
-    /**
-     * loads root object of the project's representation in a tool (repository/project)
-     */
-    protected abstract RootObjectType init();
+    private Set<String> mineMentions(String text, String regex) {
+        Set<String> mentions = new HashSet<>();
 
-    /**
-     * gathers all data needed from project instance
-     *
-     * @return ProjectInstrance with all data
-     */
-    public abstract ProjectInstance mineData();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(text);
 
-    /**
-     * performs the steps necessary to successfully close the instance in a clean way
-     */
-    public void close() {
-        deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
+        while (matcher.find()) {
+            mentions.add(matcher.group());
+            text = text.substring(matcher.end());
+            matcher = matcher.reset(text);
+        }
+        return mentions;
+    }
+
+    protected Relation resolveRelation(String name) {
+
+        for (Relation relation : pi.getRelations()) {
+            if (toLetterOnlyLowerCase(name).equals(toLetterOnlyLowerCase(relation.getName()))) {
+                relation.setName(name);
+
+                return relation;
+            }
+        }
+        Relation newRelation = new Relation(name, relationDao.findByClass(RelationClass.UNASSIGNED));
+        pi.getRelations().add(newRelation);
+        return null;
+    }
+
+    protected  void mineAllMentionedItems(WorkItem item) {
+        mineAllMentionedItems(item, item.getDescription());
+    }
+
+    protected void mineAllMentionedItems(WorkItem item, String text){
+        mineMentionedUnits(item, text);
+        mineAllMentionedCommits(item, text);
+    }
+
+    protected  void mineAllMentionedItemsGit(WorkItem item) {
+        mineAllMentionedItemsGit(item, item.getDescription());
+    }
+
+    protected void mineAllMentionedItemsGit(WorkItem item, String text){
+        mineMentionedUnits(item, text);
+        mineMentionedGitCommits(item, text);
+    }
+
+    /*protected  void mineAllMentionedItemsSvn(WorkItem item) {
+        mineAllMentionedItemsSvn(item, item.getDescription());
+    }
+
+    protected void mineAllMentionedItemsSvn(WorkItem item, String text){
+        mineMentionedUnits(item, text);
+        mineMentionedSvnCommits(item, text);
+    }
+
+    protected void mineMentionedUnits(WorkItem item) {
+        mineMentionedUnits(item, item.getDescription());
+    }*/
+
+    private void mineMentionedUnits(WorkItem item, String text) {
+        for (String mention : mineMentions(text, IssueTrackingPump.WU_MENTION_REGEX)) {
+            WorkUnit mentioned = pi.getProject().addUnit(new WorkUnit(Integer.parseInt(mention)));
+            generateMentionRelation(item, mentioned);
+        }
+    }
+
+    /*protected void mineMentionedCommits(WorkItem item) {
+        mineMentionedGitCommits(item, item.getDescription());
+        mineMentionedSvnCommits(item, item.getDescription());
+    }*/
+
+    private void mineAllMentionedCommits(WorkItem item, String text) {
+        mineMentionedGitCommits(item, text);
+        mineMentionedSvnCommits(item, text);
+    }
+
+    private void mineMentionedGitCommits(WorkItem item, String text) {
+        mineMentionedItemsCommit(item, text, GitPump.GIT_COMMIT_REGEX);
+    }
+
+    private void mineMentionedSvnCommits(WorkItem item, String text) {
+        mineMentionedItemsCommit(item, text, SVN_REVISION_REGEX);
+    }
+
+    private void mineMentionedItemsCommit(WorkItem item, String text, String regex) {
+        for (String mention : mineMentions(text, regex)) {
+            Commit mentioned = pi.getProject().addCommit(new Commit(mention));
+            generateMentionRelation(item, mentioned);
+        }
+    }
+
+    protected void generateMentionRelation(WorkItem mentioner, WorkItem mentionee) {
+        Relation mentionsRelation = resolveRelation("mentions");
+        Relation mentionedByRelation = resolveRelation("mentioned by");
+
+        mentioner.getRelatedItems().add(new WorkItemRelation(mentionee, mentionsRelation));
+        mentionee.getRelatedItems().add(new WorkItemRelation(mentioner, mentionedByRelation));
     }
 
     /**
      * adds either a new Project-Person-Role to a collection or a new identity to an existing person based on name and email
      *
-     * @param peopleColl collection to check for existence of a person/identity
-     * @param identity   person's identity
+     * @param identity person's identity
      * @return added person or identified or enhanced (added identity) priviosly existing one
      */
-    protected Person addPerson(Collection<Person> peopleColl, Identity identity) {
-        // TODO disambiguation - heuristic for aggregating people based on name and email
-        /*
-        prijmeni, krestni|k. [stredni|s.] = *, * [*] = contains ","; 2/3 parts
-        prijmeni krestni s.|k. s.|k. = * *.* = ends with "."; 2/3 parts
-        krestni|k. [stredni|s.] prijmeni = * [*] * = else
-        */
-        /*
-        kspp
-        ppks
-        pp
-        kksp
-        */
-        for (Person person : peopleColl) {
+    protected Person addPerson(Identity identity) {
+        for (Person person : pi.getProject().getPeople()) {
+
             boolean foundSimilar = false;
-            for (Identity ident : person.getIdentities()) {
 
-                boolean sameEmail = ident.getEmail().equals(identity.getEmail());
-                boolean sameName = ident.getName().equals(identity.getName());
+            for (Identity member : person.getIdentities()) {
 
-                if (sameName && sameEmail) return person;
-                if (sameName != sameEmail) {
+                if (identity.getExternalId() != null && member.getExternalId() != null) {
+                    if (identity.getExternalId().equals(member.getExternalId())) {
+                        return person;
+                    }
+                }
+
+                boolean sameEmail = false;
+                boolean sameName = false;
+
+                if (!identity.getEmail().isEmpty()) {
+                    sameEmail = identity.getEmail().equals(member.getEmail());
+                }
+                if (!identity.getName().isEmpty()) {
+                    sameName = identity.getName().equals(member.getName());
+                }
+
+                if (sameEmail && sameName) {
+                    return person;
+                }
+                if (sameEmail != sameName) {
+                    if (identity.getEmail().equals(member.getEmail()) && identity.getName().equals(member.getName())) {
+                        return person;
+                    }
+                    foundSimilar = true;
+                }
+                if (!identity.getDescription().isEmpty() &&
+                        (identity.getDescription().equals(member.getName()) ||
+                                identity.getDescription().equals(member.getDescription()))) {
                     foundSimilar = true;
                 }
             }
@@ -135,6 +348,9 @@ public abstract class DataPump<RootObjectType> {
                 person.getIdentities().add(identity);
                 if (identity.getName().length() > person.getName().length()) {
                     person.setName(identity.getName());
+                }
+                if (identity.getDescription().length() > person.getName().length()) {
+                    person.setName(identity.getDescription());
                 }
                 return person;
             }
@@ -144,7 +360,7 @@ public abstract class DataPump<RootObjectType> {
         newPerson.setName(identity.getName());
         newPerson.getIdentities().add(identity);
 
-        peopleColl.add(newPerson);
+        pi.getProject().getPeople().add(newPerson);
         return newPerson;
     }
 
@@ -153,9 +369,9 @@ public abstract class DataPump<RootObjectType> {
      *
      * @return sorted list of configurations
      */
-    protected List<Configuration> sortConfigsByDate(Collection<Configuration> configurations) {
+    protected List<Configuration> sortConfigsByDate() {
         List<Configuration> list = new ArrayList<>();
-        list.addAll(configurations);
+        list.addAll(pi.getProject().getConfigurations());
         list.sort(getConfigurationByDateComparator());
         return list;
     }
@@ -166,16 +382,18 @@ public abstract class DataPump<RootObjectType> {
      * @param list list of configurations to by cleaned up
      * @return list after clean up
      */
-    protected List<Configuration> cleanUpConfList(List<Configuration> list) {
+    protected List<Configuration> cleanUpCommitList(List<Configuration> list) {
         long externalId = 0;
         Map<String, Artifact> artifacts = new TreeMap<>();
 
-        for (Configuration conf : list) {
-            for (WorkItemChange change : conf.getChanges()) {
+        for (Configuration configuration : list) {
+            if (!(configuration instanceof Commit)) continue;
+            Commit commit = (Commit) configuration;
+            for (WorkItemChange change : commit.getChanges()) {
 
                 Artifact changed = (Artifact) change.getChangedItem();
-                changed.setAuthor(conf.getAuthor());
-                changed.setCreated(conf.getCreated());
+                changed.setAuthor(commit.getAuthor());
+                changed.setCreated(commit.getCreated());
 
                 if (change.getName().equals("ADD") || change.getName().contains("COPY")) {
                     changed.setExternalId(Long.toString(externalId));
@@ -222,205 +440,32 @@ public abstract class DataPump<RootObjectType> {
         else return path;
     }
 
-    /**
-     * cuts protocol and username (e.g. "ppicha@...") from project handle
-     *
-     * @return project URL without protocol and username
-     */
-    private String cutProtocolAndUser() {
-        String withoutProtocol = projectHandle;
-        if (withoutProtocol.contains("://")) withoutProtocol = withoutProtocol.split("://")[1];
-        if (withoutProtocol.contains("@")) withoutProtocol = withoutProtocol.split("@")[1];
-        return withoutProtocol;
-    }
+    protected void addWorkItemAuthors() {
 
-    /**
-     * returns a temporary directory location of this project instance data
-     *
-     * @return project's temporary directory
-     */
-    protected String getProjectDir() {
-        String cut = cutProtocolAndUser();
-        String withoutPort = getServer().split(":")[0] + cut.substring(cut.indexOf('/'));
-        return withoutPort.substring(0, withoutPort.lastIndexOf(".git"));
-    }
-
-    /**
-     * cuts a server name from project handle
-     *
-     * @return server the project is mined from
-     */
-    protected String getServer() {
-        String cut = cutProtocolAndUser();
-        return cut.substring(0, cut.indexOf('/'));
-    }
-
-    /**
-     * gets project name
-     *
-     * @return project name
-     */
-    public String getProjectName() {
-        return projectHandle.substring(projectHandle.lastIndexOf("/") + 1, projectHandle.lastIndexOf(".git"));
-    }
-
-    /**
-     * prints data report to an output text file
-     *
-     * @param pi     project instance with all the necessary data
-     * @param stream print destination
-     */
-    public ProjectInstance printReport(ProjectInstance pi, PrintStream stream) {
-
-        stream.println();
-        stream.println("Project: " + pi.getProject().getName());
-        stream.println("Tool: " + pi.getToolInstance().getTool() + " (" + pi.getToolInstance().getExternalId() + ")");
-        stream.println("URL: " + pi.getUrl());
-        stream.println("Description: " + pi.getProject().getDescription());
-        stream.println("Start date: " + pi.getProject().getStartDate());
-
-        Collection<String> tags = new LinkedHashSet<>();
-        Collection<String> branches = new LinkedHashSet<>();
-        Collection<Person> people = new LinkedHashSet<>();
-
-        stream.println("Configurations: " + pi.getProject().getConfigurations().size());
         for (Configuration conf : pi.getProject().getConfigurations()) {
-            stream.println("\tSHA: " + conf.getName().substring(0, 7));
-            for (Identity identity : conf.getAuthor().getIdentities()) {
-                Person author = addPerson(people, identity);
-                conf.setAuthor(author);
-            }
-            stream.println("\tAuthor: " + conf.getAuthor().getName());
-            stream.println("\tCreated: " + conf.getCreated());
-            stream.println("\tCommitted: " + conf.getCommitted());
-            String tagList = "\tTags: ";
-            for (VCSTag tag : conf.getTags()) {
-                tagList = tagList.concat(tag.getName());
-                tagList = tagList.concat(", ");
-                tags.add(tag.getName());
-            }
-            if (tagList.endsWith(", ")) stream.println(tagList.substring(0, tagList.length() - 2));
-            String branchList = "\tBranches: ";
-            for (Branch branch : conf.getBranches()) {
-                branchList = branchList.concat(branch.getName());
-                if (branch.getIsMain()) {
-                    branchList = branchList.concat(" (default)");
-                    branches.add(branch.getName() + " (default)");
-                } else {
-                    branches.add(branch.getName());
-                }
-                branchList = branchList.concat(", ");
-            }
-            stream.println(branchList.substring(0, branchList.length() - 2));
-            String formatted = conf.getDescription().replaceAll("\n\n", "\n").replaceAll("\n", "\n\t\t");
-            stream.println("\tMsg: " + formatted.trim());
-            stream.println("\tAssociated people:");
-            for (ConfigPersonRelation rel : conf.getRelations()) {
-                for (Identity identity : rel.getPerson().getIdentities()) {
-                    Person person = addPerson(people, identity);
-                    rel.setPerson(person);
-                }
-                stream.println("\t\t" + rel.getName() + ": " + rel.getPerson().getName());
-            }
-            String workUnitsList = "\tAssociated work units: ";
-            for (WorkUnit wu : conf.getWorkUnits()) {
-                workUnitsList = workUnitsList.concat(wu.getNumber() + ", ");
-            }
-            if (workUnitsList.endsWith(", ")) {
-                workUnitsList = workUnitsList.substring(0, workUnitsList.length() - 2);
-            }
-            stream.println(workUnitsList);
-            stream.println("\tChanged files: " + conf.getChanges().size());
             for (WorkItemChange change : conf.getChanges()) {
-                stream.println("\t\t" + change.getName() + " " + change.getChangedItem().getName());
-                stream.println("\t\t\t" + "File path: " + change.getChangedItem().getUrl());
-                for (FieldChange field : change.getFieldChanges()) {
-                    stream.println("\t\t\t" + field.getName() + " changed from: " + field.getOldValue() + " to: " + field.getNewValue());
-                }
-                stream.println("\t\t\t" + change.getDescription().replaceAll("\n", "\n\t\t\t"));
-
                 if (change.getName().equals("ADD")) {
                     change.getChangedItem().setAuthor(conf.getAuthor());
                 }
             }
-            stream.println();
-        }
-        stream.println("Tags: " + tags.size() + " " + tags.toString());
-        stream.println("Branches: " + branches.size() + " " + branches.toString());
-        stream.println("Personnel: " + people.size());
-        pi.getProject().setPeople(people);
-        for (Person person : people) {
-            pi.getProject().getPeople().add(person);
-            String personString = "\t" + person.getName() + " (";
-            for (Identity identity : person.getIdentities()) {
-                personString += identity.getEmail() + ", ";
-            }
-            stream.println(personString.substring(0, personString.length() - 2) + ")");
         }
 
-        stream.println();
-
-        /*Map<String, Integer> brs = new HashMap<>();
-        int i = 1;
-        for (String b : branches) {
-            brs.put(b, i);
-            stream.println(i + " - " + b);
-            i++;
-        }
-        stream.println();
-
-
-        for (Configuration conf : pi.getProject().getConfigurations()) {
-            for (Map.Entry<String, Integer> b : brs.entrySet()) {
-                boolean found = false;
-                for (Branch br : conf.getBranches()) {
-                    if (b.getKey().contains(br.getName())) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (found) stream.print("x ");
-                else stream.print("  ");
-            }
-            stream.print(" " + conf.getName().substring(0, 7) + " " + conf.getCommitted());
-            //if (conf.isMergePoint()) stream.print(" merge");
-            //if (conf.isBranchPoint()) stream.print(" branch");
-            stream.println();
-        }*/
-
-        stream.flush();
-        stream.close();
-        return pi;
     }
 
-    public void printWorkItemHistories(ProjectInstance pi, PrintStream stream) {
-        Map<String, Artifact> artifacts = new TreeMap<>();
-        for (Configuration conf : pi.getProject().getConfigurations()) {
-            for (WorkItemChange change : conf.getChanges()) {
-                if (!artifacts.containsKey(change.getChangedItem().getExternalId())) {
-                    artifacts.put(change.getChangedItem().getExternalId(), (Artifact) change.getChangedItem());
-                }
+    protected String toLetterOnlyLowerCase(String anyString) {
+        StringBuilder compressed = new StringBuilder();
+        for (int i = 0; i < anyString.length(); i++) {
+            if (Character.isLetter(anyString.charAt(i))) {
+                compressed.append(anyString.charAt(i));
             }
         }
-        Map<String, List<String>> artifactHistories = new TreeMap<>();
-        for (String id : artifacts.keySet()) {
-            artifactHistories.put(id, new ArrayList<>());
-        }
-        for (String artifactId : artifacts.keySet()) {
-            for (Configuration conf : pi.getProject().getConfigurations()) {
-                for (WorkItemChange change : conf.getChanges()) {
-                    Artifact changedArtifact = (Artifact) change.getChangedItem();
-                    if (artifactId.equals(changedArtifact.getExternalId())) {
-                        artifactHistories.get(artifactId).add(conf.getCommitted() + "\t" + change.getName());
-                    }
-                }
-            }
-        }
-        for (Artifact artifact : artifacts.values()) {
-            stream.println(artifact.getName() + "\t" + artifact.getExternalId());
-            for (String history : artifactHistories.get(artifact.getExternalId())) {
-                stream.println("\t" + history);
-            }
-        }
+        return compressed.toString().toLowerCase();
+    }
+
+    /**
+     * performs the steps necessary to successfully close the instance in a clean way
+     */
+    public void close() {
+        deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
     }
 }

@@ -1,11 +1,13 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
-import cz.zcu.kiv.spade.domain.WorkUnit;
+import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.pumps.DataPump;
 
-import java.util.Map;
+import java.util.Collection;
 
 public abstract class IssueTrackingPump<RootObjectType> extends DataPump<RootObjectType> implements IIssueTrackingPump {
+
+    public static final String WU_MENTION_REGEX = "(?<=^#|\\W#|_#|$#)\\d{1,4}(?=\\W|_|^|$)";
 
     /**
      * @param projectHandle URL of the project instance
@@ -18,5 +20,11 @@ public abstract class IssueTrackingPump<RootObjectType> extends DataPump<RootObj
     }
 
     @Override
-    public abstract Map<Integer, WorkUnit> mineTickets();
+    public abstract void mineTickets();
+
+    @Override
+    public abstract Collection<ProjectSegment> mineIterations();
+
+    @Override
+    public abstract void mineEnums();
 }

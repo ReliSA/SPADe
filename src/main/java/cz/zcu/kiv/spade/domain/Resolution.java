@@ -3,13 +3,12 @@ package cz.zcu.kiv.spade.domain;
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
 import cz.zcu.kiv.spade.domain.enums.ResolutionClass;
 import cz.zcu.kiv.spade.domain.enums.ResolutionSuperClass;
-import cz.zcu.kiv.spade.domain.enums.WorkUnitTypeClass;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "resolution")
-public class Resolution extends DescribedEntity{
+public class Resolution extends DescribedEntity {
 
     private ResolutionClassification classification;
 
@@ -18,14 +17,13 @@ public class Resolution extends DescribedEntity{
         this.classification = new ResolutionClassification();
     }
 
-    public Resolution(String name, ResolutionClass aClass) {
+    public Resolution(String name, ResolutionClassification classification) {
         super();
-        this.classification = new ResolutionClassification();
-        this.setName(name);
-        this.setAClass(aClass);
+        this.classification = classification;
+        this.name = name;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "classId")
     public ResolutionClassification getClassification() {
         return classification;
@@ -40,12 +38,12 @@ public class Resolution extends DescribedEntity{
         return classification.getaClass();
     }
 
+    public void setAClass(ResolutionClass newClass) {
+        this.classification.setaClass(newClass);
+    }
+
     @Transient
     public ResolutionSuperClass getSuperClass() {
         return classification.getSuperClass();
-    }
-
-    public void setAClass(ResolutionClass newClass){
-        this.classification.setaClass(newClass);
     }
 }

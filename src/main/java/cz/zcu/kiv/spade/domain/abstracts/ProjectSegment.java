@@ -9,15 +9,15 @@ import java.util.Date;
 public abstract class ProjectSegment extends DescribedEntity {
 
     protected Project project;
-    protected Date startDate;
-    protected Date endDate;
+    private Date startDate;
+    private Date endDate;
 
     public ProjectSegment() {
         super();
     }
 
     @JoinColumn(name = "superProjectId")
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     public Project getProject() {
         return project;
     }

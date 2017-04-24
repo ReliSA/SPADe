@@ -6,13 +6,13 @@ import javax.persistence.MappedSuperclass;
 @MappedSuperclass
 public abstract class DescribedEntity extends NamedEntity {
 
-    protected String description;
+    protected String description = "";
 
     public DescribedEntity() {
         super();
     }
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "longtext")
     public String getDescription() {
         return description;
     }

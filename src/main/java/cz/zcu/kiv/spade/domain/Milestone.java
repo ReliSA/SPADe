@@ -17,7 +17,7 @@ public class Milestone extends DescribedEntity {
         this.criteria = new LinkedHashSet<>();
     }
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "milestone_criterion", joinColumns = @JoinColumn(name = "milestoneId", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "criterionId", referencedColumnName = "id"))
     public Collection<Criterion> getCriteria() {

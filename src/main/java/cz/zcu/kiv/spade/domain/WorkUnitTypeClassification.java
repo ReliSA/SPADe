@@ -7,13 +7,17 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "wu_type_classification")
-public class WorkUnitTypeClassification extends BaseEntity{
+public class WorkUnitTypeClassification extends BaseEntity {
 
     private WorkUnitTypeClass aClass;
 
     public WorkUnitTypeClassification() {
         super();
-        aClass = WorkUnitTypeClass.TASK;
+    }
+
+    public WorkUnitTypeClassification(WorkUnitTypeClass aClass) {
+        super();
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")

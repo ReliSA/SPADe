@@ -15,8 +15,11 @@ public class PriorityClassification extends BaseEntity {
 
     public PriorityClassification() {
         super();
-        aClass = PriorityClass.NORMAL;
-        superClass = PrioritySuperClass.NORMAL;
+    }
+
+    public PriorityClassification(PriorityClass aClass) {
+        super();
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
@@ -27,6 +30,8 @@ public class PriorityClassification extends BaseEntity {
 
     public void setaClass(PriorityClass aClass) {
         this.aClass = aClass;
+        if (aClass == PriorityClass.UNASSIGNED)
+            this.superClass = PrioritySuperClass.UNASSIGNED;
         if (aClass == PriorityClass.LOWEST || aClass == PriorityClass.LOW)
             this.superClass = PrioritySuperClass.LOW;
         if (aClass == PriorityClass.NORMAL)
