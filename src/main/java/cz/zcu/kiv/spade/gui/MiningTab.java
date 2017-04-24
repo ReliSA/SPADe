@@ -5,7 +5,6 @@ import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -26,9 +25,10 @@ class MiningTab extends Tab {
 
     private App app;
 
-    private CheckBox blankBox;
+    TextField newBox;
     private ChoiceBox<String> toolBox;
     private TextArea logArea;
+    RadioButton reloadBtn;
     private ListView<String> reloadBox;
     private Text info;
     private ProgressBar progBar;
@@ -50,15 +50,14 @@ class MiningTab extends Tab {
         this.setContent(grid);
 
         // conponents
-        blankBox = new CheckBox();
-        CheckBox mineBox = new CheckBox();
+        Button blankBox = new Button("Create blank database");
         RadioButton newBtn = new RadioButton("Load new project:");
-        TextField newBox = new TextField();
+        newBox = new TextField();
         toolBox = new ChoiceBox<>();
         logArea = new TextArea();
-        RadioButton reloadBtn = new RadioButton("Reload projects:");
+        reloadBtn = new RadioButton("Reload projects:");
         reloadBox = new ListView<>();
-        Button confirmBtn = new Button("Confirm");
+        Button confirmBtn = new Button("Mine");
         HBox confirmBtnHBox = new HBox(10);
         info = new Text();
         progBar = new ProgressBar();
@@ -66,24 +65,22 @@ class MiningTab extends Tab {
         progInd = new ProgressIndicator();
 
         // layout
-        grid.add(new Label("Create blank database"), 0, 0);
-        grid.add(blankBox, 1, 0);
+        grid.add(blankBox, 0, 0);
         grid.add(new Label("Mine project data"), 0, 1);
-        grid.add(mineBox, 1, 1);
-        grid.add(newBtn, 0, 2);
-        grid.add(newBox, 1, 2);
-        grid.add(new Label("Tool:"), 2, 2);
-        grid.add(toolBox, 3, 2);
-        grid.add(new Label("Log:"), 4, 2);
-        grid.add(reloadBtn, 0, 3);
-        grid.add(reloadBox, 1, 3, 3, 1);
-        grid.add(logArea, 4, 3);
+        grid.add(newBtn, 0, 1);
+        grid.add(newBox, 1, 1);
+        grid.add(new Label("Tool:"), 2, 1);
+        grid.add(toolBox, 3, 1);
+        grid.add(new Label("Log:"), 4, 1);
+        grid.add(reloadBtn, 0, 2);
+        grid.add(reloadBox, 1, 2, 3, 1);
+        grid.add(logArea, 4, 2);
         confirmBtnHBox.getChildren().add(confirmBtn);
-        grid.add(confirmBtnHBox, 0, 4, 4, 1);
-        grid.add(info, 0, 5, 5, 1);
-        grid.add(progBar, 0, 6, 4, 1);
+        grid.add(confirmBtnHBox, 0, 3, 4, 1);
+        grid.add(info, 0, 4, 5, 1);
+        grid.add(progBar, 0, 5, 4, 1);
         progIndHBox.getChildren().add(progInd);
-        grid.add(progIndHBox, 4, 6);
+        grid.add(progIndHBox, 4, 5);
 
         grid.getColumnConstraints().add(new ColumnConstraints(120));
         grid.getColumnConstraints().add(new ColumnConstraints(200));
@@ -93,7 +90,6 @@ class MiningTab extends Tab {
         grid.getColumnConstraints().add(new ColumnConstraints(100));
 
         // default settings
-        blankBox.requestFocus();
         ToggleGroup urlGroup = new ToggleGroup();
         newBtn.setToggleGroup(urlGroup);
         reloadBtn.setToggleGroup(urlGroup);
@@ -102,6 +98,7 @@ class MiningTab extends Tab {
         logArea.setEditable(true);
         logArea.setFont(Font.font("Courier New"));
         confirmBtnHBox.setAlignment(Pos.CENTER);
+        confirmBtn.requestFocus();
 
         info.setVisible(false);
         progBar.setVisible(false);
@@ -121,60 +118,90 @@ class MiningTab extends Tab {
 
         // behavior
 
-        blankBox.disableProperty().bind(reloadBtn.selectedProperty());
-        newBtn.disableProperty().bind(Bindings.not(mineBox.selectedProperty()));
+        blankBox.setOnAction(event -> startJob(false));
 
-        BooleanBinding newOptBind = Bindings.not(mineBox.selectedProperty().and(newBtn.selectedProperty()));
-        newBox.disableProperty().bind(newOptBind);
-        toolBox.disableProperty().bind(newOptBind);
+        reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
 
-        reloadBtn.disableProperty().bind(Bindings.not(mineBox.selectedProperty()));
-        reloadBox.disableProperty().bind(Bindings.not(mineBox.selectedProperty().and(reloadBtn.selectedProperty())));
+        newBox.textProperty().addListener((observable, oldValue, newValue) -> selectTool(newBox.getText()));
 
-        newBox.textProperty().addListener((observable, oldValue, newValue) -> selectTool());
+        confirmBtn.setOnAction(e -> startJob(true));
+    }
 
-        confirmBtn.disableProperty().bind(Bindings.or(blankBox.selectedProperty(), mineBox.selectedProperty()).not());
-        confirmBtn.setOnAction(e -> {
-            boolean createDb = (blankBox.isSelected() && !blankBox.isDisabled());
-            boolean mine = mineBox.isSelected();
+    private void startJob(boolean mine) {
+        setProgress(0);
+        setStartJobLogJob();
+        if (mine) {
             boolean reload = reloadBtn.isSelected();
             String newProject = newBox.getText();
             String tool = toolBox.getSelectionModel().getSelectedItem();
             List<String> selectedProjects = reloadBox.getSelectionModel().getSelectedItems();
-            if (!checkInputs(mine, reload, newProject, tool, selectedProjects)) return;
-            processForm(createDb, mine, reload, newProject, tool, selectedProjects);
-        });
+            if (!checkInputs(reload, newProject, tool, selectedProjects)) return;
+            processForm(reload, newProject, tool, selectedProjects);
+        } else
+            createDb();
+        setProgress(1);
     }
 
-    private boolean checkInputs(boolean mine, boolean reload, String newProject, String tool, List<String> selectedProjects) {
-        if (mine) {
-            if (!reload) {
-                if (!newProject.trim().isEmpty()) {
-                    if (tool == null) {
-                        showError("No tool specified!", "Please select a tool for the new project data");
-                        return false;
-                    }
-                }/* else {
-                    this.showError("No URL specified!", "Please input the URL of the project data to mine");
+    private boolean checkInputs(boolean reload, String newProject, String tool, List<String> selectedProjects) {
+        if (!reload) {
+            if (!newProject.trim().isEmpty()) {
+                if (tool == null) {
+                    showError("No tool specified!", "Please select a tool for the new project data");
                     return false;
-                }*/
-            } else if (selectedProjects.isEmpty()) {
-                showError("No projects selected!", "Please choose at least one project");
+                }
+            }/* else {
+                this.showError("No URL specified!", "Please input the URL of the project data to mine");
                 return false;
-            }
+            }*/
+        } else if (selectedProjects.isEmpty()) {
+            showError("No projects selected!", "Please choose at least one project");
+            return false;
         }
         return true;
     }
 
-    private void selectTool() {
-        /*String toolName = app.guessTool(newBox.getText());
+    private void selectTool(String text) {
+        String toolName = app.guessTool(text);
         if (toolName.isEmpty()) {
             toolBox.getSelectionModel().clearSelection();
         }
-        toolBox.getSelectionModel().select(toolName);*/
+        toolBox.getSelectionModel().select(toolName);
     }
 
-    private void processForm(boolean createDb, boolean mine, boolean reload, String newProject, String tool, List<String> selectedProjects) {
+    private void processForm(boolean reload, String newProject, String tool, List<String> selectedProjects) {
+        Map<String, String> loginResults = new HashMap<>();
+
+        if (!reload) {
+            // one new project
+            if (!newProject.trim().isEmpty()) {
+                loginResults = showLoginDialog(tool);
+                if (loginResults != null) {
+                    mineSingleProject(1, 1, newProject, tool, loginResults);
+                }
+            // project list form file
+            } else {
+                List<String> lines = readFile(tool + ".txt");
+
+                loginResults.put("username", lines.get(0));
+                loginResults.put("password", lines.get(1));
+                if (lines.get(2).isEmpty()) loginResults.put("privateKey", null);
+                else loginResults.put("privateKey", lines.get(2));
+
+                for (int i = 3; i < lines.size(); i ++) {
+                    mineSingleProject(lines.size() - 3, i - 2, lines.get(i), tool, loginResults);
+                }
+            }
+        // reload projects
+        } else {
+            int i = 1;
+            for (String url : selectedProjects) {
+                loginResults = showLoginDialog(url);
+                mineSingleProject(selectedProjects.size(), i++, url, null, loginResults);
+            }
+        }
+    }
+
+    private void setStartJobLogJob() {
         startTime = System.currentTimeMillis();
 
         String separator = "----------New Job----------";
@@ -184,43 +211,6 @@ class MiningTab extends Tab {
         info.setVisible(true);
         progBar.setVisible(true);
         progInd.setVisible(true);
-
-        setProgress(0);
-        Map<String, String> loginResults = new HashMap<>();
-
-        // create DB
-        if (createDb) createDb();
-        if (mine) {
-            if (!reload) {
-                // one new project
-                if (!newProject.trim().isEmpty()) {
-                    loginResults = showLoginDialog(tool);
-                    if (loginResults != null) {
-                        mineSingleProject(1, 1, newProject, tool, loginResults);
-                    }
-                // project list form file
-                } else {
-                    List<String> lines = readFile(tool + ".txt");
-
-                    loginResults.put("username", lines.get(0));
-                    loginResults.put("password", lines.get(1));
-                    if (lines.get(2).isEmpty()) loginResults.put("privateKey", null);
-                    else loginResults.put("privateKey", lines.get(2));
-
-                    for (int i = 3; i < lines.size(); i ++) {
-                        mineSingleProject(lines.size() - 3, i - 2, lines.get(i), tool, loginResults);
-                    }
-                }
-            // reload projects
-            } else {
-                int i = 1;
-                for (String url : selectedProjects) {
-                    loginResults = showLoginDialog(url);
-                    mineSingleProject(selectedProjects.size(), i++, url, null, loginResults);
-                }
-            }
-        }
-        setProgress(1);
     }
 
     private void createDb() {
@@ -272,15 +262,13 @@ class MiningTab extends Tab {
         String logLine = "Now mining "+ url + " ...";
         printLogline(logLine);
 
-        int actionCount = prjNumber * 2;
-        if (blankBox.isSelected() && !blankBox.isDisable()) actionCount++;
         long prevTime = System.currentTimeMillis();
 
         ProjectInstance pi;
         if (tool == null) pi = app.reloadProjectInstance(url, loginResults);
         else pi = app.loadProjectInstance(url, loginResults, tool);
 
-        double progress = ((order * 2.0) - 1) / actionCount;
+        double progress = ((order * 2.0) - 1) / (prjNumber * 2);
         logLine = String.format("\"%s\" data mined (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
 
         printLogline(logLine);
@@ -289,7 +277,7 @@ class MiningTab extends Tab {
 
         app.loadProjectInstance(pi);
 
-        progress = order * 2.0 / actionCount;
+        progress = order * 2.0 / (prjNumber * 2);
         logLine = String.format("\"%s\" data loaded (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
 
         setProgress(progress);
