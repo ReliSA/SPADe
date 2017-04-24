@@ -72,7 +72,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         minePeople();
         Collection<ProjectSegment> iterations = mineIterations();
 
-        //TODO changesets, relations, journals, unit ADD, case insensitive
+        //TODO changesets, relations, journals
 
         mineTickets();
 
@@ -126,7 +126,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         try {
             pages = wikiMgr.getWikiPagesByProject(redmineProject.getIdentifier());
         } catch (RedmineException e) {
-            System.out.println("\tInsufficient permissions for wiki");;
+            System.out.println("\tInsufficient permissions for wiki");
         }
         for (WikiPage page : pages) {
             Artifact wikiPage = mineWikiPage(page);

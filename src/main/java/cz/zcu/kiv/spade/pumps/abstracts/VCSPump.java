@@ -1,10 +1,6 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
-import cz.zcu.kiv.spade.domain.Commit;
-import cz.zcu.kiv.spade.domain.Configuration;
 import cz.zcu.kiv.spade.pumps.DataPump;
-
-import java.util.Map;
 
 public abstract class VCSPump<RootObjectType> extends DataPump<RootObjectType> implements IVCSPump {
 

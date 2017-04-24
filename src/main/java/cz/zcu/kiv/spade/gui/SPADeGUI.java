@@ -9,9 +9,9 @@ import javafx.stage.Stage;
 
 public class SPADeGUI {
 
-    App app;
-    MiningTab mineTab;
-    ChartTab chartTab;
+    private App app;
+    private MiningTab mineTab;
+    private ChartTab chartTab;
 
     public void showMainWindow(Stage stage) {
         stage.setTitle("SPADe - Software Process Anti-patterns Detector");
@@ -25,7 +25,7 @@ public class SPADeGUI {
         mineTab.setClosable(false);
         TabPane tabPane = new TabPane(mineTab, chartTab, new TimelineTab());
 
-        Scene scene = new Scene(tabPane, 800, 600);
+        Scene scene = new Scene(tabPane, 900, 700);
         stage.setScene(scene);
 
         stage.setOnCloseRequest(event -> app.close());

@@ -8,7 +8,7 @@ import java.util.Date;
 @MappedSuperclass
 public abstract class DefinedProjectSegment extends ProjectSegment {
 
-    protected Date created;
+    private Date created;
     protected Commit commit;
 
     public DefinedProjectSegment() {

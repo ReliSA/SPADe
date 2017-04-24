@@ -15,10 +15,10 @@ import java.util.LinkedHashSet;
 @DiscriminatorColumn(name = "workItemType")
 public class WorkItem extends DescribedEntity {
 
-    protected Date created;
+    private Date created;
     protected Person author;
     protected String url = "";
-    protected Collection<WorkItemRelation> relatedItems;
+    private Collection<WorkItemRelation> relatedItems;
 
     public WorkItem() {
         super();

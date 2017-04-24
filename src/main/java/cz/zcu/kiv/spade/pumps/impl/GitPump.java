@@ -132,8 +132,9 @@ public class GitPump extends VCSPump<Repository> {
             }
             commitSHA = commitSHA.substring(0, 7);
 
-            if (!pi.getProject().containsCommit(commitSHA))
+            if (!pi.getProject().containsCommit(commitSHA)) {
                 mineCommit((RevCommit) any);
+            }
 
             Commit commit = pi.getProject().getCommit(commitSHA);
             commit.getTags().add(tag);

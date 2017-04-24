@@ -8,7 +8,7 @@ import java.util.Date;
 @DiscriminatorValue("COMMITTED")
 public class CommittedConfiguration extends Configuration {
 
-    protected Date committed;
+    private Date committed;
 
     public CommittedConfiguration() {
         super();

@@ -25,10 +25,10 @@ class MiningTab extends Tab {
 
     private App app;
 
-    TextField newBox;
+    private TextField newBox;
     private ChoiceBox<String> toolBox;
     private TextArea logArea;
-    RadioButton reloadBtn;
+    private RadioButton reloadBtn;
     private ListView<String> reloadBox;
     private Text info;
     private ProgressBar progBar;
@@ -46,16 +46,15 @@ class MiningTab extends Tab {
         grid.setHgap(10);
         grid.setVgap(10);
         grid.setPadding(new Insets(25, 25, 25, 25));
-
         this.setContent(grid);
 
         // conponents
         RadioButton newBtn = new RadioButton("Load new project:");
         newBox = new TextField();
         toolBox = new ChoiceBox<>();
-        logArea = new TextArea();
         reloadBtn = new RadioButton("Reload projects:");
         reloadBox = new ListView<>();
+        logArea = new TextArea();
         Button confirmBtn = new Button("Mine projects");
         Button blankBtn = new Button("Create blank database");
         HBox btnHBox = new HBox(10);
@@ -74,16 +73,16 @@ class MiningTab extends Tab {
         grid.add(reloadBox, 1, 1, 3, 1);
         grid.add(logArea, 4, 1);
         btnHBox.getChildren().addAll(confirmBtn, blankBtn);
-        grid.add(btnHBox, 0, 2, 5, 1);
-        grid.add(info, 0, 3, 5, 1);
+        grid.add(btnHBox, 0, 2, 6, 1);
+        grid.add(info, 0, 3, 6, 1);
         progHBox.getChildren().addAll(progBar, progInd);
-        grid.add(progHBox, 0, 4, 5, 1);
+        grid.add(progHBox, 0, 4, 6, 1);
 
         grid.getColumnConstraints().add(new ColumnConstraints(120));
         grid.getColumnConstraints().add(new ColumnConstraints(200));
-        ColumnConstraints cc = new ColumnConstraints(30);
-        cc.setHalignment(HPos.RIGHT);
-        grid.getColumnConstraints().add(cc);
+        ColumnConstraints column3 = new ColumnConstraints(30);
+        column3.setHalignment(HPos.RIGHT);
+        grid.getColumnConstraints().add(column3);
         grid.getColumnConstraints().add(new ColumnConstraints(100));
 
         // default settings
@@ -99,30 +98,28 @@ class MiningTab extends Tab {
 
         info.setVisible(false);
         progBar.setVisible(false);
-        progBar.setPrefWidth(700);
+        progBar.setPrefWidth(650);
         progInd.setVisible(false);
         progHBox.setAlignment(Pos.CENTER);
 
         // data
         newBox.setPromptText("Project URL");
-
         for (Tool tool : Tool.values()) {
             toolBox.getItems().add(tool.name());
             if (tool.equals(Tool.GIT)) toolBox.getSelectionModel().select(tool.name());
         }
-
         refreshProjects(app.getProjects());
 
         // behavior
-        blankBtn.setOnAction(event -> startJob(false));
         reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
         newBox.textProperty().addListener((observable, oldValue, newValue) -> selectTool(newBox.getText()));
         confirmBtn.setOnAction(e -> startJob(true));
+        blankBtn.setOnAction(event -> startJob(false));
     }
 
     private void startJob(boolean mine) {
         setProgress(0);
-        setStartJobLogJob();
+        setStartJobLog();
         if (mine) {
             boolean reload = reloadBtn.isSelected();
             String newProject = newBox.getText();
@@ -171,7 +168,7 @@ class MiningTab extends Tab {
                 if (loginResults != null) {
                     mineSingleProject(1, 1, newProject, tool, loginResults);
                 }
-            // project list form file
+            // project list from file
             } else {
                 List<String> lines = readFile(tool + ".txt");
 
@@ -194,7 +191,7 @@ class MiningTab extends Tab {
         }
     }
 
-    private void setStartJobLogJob() {
+    private void setStartJobLog() {
         startTime = System.currentTimeMillis();
 
         String separator = "----------New Job----------";
