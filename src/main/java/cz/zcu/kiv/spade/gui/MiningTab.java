@@ -50,37 +50,34 @@ class MiningTab extends Tab {
         this.setContent(grid);
 
         // conponents
-        Button blankBox = new Button("Create blank database");
         RadioButton newBtn = new RadioButton("Load new project:");
         newBox = new TextField();
         toolBox = new ChoiceBox<>();
         logArea = new TextArea();
         reloadBtn = new RadioButton("Reload projects:");
         reloadBox = new ListView<>();
-        Button confirmBtn = new Button("Mine");
-        HBox confirmBtnHBox = new HBox(10);
+        Button confirmBtn = new Button("Mine projects");
+        Button blankBtn = new Button("Create blank database");
+        HBox btnHBox = new HBox(10);
         info = new Text();
         progBar = new ProgressBar();
-        HBox progIndHBox = new HBox(10);
+        HBox progHBox = new HBox(10);
         progInd = new ProgressIndicator();
 
         // layout
-        grid.add(blankBox, 0, 0);
-        grid.add(new Label("Mine project data"), 0, 1);
-        grid.add(newBtn, 0, 1);
-        grid.add(newBox, 1, 1);
-        grid.add(new Label("Tool:"), 2, 1);
-        grid.add(toolBox, 3, 1);
-        grid.add(new Label("Log:"), 4, 1);
-        grid.add(reloadBtn, 0, 2);
-        grid.add(reloadBox, 1, 2, 3, 1);
-        grid.add(logArea, 4, 2);
-        confirmBtnHBox.getChildren().add(confirmBtn);
-        grid.add(confirmBtnHBox, 0, 3, 4, 1);
-        grid.add(info, 0, 4, 5, 1);
-        grid.add(progBar, 0, 5, 4, 1);
-        progIndHBox.getChildren().add(progInd);
-        grid.add(progIndHBox, 4, 5);
+        grid.add(newBtn, 0, 0);
+        grid.add(newBox, 1, 0);
+        grid.add(new Label("Tool:"), 2, 0);
+        grid.add(toolBox, 3, 0);
+        grid.add(new Label("Log:"), 4, 0);
+        grid.add(reloadBtn, 0, 1);
+        grid.add(reloadBox, 1, 1, 3, 1);
+        grid.add(logArea, 4, 1);
+        btnHBox.getChildren().addAll(confirmBtn, blankBtn);
+        grid.add(btnHBox, 0, 2, 5, 1);
+        grid.add(info, 0, 3, 5, 1);
+        progHBox.getChildren().addAll(progBar, progInd);
+        grid.add(progHBox, 0, 4, 5, 1);
 
         grid.getColumnConstraints().add(new ColumnConstraints(120));
         grid.getColumnConstraints().add(new ColumnConstraints(200));
@@ -97,14 +94,14 @@ class MiningTab extends Tab {
         reloadBox.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         logArea.setEditable(true);
         logArea.setFont(Font.font("Courier New"));
-        confirmBtnHBox.setAlignment(Pos.CENTER);
+        btnHBox.setAlignment(Pos.CENTER);
         confirmBtn.requestFocus();
 
         info.setVisible(false);
         progBar.setVisible(false);
         progBar.setPrefWidth(700);
         progInd.setVisible(false);
-        progIndHBox.setAlignment(Pos.CENTER_LEFT);
+        progHBox.setAlignment(Pos.CENTER);
 
         // data
         newBox.setPromptText("Project URL");
@@ -117,13 +114,9 @@ class MiningTab extends Tab {
         refreshProjects(app.getProjects());
 
         // behavior
-
-        blankBox.setOnAction(event -> startJob(false));
-
+        blankBtn.setOnAction(event -> startJob(false));
         reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
-
         newBox.textProperty().addListener((observable, oldValue, newValue) -> selectTool(newBox.getText()));
-
         confirmBtn.setOnAction(e -> startJob(true));
     }
 
