@@ -177,7 +177,9 @@ class MiningTab extends Tab {
     private void processForm(boolean createDb, boolean mine, boolean reload, String newProject, String tool, List<String> selectedProjects) {
         startTime = System.currentTimeMillis();
 
-        logArea.clear();
+        String separator = "----------New Job----------";
+        if (!logArea.getText().isEmpty()) separator = "\n" + separator;
+        logArea.setText(logArea.getText() + separator);
         info.setText("");
         info.setVisible(true);
         progBar.setVisible(true);
