@@ -36,7 +36,7 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
         if (entity.equals("WorkUnitType")) diff = "Type";
 
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, " + entity + " en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
                         "AND wu." + diff.toLowerCase() + " IS NULL"
@@ -57,10 +57,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
         if (entity.equals("WorkUnitType")) diff = "Type";
 
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, " + entity + " en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu." + diff.toLowerCase() + " = en " +
                         "AND wu." + diff.toLowerCase() + ".name = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -77,10 +76,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByPriority(PriorityClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Priority en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.priority = en " +
                         "AND wu.priority.classification.aClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -97,10 +95,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByPriority(PrioritySuperClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Priority en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.priority = en " +
                         "AND wu.priority.classification.superClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -117,10 +114,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByStatus(StatusClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Status en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.status = en " +
                         "AND wu.status.classification.aClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -137,10 +133,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByStatus(StatusSuperClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Status pr " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.status = pr " +
                         "AND wu.status.classification.superClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -157,10 +152,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByResolution(ResolutionClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Resolution en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.resolution = en " +
                         "AND wu.resolution.classification.aClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -177,10 +171,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByResolution(ResolutionSuperClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Status en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.resolution = en " +
                         "AND wu.resolution.classification.superClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -197,10 +190,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountBySeverity(SeverityClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Severity en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.severity = en " +
                         "AND wu.severity.classification.aClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -217,10 +209,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountBySeverity(SeveritySuperClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, Status en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.severity = en " +
                         "AND wu.severity.classification.superClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -237,10 +228,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByType(WorkUnitTypeClass value, String url) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi, WorkUnitType en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu.type = en " +
                         "AND wu.type.classification.aClass = :value"
                 , Long.class);
         q.setParameter("url", url);
@@ -260,7 +250,7 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
         if (diff.equals("workunittype")) diff = "type";
 
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, " + entity + " en " +
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
                         "WHERE wu." + diff + " IS NULL"
                 , Long.class);
         int result;
@@ -278,9 +268,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
         if (diff.equals("workunittype")) diff = "type";
 
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, " + entity + " en " +
-                        "WHERE wu." + diff + " = en " +
-                        "AND wu." + diff + ".name = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu." + diff + ".name = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -295,9 +284,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByPriority(PriorityClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Priority en " +
-                        "WHERE wu.priority = en " +
-                        "AND wu.priority.classification.aClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.priority.classification.aClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -312,9 +300,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByPriority(PrioritySuperClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Priority en " +
-                        "WHERE wu.priority = en " +
-                        "AND wu.priority.classification.superClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.priority.classification.superClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -329,9 +316,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByStatus(StatusClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Status en " +
-                        "WHERE wu.status = en " +
-                        "AND wu.status.classification.aClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.status.classification.aClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -346,9 +332,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByStatus(StatusSuperClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Status pr " +
-                        "WHERE wu.status = pr " +
-                        "AND wu.status.classification.superClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.status.classification.superClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -363,9 +348,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByResolution(ResolutionClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Resolution en " +
-                        "WHERE wu.resolution = en " +
-                        "AND wu.resolution.classification.aClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.resolution.classification.aClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -380,9 +364,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByResolution(ResolutionSuperClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Status en " +
-                        "WHERE wu.resolution = en " +
-                        "AND wu.resolution.classification.superClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.resolution.classification.superClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -397,9 +380,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountBySeverity(SeverityClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Severity en " +
-                        "WHERE wu.severity = en " +
-                        "AND wu.severity.classification.aClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.severity.classification.aClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -414,9 +396,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountBySeverity(SeveritySuperClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, Status en " +
-                        "WHERE wu.severity = en " +
-                        "AND wu.severity.classification.superClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.severity.classification.superClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
@@ -431,9 +412,8 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     @Override
     public int getUnitCountByType(WorkUnitTypeClass value) {
         TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu, WorkUnitType en " +
-                        "WHERE wu.type = en " +
-                        "AND wu.type.classification.aClass = :value"
+                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                        "WHERE wu.type.classification.aClass = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;
