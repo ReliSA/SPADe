@@ -7,7 +7,7 @@ import cz.zcu.kiv.spade.domain.enums.RelationSuperClass;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "wu_relation_classification")
+@Table(name = "relation_classification")
 public class RelationClassification extends BaseEntity {
 
     private RelationClass aClass;
