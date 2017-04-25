@@ -2,15 +2,19 @@ package cz.zcu.kiv.spade.gui;
 
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.utils.Record;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
-import javafx.scene.text.Text;
+import javafx.scene.text.Font;
 
 import java.util.*;
 
@@ -28,7 +32,7 @@ class ChartTab extends Tab {
     private ComboBox<String> fldSelect;
     private CheckBox zeroBox;
     private CheckBox nullBox;
-    private Text stats;
+    private TableView<Record> statTbl;
 
     ChartTab(App app) {
         super("Charts");
@@ -50,7 +54,9 @@ class ChartTab extends Tab {
         ToggleGroup chartGroup = new ToggleGroup();
         RadioButton pieBtn = new RadioButton("pie chart");
         RadioButton barBtn = new RadioButton("bar chart");
-        stats = new Text();
+        Label statLbl = new Label("Statistics");
+        statLbl.setFont(new Font(14));
+        statTbl = new TableView<>();
 
         grid.add(new Label("Project: "), 0, 0);
         grid.add(prjSelect, 1, 0, 3, 1);
@@ -61,14 +67,16 @@ class ChartTab extends Tab {
         grid.add(nullBox, 4, 1);
         grid.add(pieBtn, 0, 2, 2, 1);
         grid.add(barBtn, 0, 3, 2, 1);
-        grid.add(stats, 0, 4, 2, 1);
-        grid.add(pieChart, 2, 2, 3, 3);
+        grid.add(statLbl, 0, 4, 2, 1);
+        grid.add(statTbl, 0, 5, 2, 1);
+        grid.add(pieChart, 2, 2, 3, 4);
 
         addRow(5, false);
         addRow(5, false);
         addRow(5, false);
         addRow(5, true);
-        addRow(90, true);
+        addRow(5, true);
+        addRow(85, true);
 
         grid.getColumnConstraints().add(new ColumnConstraints(45));
         grid.getColumnConstraints().add(new ColumnConstraints(120));
@@ -92,6 +100,14 @@ class ChartTab extends Tab {
         enumSelect.getSelectionModel().selectFirst();
         fldSelect.getSelectionModel().selectFirst();
 
+        TableColumn <Record, String> nameCol = new TableColumn<>("name");
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
+        TableColumn <Record, Integer> countCol = new TableColumn<>("#");
+        countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
+        TableColumn <Record, Double> percetCol = new TableColumn<>("%");
+        percetCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
+        statTbl.getColumns().addAll(nameCol, countCol, percetCol);
+
         fillChart();
 
         prjSelect.setOnAction(event -> fillChart());
@@ -106,12 +122,12 @@ class ChartTab extends Tab {
 
         pieBtn.setOnAction(event -> {
             grid.getChildren().remove(barChart);
-            grid.add(pieChart, 2, 2, 2, 3);
+            grid.add(pieChart, 2, 2, 3, 4);
             fillChart();
         });
         barBtn.setOnAction(event -> {
             grid.getChildren().remove(pieChart);
-            grid.add(barChart, 2, 2, 2, 3);
+            grid.add(barChart, 2, 2, 3, 4);
             fillChart();
         });
     }
@@ -170,18 +186,16 @@ class ChartTab extends Tab {
     }
 
     private void refreshStats(int total, Map<String, Integer> data) {
-        StringBuilder statText = new StringBuilder();
-        String format = "%-10s %20s\t( %.2f%% )\n";
+        statTbl.getItems().clear();
 
+        ObservableList<Record> records = FXCollections.observableArrayList();
+
+        records.add(new Record("TOTAL", total, 100));
         for (Map.Entry<String, Integer> dataPoint : data.entrySet()) {
-            if (dataPoint.getValue() != 0) {
-                double percent = (dataPoint.getValue() * 100.0) / total;
-                statText.append(String.format(Locale.ROOT, format, dataPoint.getKey() + ": ", dataPoint.getValue(), percent));
-            }
+            double percent = (dataPoint.getValue() * 100.0) / total;
+            records.add(new Record(dataPoint.getKey(), dataPoint.getValue(), percent));
         }
-        statText.insert(0, String.format("TOTAL:\t %d\n\n", total));
-        statText.insert(0, "STATS\n\n");
-        stats.setText(statText.toString());
+        statTbl.getItems().addAll(records);
     }
 
     private Map<String, Integer> collectData() {
@@ -329,3 +343,4 @@ class ChartTab extends Tab {
         return data;
     }
 }
+
