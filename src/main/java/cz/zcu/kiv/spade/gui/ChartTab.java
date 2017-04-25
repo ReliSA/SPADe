@@ -21,7 +21,7 @@ import java.util.*;
 class ChartTab extends Tab {
 
     private final PieChart pieChart = new PieChart();
-    private final Map<String, String> enums = new HashMap<>();
+    private final Map<String, String> enums = new LinkedHashMap<>();
     private CategoryAxis xAxis = new CategoryAxis();
     private NumberAxis yAxis = new NumberAxis();
     private final BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
@@ -207,9 +207,13 @@ class ChartTab extends Tab {
 
         if (url.equals("ALL")) url = null;
 
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
+        if (includeNull) {
+            count = app.getUnitCountWithNullEnum(url, enumer);
+            data.put("null", count);
+        }
         if (column.equals("name")) {
             for (String name : app.getEnumsByPrjUrl(enumer, enums.get(enumer), url)) {
                 count = app.getUnitCountByEnumName(name, url, enumer);
@@ -234,10 +238,6 @@ class ChartTab extends Tab {
                     break;
             }
         }
-        if (includeNull) {
-            count = app.getUnitCountWithNullEnum(url, enumer);
-            data.put("null", count);
-        }
         if (excludeZeros) {
             List<String> zeros = new ArrayList<>();
             for (Map.Entry<String, Integer> dataPoint : data.entrySet()) {
@@ -251,7 +251,7 @@ class ChartTab extends Tab {
     }
 
     private Map<String, Integer> withPriorities(String url, String column) {
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
         if (column.equals("class")) {
@@ -271,7 +271,7 @@ class ChartTab extends Tab {
     }
 
     private Map<String, Integer> withStatuses(String url, String column) {
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
         if (column.equals("class")) {
@@ -291,7 +291,7 @@ class ChartTab extends Tab {
     }
 
     private Map<String, Integer> withResolutions(String url, String column) {
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
         if (column.equals("class")) {
@@ -311,7 +311,7 @@ class ChartTab extends Tab {
     }
 
     private Map<String, Integer> withSeverities(String url, String column) {
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
         if (column.equals("class")) {
@@ -331,7 +331,7 @@ class ChartTab extends Tab {
     }
 
     private Map<String, Integer> withTypes(String url, String column) {
-        Map<String, Integer> data = new HashMap<>();
+        Map<String, Integer> data = new LinkedHashMap<>();
 
         int count;
         if (column.equals("class")) {

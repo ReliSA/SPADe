@@ -75,7 +75,9 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
     @Override
     public Collection<String> selectEnums(String entity) {
         Query q = entityManager.createQuery(
-                "SELECT en.name FROM " + entity + " en GROUP BY en.name");
+                "SELECT en.name FROM " + entity + " en " +
+                        "GROUP BY en.name " +
+                        "ORDER BY en.classification.id");
         List<String> results = new ArrayList<>();
         try {
             for (Object o : q.getResultList()) {
@@ -92,7 +94,8 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
         Query q = entityManager.createQuery(
                 "SELECT en.name FROM " + entity + " en, ProjectInstance pi " +
                         "WHERE pi.url = :url " +
-                        "AND en MEMBER pi." + collection);
+                        "AND en MEMBER pi." + collection + " " +
+                        "ORDER BY en.classification.id");
         q.setParameter("url", url);
         List<String> results = new ArrayList<>();
         try {
