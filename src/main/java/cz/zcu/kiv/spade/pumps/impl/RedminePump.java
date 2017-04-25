@@ -228,7 +228,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             Person person = addPerson(generateIdentity(member.getUserId(), member.getUserName()));
             for (com.taskadapter.redmineapi.bean.Role redmineRole : member.getRoles()) {
                 person.getRoles().add(resolveRole(redmineRole.getName()));
-
             }
         }
 
@@ -247,8 +246,20 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     public void mineTickets() {
 
         List<Issue> issues = new ArrayList<>();
+        int queryId = 73;
         try {
-            issues = rootObject.getIssueManager().getIssues(redmineProject.getIdentifier(), 73, Include.relations);
+            for (SavedQuery query : rootObject.getIssueManager().getSavedQueries()) {
+                if (toLetterOnlyLowerCase(query.getName()).equals("allissues")) {
+                    queryId = query.getId();
+                }
+            }
+        } catch (RedmineException e) {
+            System.out.println("\tInsufficient permissions for queries");
+        }
+
+        try {
+            issues = rootObject.getIssueManager().getIssues(redmineProject.getIdentifier(), queryId, Include.values());
+            System.out.println(issues.size());
         } catch (RedmineException e) {
             System.out.println("\tInsufficient permissions for issues");
         }
@@ -326,6 +337,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             commit.setAuthor(addPerson(generateIdentity(changeset.getUser().getId(), changeset.getUser().getLogin())));
             commit.setCreated(changeset.getCommittedOn());
             commit.setDescription(changeset.getComments());
+            commit.setCommitted(changeset.getCommittedOn());
 
             generateMentionRelation(commit, unit);
 
