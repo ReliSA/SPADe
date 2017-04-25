@@ -1,15 +1,15 @@
 package cz.zcu.kiv.spade.domain.enums;
 
 public enum RoleClass {
-    UNASSIGNED,
+    TEAMMEMBER,
     ANALYST,
     DESIGNER,
     DEVELOPER,
+    TESTER,
     DOCUMENTER,
+    PROJECTMANAGER,
+    STAKEHOLDER,
     MENTOR,
     NONMEMBER,
-    PROJECTMANAGER,
-    TESTER,
-    TEAMMEMBER,
-    STAKEHOLDER
+    UNASSIGNED
 }
