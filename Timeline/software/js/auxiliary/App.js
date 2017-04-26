@@ -34,13 +34,23 @@ var App = new Class("App", {
     
     /** @member {Object} relation translations */
     _RELATION_TRANSLATE : {
-        "part_of" : "součást",
-        "relationship" : "relation",
-        "participation" : "účast",
-        "takes_place" : "místo konání",
-        "creation" : "zapříčinění vzniku",
-        "cause" : "zapříčinění",
-        "interaction" : "interakce"
+        "UNASSIGNED" : "unassigned",
+        "RELATESTO" : "general: relates to",
+        "DUPLICATES" : "similarity: duplicate",
+        "DUPLICATEDBY" : "similarity: duplicated by",
+        "COPIEDFROM" : "similarity: copied from",
+        "COPIEDBY" : "similarity: copied by",
+        "BLOCKS" : "temporal: blocks",
+        "BLOCKEDBY" : "temporal: blocked by",
+        "PRECEDES" : "temporal: precedes",
+        "FOLLOWS" : "temporal: follows",
+        "CHILDOF" : "hiererchical: child of",
+        "PARENTOF" : "hiererchical: parent of",
+        "CAUSES" : "causal: causes",
+        "CAUSEDBY" : "causal: caused by",
+        "RESOLVES" : "causal: resolves",
+        "RESOLVEDBY" : "causal: resolved by",
+        "CHANGES" : "changes"
     },
     
     
