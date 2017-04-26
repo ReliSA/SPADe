@@ -1,51 +1,33 @@
-package cz.zcu.kiv.spade.gui;
+package cz.zcu.kiv.spade.gui.tabs;
 
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.SPADeGUI;
 import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.gui.utils.Record;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.Font;
 
 import java.util.*;
 
-class ChartTab extends Tab {
+public class ChartTab extends SPADeTab {
 
     private final PieChart pieChart = new PieChart();
     private final Map<String, EnumStrings> enums = new LinkedHashMap<>();
     private CategoryAxis xAxis = new CategoryAxis();
     private NumberAxis yAxis = new NumberAxis();
     private final BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
-    private App app;
-    private GridPane grid;
-    private ComboBox<String> prjSelect;
-    private ComboBox<String> enumSelect;
-    private ComboBox<String> fldSelect;
-    private CheckBox zeroBox;
-    private CheckBox nullBox;
+    private ComboBox<String> prjSelect, enumSelect, fldSelect;
+    private CheckBox zeroBox, nullBox;
     private TableView<Record> statTbl;
 
-    ChartTab(App app) {
-        super("Charts");
-        this.app = app;
-
-        grid = new GridPane();
-        grid.setAlignment(Pos.TOP_LEFT);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-
-        this.setContent(grid);
+    public ChartTab(SPADeGUI gui) {
+        super("Charts", gui);
 
         prjSelect = new ComboBox<>();
         enumSelect = new ComboBox<>();
@@ -72,24 +54,14 @@ class ChartTab extends Tab {
         grid.add(statTbl, 0, 5, 2, 1);
         grid.add(pieChart, 2, 2, 3, 4);
 
-        addRow(5, false);
-        addRow(5, false);
-        addRow(5, false);
-        addRow(5, true);
-        addRow(5, true);
-        addRow(85, true);
+        setRowHeightPercetages(5, 5, 5, 5, 5, 75);
+        setRowValignment(VPos.TOP, 3, 4, 5);
 
-        grid.getColumnConstraints().add(new ColumnConstraints(45));
-        grid.getColumnConstraints().add(new ColumnConstraints(120));
-        grid.getColumnConstraints().add(new ColumnConstraints(100));
-        grid.getColumnConstraints().add(new ColumnConstraints(100));
-        grid.getColumnConstraints().add(new ColumnConstraints(500));
+        setColumnWidths(45, 120, 100, 100, 500);
 
         pieBtn.setToggleGroup(chartGroup);
         pieBtn.setSelected(true);
         barBtn.setToggleGroup(chartGroup);
-
-        refreshProjects(app.getProjects());
 
         enums.put("priority", new EnumStrings("Priority", "priority", "priorities"));
         enums.put("severity", new EnumStrings("Severity", "severity", "severities"));
@@ -109,8 +81,6 @@ class ChartTab extends Tab {
         TableColumn <Record, Double> percetCol = new TableColumn<>("%");
         percetCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
         statTbl.getColumns().addAll(nameCol, countCol, percetCol);
-
-        fillChart();
 
         prjSelect.setOnAction(event -> fillChart());
         enumSelect.setOnAction(event -> {
@@ -134,25 +104,22 @@ class ChartTab extends Tab {
         });
     }
 
-    private void addRow(double heightPercentage, boolean top) {
-        RowConstraints rc = new RowConstraints();
-        rc.setPercentHeight(heightPercentage);
-        if (top) rc.setValignment(VPos.TOP);
-        grid.getRowConstraints().add(rc);
-    }
-
     private String getSelected(ComboBox<String> selectBox) {
         return selectBox.getSelectionModel().getSelectedItem();
     }
 
-    void refreshProjects(List<String> projects) {
+    @Override
+    public void refreshProjects(List<String> projects) {
         prjSelect.getItems().clear();
         prjSelect.getItems().add("ALL");
         prjSelect.getItems().addAll(projects);
         prjSelect.getSelectionModel().selectFirst();
+        fillChart();
     }
 
     private void fillChart() {
+        if (getSelected(prjSelect) == null) return;
+
         String prj;
         if (getSelected(prjSelect).equals("ALL")) {
             prj = "all projects";
@@ -213,12 +180,12 @@ class ChartTab extends Tab {
 
         int count;
         if (includeNull) {
-            count = app.getUnitCountWithNullEnum(enums.get(enumer), url);
+            count = gui.getApp().getUnitCountWithNullEnum(enums.get(enumer), url);
             data.put("null", count);
         }
         if (column.equals("name")) {
-            for (String name : app.getEnumsByPrjUrl(enums.get(enumer), url)) {
-                count = app.getUnitCountByEnumName(enums.get(enumer), url, name);
+            for (String name : gui.getApp().getEnumsByPrjUrl(enums.get(enumer), url)) {
+                count = gui.getApp().getUnitCountByEnumName(enums.get(enumer), url, name);
                 data.put(name, count);
             }
         } else {
@@ -258,13 +225,13 @@ class ChartTab extends Tab {
         int count;
         if (column.equals("class")) {
             for (PriorityClass aClass : PriorityClass.values()) {
-                count = app.getUnitCountByPriority(column, aClass.name(), url);
+                count = gui.getApp().getUnitCountByPriority(column, aClass.name(), url);
                 data.put(aClass.name(), count);
             }
 
         } else if (column.equals("superclass")) {
             for (PrioritySuperClass superClass : PrioritySuperClass.values()) {
-                count = app.getUnitCountByPriority(column, superClass.name(), url);
+                count = gui.getApp().getUnitCountByPriority(column, superClass.name(), url);
                 data.put(superClass.name(), count);
             }
 
@@ -278,13 +245,13 @@ class ChartTab extends Tab {
         int count;
         if (column.equals("class")) {
             for (StatusClass aClass : StatusClass.values()) {
-                count = app.getUnitCountByStatus(column, aClass.name(), url);
+                count = gui.getApp().getUnitCountByStatus(column, aClass.name(), url);
                 data.put(aClass.name(), count);
             }
 
         } else if (column.equals("superclass")) {
             for (StatusSuperClass superClass : StatusSuperClass.values()) {
-                count = app.getUnitCountByStatus(column, superClass.name(), url);
+                count = gui.getApp().getUnitCountByStatus(column, superClass.name(), url);
                 data.put(superClass.name(), count);
             }
 
@@ -298,13 +265,13 @@ class ChartTab extends Tab {
         int count;
         if (column.equals("class")) {
             for (ResolutionClass aClass : ResolutionClass.values()) {
-                count = app.getUnitCountByResolution(column, aClass.name(), url);
+                count = gui.getApp().getUnitCountByResolution(column, aClass.name(), url);
                 data.put(aClass.name(), count);
             }
 
         } else if (column.equals("superclass")) {
             for (ResolutionSuperClass superClass : ResolutionSuperClass.values()) {
-                count = app.getUnitCountByResolution(column, superClass.name(), url);
+                count = gui.getApp().getUnitCountByResolution(column, superClass.name(), url);
                 data.put(superClass.name(), count);
             }
 
@@ -318,13 +285,13 @@ class ChartTab extends Tab {
         int count;
         if (column.equals("class")) {
             for (SeverityClass aClass : SeverityClass.values()) {
-                count = app.getUnitCountBySeverity(column, aClass.name(), url);
+                count = gui.getApp().getUnitCountBySeverity(column, aClass.name(), url);
                 data.put(aClass.name(), count);
             }
 
         } else if (column.equals("superclass")) {
             for (SeveritySuperClass superClass : SeveritySuperClass.values()) {
-                count = app.getUnitCountBySeverity(column, superClass.name(), url);
+                count = gui.getApp().getUnitCountBySeverity(column, superClass.name(), url);
                 data.put(superClass.name(), count);
             }
 
@@ -338,7 +305,7 @@ class ChartTab extends Tab {
         int count;
         if (column.equals("class")) {
             for (WorkUnitTypeClass aClass : WorkUnitTypeClass.values()) {
-                count = app.getUnitCountByType(column, aClass.name(), url);
+                count = gui.getApp().getUnitCountByType(column, aClass.name(), url);
                 data.put(aClass.name(), count);
             }
         }

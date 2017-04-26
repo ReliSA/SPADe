@@ -1,8 +1,8 @@
-package cz.zcu.kiv.spade.gui;
+package cz.zcu.kiv.spade.gui.tabs;
 
-import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.gui.SPADeGUI;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
@@ -21,9 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-class MiningTab extends Tab {
-
-    private App app;
+public class MiningTab extends SPADeTab {
 
     private TextField newBox;
     private ChoiceBox<String> toolBox;
@@ -36,17 +34,8 @@ class MiningTab extends Tab {
 
     private long startTime;
 
-    MiningTab(App app) {
-        super("Mining");
-
-        this.app = app;
-
-        GridPane grid = new GridPane();
-        grid.setAlignment(Pos.TOP_LEFT);
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(25, 25, 25, 25));
-        this.setContent(grid);
+    public MiningTab(SPADeGUI gui) {
+        super("Mining", gui);
 
         // conponents
         RadioButton newBtn = new RadioButton("Load new project:");
@@ -78,13 +67,8 @@ class MiningTab extends Tab {
         progHBox.getChildren().addAll(progBar, progInd);
         grid.add(progHBox, 0, 4, 6, 1);
 
-        grid.getColumnConstraints().add(new ColumnConstraints(120));
-        grid.getColumnConstraints().add(new ColumnConstraints(200));
-        ColumnConstraints column3 = new ColumnConstraints(30);
-        column3.setHalignment(HPos.RIGHT);
-        grid.getColumnConstraints().add(column3);
-        grid.getColumnConstraints().add(new ColumnConstraints(100));
-        grid.getColumnConstraints().add(new ColumnConstraints(450));
+        setColumnWidths(120, 200, 30, 100, 450);
+        setColumnHalignment(HPos.RIGHT, 3);
 
         // default settings
         ToggleGroup urlGroup = new ToggleGroup();
@@ -109,7 +93,6 @@ class MiningTab extends Tab {
             toolBox.getItems().add(tool.name());
             if (tool.equals(Tool.GIT)) toolBox.getSelectionModel().select(tool.name());
         }
-        refreshProjects(app.getProjects());
 
         // behavior
         reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
@@ -152,7 +135,7 @@ class MiningTab extends Tab {
     }
 
     private void selectTool(String text) {
-        String toolName = app.guessTool(text);
+        String toolName = gui.getApp().guessTool(text);
         if (toolName.isEmpty()) {
             toolBox.getSelectionModel().clearSelection();
         }
@@ -208,12 +191,12 @@ class MiningTab extends Tab {
         String logLine = "Initializing DB ...";
         printLogline(logLine);
 
-        app.createBlankDB();
+        gui.getApp().createBlankDB();
 
         logLine = "DB initialized";
         printLogline(logLine);
 
-        refreshProjects(app.getProjects());
+        gui.refreshProjects();
     }
 
     private void printLogline(String logLine) {
@@ -256,8 +239,8 @@ class MiningTab extends Tab {
         long prevTime = System.currentTimeMillis();
 
         ProjectInstance pi;
-        if (tool == null) pi = app.reloadProjectInstance(url, loginResults);
-        else pi = app.loadProjectInstance(url, loginResults, tool);
+        if (tool == null) pi = gui.getApp().reloadProjectInstance(url, loginResults);
+        else pi = gui.getApp().loadProjectInstance(url, loginResults, tool);
 
         double progress = ((order * 2.0) - 1) / (prjNumber * 2);
         logLine = String.format("\"%s\" data mined (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
@@ -266,7 +249,7 @@ class MiningTab extends Tab {
         setProgress(progress);
         prevTime = System.currentTimeMillis();
 
-        app.loadProjectInstance(pi);
+        gui.getApp().loadProjectInstance(pi);
 
         progress = order * 2.0 / (prjNumber * 2);
         logLine = String.format("\"%s\" data loaded (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
@@ -274,10 +257,11 @@ class MiningTab extends Tab {
         setProgress(progress);
         printLogline(logLine);
 
-        refreshProjects(app.getProjects());
+        gui.refreshProjects();
     }
 
-    void refreshProjects(List<String> projects) {
+    @Override
+    public void refreshProjects(List<String> projects) {
         reloadBox.getItems().clear();
         reloadBox.getItems().addAll(projects);
     }
