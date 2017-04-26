@@ -12,6 +12,7 @@ import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
+import org.kohsuke.github.GHIssueState;
 
 import javax.persistence.EntityManager;
 import java.util.*;
@@ -96,6 +97,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
 
         mineWiki();
+
+        addDeletedStatus();
+        assignDefaultEnums();
 
         return pi;
     }
@@ -259,7 +263,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
         try {
             issues = rootObject.getIssueManager().getIssues(redmineProject.getIdentifier(), queryId, Include.values());
-            System.out.println(issues.size());
         } catch (RedmineException e) {
             System.out.println("\tInsufficient permissions for issues");
         }
@@ -299,18 +302,39 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
             mineAllMentionedItems(unit);
 
-            WorkItemChange change = new WorkItemChange();
-            change.setName("ADD");
-            change.setDescription("issue added");
-            change.setChangedItem(unit);
-
-            Configuration creation = new Configuration();
-            creation.setCreated(unit.getCreated());
-            creation.setAuthor(unit.getAuthor());
-            creation.getChanges().add(change);
-
-            pi.getProject().getConfigurations().add(creation);
+            generateCreationConfig(unit);
+            generateClosureConfig(unit, issue.getClosedOn());
         }
+    }
+
+    private void generateClosureConfig(WorkUnit unit, Date closedOn) {
+        WorkItemChange change = new WorkItemChange();
+        change.setName("MODIFY");
+        change.setDescription("issue closed");
+        change.setChangedItem(unit);
+
+        change.getFieldChanges().add(generateFieldChange("status", StatusSuperClass.OPEN.name(), StatusSuperClass.CLOSED.name()));
+
+        Configuration closure = new Configuration();
+        closure.setCreated(closedOn);
+        closure.getChanges().add(change);
+
+        pi.getProject().getConfigurations().add(closure);
+    }
+
+    private void generateCreationConfig(WorkUnit unit) {
+
+        WorkItemChange change = new WorkItemChange();
+        change.setName("ADD");
+        change.setDescription("issue added");
+        change.setChangedItem(unit);
+
+        Configuration creation = new Configuration();
+        creation.setCreated(unit.getCreated());
+        creation.setAuthor(unit.getAuthor());
+        creation.getChanges().add(change);
+
+        pi.getProject().getConfigurations().add(creation);
     }
 
     private void mineRelations(Issue issue, WorkUnit unit) {
@@ -318,10 +342,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         if (issue.getParentId() != null) {
             generateRelation(unit, "child of", issue.getParentId());
         }
-        for (Issue childIssue : issue.getChildren()) {
-            generateRelation(unit, "parent of", childIssue.getId());
-        }
         for (IssueRelation relation : issue.getRelations()) {
+            System.out.println(relation.getIssueId() + " " + relation.getType() + " " + relation.getIssueToId());
             generateRelation(unit, relation.getType(), relation.getIssueToId());
         }
     }

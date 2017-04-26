@@ -84,6 +84,8 @@ public class GitPump extends VCSPump<Repository> {
 
         addWorkItemAuthors();
 
+        assignDefaultEnums();
+
         return pi;
     }
 

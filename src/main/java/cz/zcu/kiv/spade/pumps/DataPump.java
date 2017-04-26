@@ -1,17 +1,10 @@
 package cz.zcu.kiv.spade.pumps;
 
 import cz.zcu.kiv.spade.App;
-import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
-import cz.zcu.kiv.spade.dao.RelationClassificationDAO;
-import cz.zcu.kiv.spade.dao.StatusClassificationDAO;
-import cz.zcu.kiv.spade.dao.ToolInstanceDAO;
-import cz.zcu.kiv.spade.dao.jpa.ProjectInstanceDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.RelationClassificationDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.StatusClassificationDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.ToolInstanceDAO_JPA;
+import cz.zcu.kiv.spade.dao.*;
+import cz.zcu.kiv.spade.dao.jpa.*;
 import cz.zcu.kiv.spade.domain.*;
-import cz.zcu.kiv.spade.domain.enums.RelationClass;
-import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
 import cz.zcu.kiv.spade.pumps.impl.GitPump;
 
@@ -60,6 +53,10 @@ public abstract class DataPump<RootObjectType> {
     private ToolInstanceDAO toolDao;
     private RelationClassificationDAO relationDao;
     protected StatusClassificationDAO statusDao;
+    private PriorityClassificationDAO priorityDao;
+    private SeverityClassificationDAO severityDao;
+    private ResolutionClassificationDAO resolutionDao;
+    private WorkUnitTypeClassificationDAO typeDao;
 
     /**
      * @param projectHandle URL of the project instance
@@ -110,6 +107,10 @@ public abstract class DataPump<RootObjectType> {
         toolDao = new ToolInstanceDAO_JPA(em);
         relationDao = new RelationClassificationDAO_JPA(em);
         statusDao = new StatusClassificationDAO_JPA(em);
+        priorityDao = new PriorityClassificationDAO_JPA(em);
+        severityDao = new SeverityClassificationDAO_JPA(em);
+        resolutionDao = new ResolutionClassificationDAO_JPA(em);
+        typeDao = new WorkUnitTypeClassificationDAO_JPA(em);
 
         piDao.deleteByUrl(projectHandle);
 
@@ -226,7 +227,7 @@ public abstract class DataPump<RootObjectType> {
         }
         Relation newRelation = new Relation(name, relationDao.findByClass(RelationClass.UNASSIGNED));
         pi.getRelations().add(newRelation);
-        return null;
+        return newRelation;
     }
 
     protected  void mineAllMentionedItems(WorkItem item) {
@@ -467,5 +468,109 @@ public abstract class DataPump<RootObjectType> {
      */
     public void close() {
         deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
+    }
+
+    protected void assignDefaultEnums() {
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            assignDefaultPriority(unit);
+            assignDefaultSeverity(unit);
+            assignDefaultStatus(unit);
+            assignDefaultResolution(unit);
+            assignDefaultWuType(unit);
+        }
+    }
+
+    private void assignDefaultPriority(WorkUnit unit) {
+        if (unit.getPriority() == null) {
+            for (Priority priority : pi.getPriorities()) {
+                if (priority.getName().equals("unassigned")) {
+                    unit.setPriority(priority);
+                    return;
+                }
+            }
+        }
+        Priority defaultPriority = new Priority("unassigned", priorityDao.findByClass(PriorityClass.UNASSIGNED));
+        pi.getPriorities().add(defaultPriority);
+        unit.setPriority(defaultPriority);
+    }
+
+    private void assignDefaultSeverity(WorkUnit unit) {
+        if (unit.getSeverity() == null) {
+            for (Severity severity : pi.getSeverities()) {
+                if (severity.getName().equals("unassigned")) {
+                    unit.setSeverity(severity);
+                    break;
+                }
+            }
+        }
+        Severity defaultSeverity = new Severity("unassigned", severityDao.findByClass(SeverityClass.UNASSIGNED));
+        pi.getSeverities().add(defaultSeverity);
+        unit.setSeverity(defaultSeverity);
+    }
+
+    private void assignDefaultStatus(WorkUnit unit) {
+        if (unit.getStatus() == null) {
+            for (Status status : pi.getStatuses()) {
+                if (status.getName().equals("unassigned")) {
+                    unit.setStatus(status);
+                    break;
+                }
+            }
+        }
+        Status defaultStatus = new Status("unassigned", statusDao.findByClass(StatusClass.UNASSIGNED));
+        pi.getStatuses().add(defaultStatus);
+        unit.setStatus(defaultStatus);
+    }
+
+    private void assignDefaultResolution(WorkUnit unit) {
+        if (unit.getStatus().getClassification().getSuperClass().equals(StatusSuperClass.OPEN)) return;
+        if (unit.getResolution() == null) {
+            for (Resolution resolution : pi.getResolutions()) {
+                if (resolution.getName().equals("unassigned")) {
+                    unit.setResolution(resolution);
+                    break;
+                }
+            }
+        }
+        Resolution defaultResolution = new Resolution("unassigned", resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+        pi.getResolutions().add(defaultResolution);
+        unit.setResolution(defaultResolution);
+    }
+
+    private void assignDefaultWuType(WorkUnit unit) {
+        if (unit.getType() == null) {
+            for (WorkUnitType type : pi.getWuTypes()) {
+                if (type.getName().equals("unassigned")) {
+                    unit.setType(type);
+                    break;
+                }
+            }
+        }
+        WorkUnitType defaultType = new WorkUnitType("unassigned", typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
+        pi.getWuTypes().add(defaultType);
+        unit.setType(defaultType);
+    }
+
+    protected void addDeletedStatus() {
+        Status delStatus = new Status("deleted", statusDao.findByClass(StatusClass.DELETED));
+        boolean add = true;
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            if (unit.getUrl() == null) {
+                if (add) {
+                    pi.getStatuses().add(delStatus);
+                    add = false;
+                }
+                unit.setStatus(delStatus);
+            }
+        }
+    }
+
+    protected FieldChange generateFieldChange(String field, String oldValue, String newValue) {
+        FieldChange fChange = new FieldChange();
+        fChange.setName(field);
+        fChange.setOldValue(oldValue);
+        fChange.setNewValue(newValue);
+
+        return fChange;
     }
 }

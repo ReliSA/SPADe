@@ -87,6 +87,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         getTagDescriptions();
 
+        assignDefaultEnums();
+
         return pi;
     }
 
@@ -134,20 +136,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 commit.getRelations().add(relation);
 
                 mineAllMentionedItemsGit(commit);
-            }
-        }
-    }
-
-    private void addDeletedStatus() {
-        Status delStatus = new Status("deleted", statusDao.findByClass(StatusClass.DELETED));
-        boolean add = true;
-        for (WorkUnit unit : pi.getProject().getUnits()) {
-            if (unit.getUrl() == null) {
-                if (add) {
-                    pi.getStatuses().add(delStatus);
-                    add = false;
-                }
-                unit.setStatus(delStatus);
             }
         }
     }
@@ -283,10 +271,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         change.setName("ADD");
         change.setDescription("added");
 
-        if (unit.getDescription() != null)
-            change.getFieldChanges().add(generateFieldChange("description", null, unit.getDescription()));
-        if (unit.getAssignee() != null)
-            change.getFieldChanges().add(generateFieldChange("asignee", null, unit.getAssignee().getName()));
         change.getFieldChanges().add(generateFieldChange("status", null, GHIssueState.OPEN.name()));
 
         Configuration configuration = new Configuration();
@@ -333,15 +317,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         configuration.getChanges().add(change);
 
         return configuration;
-    }
-
-    private FieldChange generateFieldChange(String field, String oldValue, String newValue) {
-        FieldChange fChange = new FieldChange();
-        fChange.setName(field);
-        fChange.setOldValue(oldValue);
-        fChange.setNewValue(newValue);
-
-        return fChange;
     }
 
     private Identity generateIdentity(GHUser user) {
