@@ -349,6 +349,7 @@ public class DBInitializer {
         relations.add(new Relation("depends on", blockedByClass));
 
         relations.add(new Relation("relates to", relatesToClass));
+        relations.add(new Relation("relates", relatesToClass));
         relations.add(new Relation("related", relatesToClass));
         relations.add(new Relation("related to", relatesToClass));
         relations.add(new Relation("mentions", relatesToClass));
