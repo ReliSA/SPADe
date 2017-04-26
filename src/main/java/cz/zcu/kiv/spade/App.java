@@ -8,6 +8,7 @@ import cz.zcu.kiv.spade.dao.jpa.ToolInstanceDAO_JPA;
 import cz.zcu.kiv.spade.dao.jpa.WorkUnitDAO_JPA;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
 import cz.zcu.kiv.spade.output.TimelineFilePrinter;
@@ -142,25 +143,25 @@ public class App {
         return toolName;
     }
 
-    public Collection<String> getEnumsByPrjUrl(String entity, String collection, String url) {
+    public Collection<String> getEnumsByPrjUrl(EnumStrings entity, String url) {
         ProjectInstanceDAO dao = new ProjectInstanceDAO_JPA(updateManager);
 
         if (url == null) return dao.selectEnums(entity);
-        else return dao.selectEnumsByPrjUrl(entity, collection, url);
+        else return dao.selectEnumsByPrjUrl(entity, url);
     }
 
-    public int getUnitCountWithNullEnum(String url, String entity) {
+    public int getUnitCountWithNullEnum(EnumStrings entity, String url) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
 
         if (url == null) return dao.getUnitCountWithNullEnum(entity);
-        else return dao.getUnitCountWithNullEnum(url, entity);
+        else return dao.getUnitCountWithNullEnum(entity, url);
     }
 
-    public int getUnitCountByEnumName(String name, String url, String entity) {
+    public int getUnitCountByEnumName(EnumStrings entity, String url, String name) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
 
-        if (url == null) return dao.getUnitCountByEnumName(name, entity);
-        else return dao.getUnitCountByEnumName(name, url, entity);
+        if (url == null) return dao.getUnitCountByEnumName(entity, name);
+        else return dao.getUnitCountByEnumName(entity, url, name);
     }
 
     public int getUnitCountByPriority(String field, String name, String url) {

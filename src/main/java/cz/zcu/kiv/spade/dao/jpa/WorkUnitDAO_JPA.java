@@ -3,6 +3,7 @@ package cz.zcu.kiv.spade.dao.jpa;
 import cz.zcu.kiv.spade.dao.WorkUnitDAO;
 import cz.zcu.kiv.spade.domain.WorkUnit;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -31,15 +32,13 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     }
 
     @Override
-    public int getUnitCountWithNullEnum(String url, String entity) {
-        String diff = entity;
-        if (entity.equals("WorkUnitType")) diff = "Type";
+    public int getUnitCountWithNullEnum(EnumStrings entity, String url) {
 
         TypedQuery<Long> q = entityManager.createQuery(
                 "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu." + diff.toLowerCase() + " IS NULL"
+                        "AND wu." + entity.getAttributeName() + " IS NULL"
                 , Long.class);
         q.setParameter("url", url);
         int result;
@@ -52,15 +51,13 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     }
 
     @Override
-    public int getUnitCountByEnumName(String value, String url, String entity) {
-        String diff = entity;
-        if (entity.equals("WorkUnitType")) diff = "Type";
+    public int getUnitCountByEnumName(EnumStrings entity, String url, String value) {
 
         TypedQuery<Long> q = entityManager.createQuery(
                 "SELECT COUNT(wu.id) FROM WorkUnit wu, ProjectInstance pi " +
                         "WHERE wu MEMBER pi.project.units " +
                         "AND pi.url = :url " +
-                        "AND wu." + diff.toLowerCase() + ".name = :value"
+                        "AND wu." + entity.getAttributeName() + ".name = :value"
                 , Long.class);
         q.setParameter("url", url);
         q.setParameter("value", value);
@@ -245,13 +242,11 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     }
 
     @Override
-    public int getUnitCountWithNullEnum(String entity) {
-        String diff = entity.toLowerCase();
-        if (diff.equals("workunittype")) diff = "type";
+    public int getUnitCountWithNullEnum(EnumStrings entity) {
 
         TypedQuery<Long> q = entityManager.createQuery(
                 "SELECT COUNT(wu.id) FROM WorkUnit wu " +
-                        "WHERE wu." + diff + " IS NULL"
+                        "WHERE wu." + entity.getAttributeName() + " IS NULL"
                 , Long.class);
         int result;
         try {
@@ -263,13 +258,9 @@ public class WorkUnitDAO_JPA extends GenericDAO_JPA<WorkUnit> implements WorkUni
     }
 
     @Override
-    public int getUnitCountByEnumName(String value, String entity) {
-        String diff = entity.toLowerCase();
-        if (diff.equals("workunittype")) diff = "type";
-
-        TypedQuery<Long> q = entityManager.createQuery(
-                "SELECT COUNT(wu.id) FROM WorkUnit wu " +
-                        "WHERE wu." + diff + ".name = :value"
+    public int getUnitCountByEnumName(EnumStrings entity, String value) {
+        TypedQuery<Long> q = entityManager.createQuery("SELECT COUNT(wu.id) FROM WorkUnit wu " +
+                "WHERE wu." + entity.getAttributeName() + ".name = :value"
                 , Long.class);
         q.setParameter("value", value);
         int result;

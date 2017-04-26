@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.gui;
 
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.gui.utils.Record;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,7 +22,7 @@ import java.util.*;
 class ChartTab extends Tab {
 
     private final PieChart pieChart = new PieChart();
-    private final Map<String, String> enums = new LinkedHashMap<>();
+    private final Map<String, EnumStrings> enums = new LinkedHashMap<>();
     private CategoryAxis xAxis = new CategoryAxis();
     private NumberAxis yAxis = new NumberAxis();
     private final BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
@@ -89,11 +90,12 @@ class ChartTab extends Tab {
         barBtn.setToggleGroup(chartGroup);
 
         refreshProjects(app.getProjects());
-        enums.put("Priority", "priorities");
-        enums.put("Severity", "severities");
-        enums.put("Status", "statuses");
-        enums.put("Resolution", "resolutions");
-        enums.put("WorkUnitType", "wuTypes");
+
+        enums.put("priority", new EnumStrings("Priority", "priority", "priorities"));
+        enums.put("severity", new EnumStrings("Severity", "severity", "severities"));
+        enums.put("status", new EnumStrings("Status", "status", "statuses"));
+        enums.put("resolution", new EnumStrings("Resolution", "resolution", "resolutions"));
+        enums.put("type", new EnumStrings("WorkUnitType", "type", "wuTypes"));
         enumSelect.getItems().addAll(enums.keySet());
         fldSelect.getItems().addAll("name", "class", "superclass");
 
@@ -113,7 +115,7 @@ class ChartTab extends Tab {
         prjSelect.setOnAction(event -> fillChart());
         enumSelect.setOnAction(event -> {
             fillChart();
-            if (getSelected(enumSelect).equals("WorkUnitType")) fldSelect.getItems().remove("superclass");
+            if (getSelected(enumSelect).equals("type")) fldSelect.getItems().remove("superclass");
             else if (fldSelect.getItems().size() == 2) fldSelect.getItems().add("superclass");
         });
         fldSelect.setOnAction(prjSelect.getOnAction());
@@ -160,14 +162,14 @@ class ChartTab extends Tab {
             if (prj.endsWith(App.GIT_SUFFIX)) prj = prj.substring(0, prj.indexOf(App.GIT_SUFFIX));
         }
 
-        pieChart.setTitle("Work units from " + prj + " by " + getSelected(enumSelect) + "." + getSelected(fldSelect));
+        pieChart.setTitle("Work units from " + prj + " by " + getSelected(enumSelect) + " " + getSelected(fldSelect));
         if (nullBox.isSelected()) pieChart.setTitle(pieChart.getTitle() + " including null");
         barChart.setTitle(pieChart.getTitle());
 
         pieChart.getData().clear();
         barChart.getData().clear();
 
-        xAxis.setLabel(getSelected(enumSelect) + "." + getSelected(fldSelect));
+        xAxis.setLabel(enums.get(getSelected(enumSelect)).getClassName() + " " + getSelected(fldSelect));
         yAxis.setLabel("Count");
 
         XYChart.Series<String, Number> series = new XYChart.Series<>();
@@ -211,30 +213,30 @@ class ChartTab extends Tab {
 
         int count;
         if (includeNull) {
-            count = app.getUnitCountWithNullEnum(url, enumer);
+            count = app.getUnitCountWithNullEnum(enums.get(enumer), url);
             data.put("null", count);
         }
         if (column.equals("name")) {
-            for (String name : app.getEnumsByPrjUrl(enumer, enums.get(enumer), url)) {
-                count = app.getUnitCountByEnumName(name, url, enumer);
+            for (String name : app.getEnumsByPrjUrl(enums.get(enumer), url)) {
+                count = app.getUnitCountByEnumName(enums.get(enumer), url, name);
                 data.put(name, count);
             }
         } else {
             switch (enumer) {
-                case "Priority":
-                    data = withPriorities(url, column);
+                case "priority":
+                    data.putAll(withPriorities(url, column));
                     break;
-                case "Status":
-                    data = withStatuses(url, column);
+                case "status":
+                    data.putAll(withStatuses(url, column));
                     break;
-                case "Resolution":
-                    data = withResolutions(url, column);
+                case "resolution":
+                    data.putAll(withResolutions(url, column));
                     break;
-                case "Severity":
-                    data = withSeverities(url, column);
+                case "severity":
+                    data.putAll(withSeverities(url, column));
                     break;
-                case "WorkUnitType":
-                    data = withTypes(url, column);
+                case "type":
+                    data.putAll(withTypes(url, column));
                     break;
             }
         }

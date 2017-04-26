@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.dao.jpa;
 
 import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -73,9 +74,9 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
     }
 
     @Override
-    public Collection<String> selectEnums(String entity) {
+    public Collection<String> selectEnums(EnumStrings entity) {
         Query q = entityManager.createQuery(
-                "SELECT en.name FROM " + entity + " en " +
+                "SELECT en.name FROM " + entity.getClassName() + " en " +
                         "GROUP BY en.name " +
                         "ORDER BY en.classification.id");
         List<String> results = new ArrayList<>();
@@ -90,12 +91,13 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
     }
 
     @Override
-    public Collection<String> selectEnumsByPrjUrl(String entity, String collection, String url) {
+    public Collection<String> selectEnumsByPrjUrl(EnumStrings entity, String url) {
         Query q = entityManager.createQuery(
-                "SELECT en.name FROM " + entity + " en, ProjectInstance pi " +
+                "SELECT en.name FROM " + entity.getClassName() + " en, ProjectInstance pi " +
                         "WHERE pi.url = :url " +
-                        "AND en MEMBER pi." + collection + " " +
-                        "ORDER BY en.classification.id");
+                        "AND en MEMBER pi." + entity.getCollectionName() + " " +
+                        "ORDER BY en.classification.id"
+        );
         q.setParameter("url", url);
         List<String> results = new ArrayList<>();
         try {

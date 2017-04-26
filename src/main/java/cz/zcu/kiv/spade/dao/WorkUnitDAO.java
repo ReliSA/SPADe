@@ -2,14 +2,15 @@ package cz.zcu.kiv.spade.dao;
 
 import cz.zcu.kiv.spade.domain.WorkUnit;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 
 public interface WorkUnitDAO extends GenericDAO<WorkUnit> {
 
     WorkUnit save(WorkUnit wu);
 
-    int getUnitCountWithNullEnum(String url, String entity);
+    int getUnitCountWithNullEnum(EnumStrings entity, String url);
 
-    int getUnitCountByEnumName(String name, String url, String entity);
+    int getUnitCountByEnumName(EnumStrings entity, String url, String name );
 
     int getUnitCountByPriority(PriorityClass value, String url);
 
@@ -29,9 +30,9 @@ public interface WorkUnitDAO extends GenericDAO<WorkUnit> {
 
     int getUnitCountByType(WorkUnitTypeClass value, String url);
 
-    int getUnitCountWithNullEnum(String entity);
+    int getUnitCountWithNullEnum(EnumStrings entity);
 
-    int getUnitCountByEnumName(String name, String entity);
+    int getUnitCountByEnumName(EnumStrings entity, String name);
 
     int getUnitCountByPriority(PriorityClass value);
 

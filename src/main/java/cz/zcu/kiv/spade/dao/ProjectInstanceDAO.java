@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.dao;
 
 import cz.zcu.kiv.spade.domain.ProjectInstance;
+import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,7 +16,7 @@ public interface ProjectInstanceDAO extends GenericDAO<ProjectInstance> {
 
     List<String> selectAllUrls();
 
-    Collection<String> selectEnums(String entity);
+    Collection<String> selectEnums(EnumStrings entity);
 
-    Collection<String> selectEnumsByPrjUrl(String entity, String collection, String url);
+    Collection<String> selectEnumsByPrjUrl(EnumStrings entity, String url);
 }
