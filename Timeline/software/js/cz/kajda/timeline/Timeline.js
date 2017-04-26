@@ -81,7 +81,7 @@ var Timeline = Class("cz.kajda.timeline.Timeline", {
             // max value used for specifying entity priority
             maxDataPriority : 100,
             // default zoom level used when timeline is created
-            defaultZoomLevel: 0,  
+            defaultZoomLevel: 14,
             // index of first zoom level that shows all the items regardless their priority
             safeZoomLevel : 5,
             // default time set as center-moment when timeline is created
