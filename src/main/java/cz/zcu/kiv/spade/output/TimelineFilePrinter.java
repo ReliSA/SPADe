@@ -14,108 +14,94 @@ import java.util.*;
 
 public class TimelineFilePrinter {
 
-    public TimelineFilePrinter() {
-    }
-
     public void print(ProjectInstance pi) throws JSONException {
-        /*
+
         Collection<JSONObject> nodes = new ArrayList<>();
         Collection<JSONObject> edges = new ArrayList<>();
 
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
         int nodesId = 0;
-        int edgesId = 1;
-        Map<Integer, Integer> unitIdMap = new HashMap<>();
+        Map<WorkItem, Integer> itemMap = new HashMap<>();
 
-        for (WorkUnit unit : pi.getProject().getUnits()) {
-            if (unit.getStartDate() == null || unit.getDueDate() == null) continue;
-            JSONObject unitNode = new JSONObject();
-            unitNode.put("id", nodesId);
-            unitNode.put("stereotype", "person");
-            unitNode.put("name", "#" + unit.getNumber() + " " + unit.getName());
-            unitNode.put("description", unit.getDescription());
-            unitNode.put("begin", convertDate(unit.getStartDate()));
-            unitNode.put("end", convertDate(unit.getDueDate()));
-            nodes.add(unitNode);
-            unitIdMap.put(unit.getNumber(), nodesId++);
-        }
-        for (Configuration conf : pi.getProject().getConfigurations()) {
-            JSONObject confNode = new JSONObject();
-            confNode.put("id", nodesId);
-            confNode.put("stereotype", "device");
-            confNode.put("name", conf.getName());
-            confNode.put("description", conf.getDescription());
-            confNode.put("begin", convertDate(conf.getCreated()));
-            nodes.add(confNode);
-            int confId = nodesId++;
+        for (WorkItem item : pi.getProject().getAllItems()) {
+            JSONObject itemNode = new JSONObject();
+            itemNode.put("id", nodesId);
+            itemNode.put("name", item.getName());
+            itemNode.put("description", item.getDescription());
+            if (item.getCreated() != null)
+                itemNode.put("begin", format.format(item.getCreated()));
+            if (item instanceof WorkUnit) {
+                itemNode.put("stereotype", "person");
+                WorkUnit unit = (WorkUnit) item;
+                if (unit.getDueDate() != null)
+                    itemNode.put("end", format.format(unit.getDueDate()));
 
-            for (WorkItemChange change : conf.getChanges()) {
-                WorkItem item = change.getChangedItem();
-                if (item instanceof Artifact) {
-                    if (item.getCreated() == null) continue;
-                    JSONObject artNode = new JSONObject();
-                    artNode.put("id", nodesId);
-                    artNode.put("stereotype", "theory");
-                    artNode.put("name", item.getName());
-                    artNode.put("description", item.getDescription());
-                    artNode.put("begin", convertDate(item.getCreated()));
-                    nodes.add(artNode);
-
-                    JSONObject confArt = new JSONObject();
-                    confArt.put("id", edgesId++);
-                    confArt.put("stereotype", "relationship");
-                    confArt.put("from", confId);
-                    confArt.put("to", nodesId);
-                    confArt.put("name", "changes");
-                    edges.add(confArt);
-
-                    nodesId++;
-                } else {
-                    WorkUnit unit = (WorkUnit) item;
-                    if (!unitIdMap.containsKey(unit.getNumber())) continue;
-                    JSONObject confUnit = new JSONObject();
-                    confUnit.put("id", edgesId++);
-                    confUnit.put("stereotype", "relationship");
-                    confUnit.put("from", confId);
-                    confUnit.put("to", unitIdMap.get(unit.getNumber()));
-                    confUnit.put("name", "changes");
-                    edges.add(confUnit);
+            } else if (item instanceof Commit || item instanceof CommittedConfiguration || item instanceof Configuration) {
+                itemNode.put("stereotype", "device");
+                if (item instanceof Commit || item instanceof  CommittedConfiguration) {
+                    CommittedConfiguration configuration = (CommittedConfiguration) item;
+                    if (configuration.getCommitted() != null)
+                        itemNode.put("end", format.format(configuration.getCommitted()));
                 }
+
+            } else if (item instanceof Artifact) {
+                itemNode.put("stereotype", "theory");
             }
-            for (WorkItemRelation relation : conf.getRelatedItems()) {
-                if (!unitIdMap.containsKey(item.getNumber())) continue;
-                JSONObject ref = new JSONObject();
-                ref.put("id", edgesId++);
-                ref.put("stereotype", "relationship");
-                ref.put("from", confId);
-                ref.put("to", unitIdMap.get(item.getNumber()));
-                ref.put("name", "relates to");
-                edges.add(ref);
+            JSONObject properties = new JSONObject();
+            properties.put("startPrecision", "day");
+            properties.put("endPrecision", "day");
+            itemNode.put("properties", properties);
+            nodes.add(itemNode);
+            itemMap.put(item, nodesId++);
+        }
+
+        int edgesId = 1;
+
+        for (WorkItem item : pi.getProject().getAllItems()) {
+            for (WorkItemRelation relation : item.getRelatedItems()) {
+                JSONObject relNode = new JSONObject();
+                relNode.put("id", edgesId++);
+                relNode.put("stereotype", "relationship");
+                if (relation.getRelation() != null) relNode.put("name", relation.getRelation().getName());
+                else relNode.put("name", "relates to");
+                relNode.put("from", itemMap.get(item));
+                relNode.put("to", itemMap.get(relation.getRelatedItem()));
+                edges.add(relNode);
+            }
+            if (item instanceof Configuration) {
+                Configuration configuration = (Configuration) item;
+                for (WorkItemChange change : configuration.getChanges()) {
+                    WorkItem changedItem = change.getChangedItem();
+                    JSONObject relNode = new JSONObject();
+                    relNode.put("id", edgesId++);
+                    relNode.put("stereotype", "relationship");
+                    relNode.put("name", "changes");
+                    relNode.put("from", itemMap.get(configuration));
+                    relNode.put("to", itemMap.get(changedItem));
+                    edges.add(relNode);
+                }
             }
         }
 
         JSONObject root = new JSONObject();
         root.put("nodes", nodes);
         root.put("edges", edges);
-
+        PrintWriter pw = null;
         try {
-            PrintWriter pw = new PrintWriter(
+             pw = new PrintWriter(
                                 new OutputStreamWriter(
                                 new FileOutputStream("Timeline/software/data/data.js")
-                                , StandardCharsets.UTF_8));
+                                , StandardCharsets.UTF_8), true);
             pw.print("define([],function(){return");
-            pw.print(root);
+            pw.print(root.toString(1));
             pw.print(";});");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            if (pw != null) {
+                pw.close();
+            }
         }
-        System.out.println("define([],function(){return");
-        System.out.println(root);
-        System.out.println(";});");
-        */
-    }
-
-    private String convertDate(Date startDate) {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:SS");
-        return format.format(startDate);
     }
 }
