@@ -36,8 +36,8 @@ public class TimelineTab extends SPADeTab {
 
     @Override
     public void refreshProjects(List<String> projects) {
+        if (projects.isEmpty()) return;
         prjSelect.getItems().clear();
-        prjSelect.getItems().add("ALL");
         prjSelect.getItems().addAll(projects);
         prjSelect.getSelectionModel().selectFirst();
         webEngine.reload();
