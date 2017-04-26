@@ -54,19 +54,19 @@ function($, BandItemRenderer, App, Timeline) {
             },*/
             {
                 id: "person",
-                label: "Lidé",
+                label: "Tickets",
                 itemRenderer: new BandItemRenderer("#FFB182"),
                 color: "#fafafa"
             },
             {
                 id: "device",
-                label: "Zařízení",
+                label: "Configurations",
                 itemRenderer: new BandItemRenderer("#F2BC53"),
                 color: "#f5f5f5"
             },
             {
                 id: "theory",
-                label: "Teorie",
+                label: "Artifacts",
                 itemRenderer: new BandItemRenderer("#78B4FF"),
                 color: "#fafafa"
             }
@@ -93,10 +93,10 @@ function($, BandItemRenderer, App, Timeline) {
         },
         
         locale : {
-            "btnSlideBack" : "vzad",
-            "btnSlideForward" : "vpřed",
-            "btnZoomIn" : "přiblížit (Num +)",
-            "btnZoomOut" : "oddálit (Num -)"
+            "btnSlideBack" : "back",
+            "btnSlideForward" : "forward",
+            "btnZoomIn" : "zoom in (Num +)",
+            "btnZoomOut" : "zoom out (Num -)"
         },
         
         popoverTemplateFactory : {
@@ -129,7 +129,7 @@ function($, BandItemRenderer, App, Timeline) {
                     var death = entity.getEndFormatted();
                     var div = new $("<div class='info'>")
                             .append(new $("<h3>" + entity.getTitle() + "</h3>"))
-                            .append("<p class='description'><div>* " + birth + (death !== null ? "</div><div>&dagger; " + death : "") + 
+                            .append("<p class='description'><div>created: " + birth + (death !== null ? "</div><div>due on: " + death : "") +
                                 "<span class='text-muted'> (" + entity.getDuration().humanize() + ")</span></div></p>");
                         
                     return elm.append(div).append($("<div class='clearfix'>"));

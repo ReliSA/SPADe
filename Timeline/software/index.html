@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Historie počítačů (DoD 2017)</title>
+        <title>SPADe data</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width">
         <meta name="robots" content="noindex">
@@ -27,8 +27,8 @@
           
                 <div role="tabpanel" class="sidebar" id="sidebar">
                     <ul class="nav nav-pills tab-list" role="tablist">
-                        <li role="presentation" class="active"><a role="tab" data-toggle="tab" href="#home">Záznamy</a></li>
-                        <li role="presentation"><a role="tab" data-toggle="tab" href="#widgeting">Rozhraní widgetu</a></li>
+                        <li role="presentation" class="active"><a role="tab" data-toggle="tab" href="#home">Items</a></li>
+                        <li role="presentation"><a role="tab" data-toggle="tab" href="#widgeting">Widget interface</a></li>
                     </ul>
                     <div class="tab-content">
                         <div role="tabpanel" class="tab-pane active" id="home">
@@ -40,7 +40,7 @@
                                     <h1 id="item_title"></h1>
                                     <p class="small" id="item_timerange"></p>
                                     <p class="small" id="item_description"></p>
-                                    <h4>Související</h4>
+                                    <h4>Related items</h4>
                                 </div>
                                 <table id="item_relations" class="table table-condensed small table-striped">
                                 </table>
@@ -48,16 +48,16 @@
                             <div id="item_search">
                                 <div class="row">
                                 <div class="text-center col-xs-8 col-xs-offset-2">
-                                    <p>Zadejte část názvu hledaného záznamu</p>
+                                    <p>Enter part of searched</p>
                                     <input type="search" id="item_search_term" class="form-control input-sm">
-                                    <div class="text-center text-muted padded-top">nebo</div>
-                                    <p class="padded-top text-center">klepněte na některý ze záznamů v ose a zobrazte jeho detail.</p>
+                                    <div class="text-center text-muted padded-top">or</div>
+                                    <p class="padded-top text-center">click on any item in timeline to view its detail.</p>
                                 </div>
                                 </div>
                                 <div class="padded-top">
                                     <table id="item_search_result" class="table table-condensed small table-striped">
                                         <tr>
-                                            <td><em>Žádné nálezy...</em></td>
+                                            <td><em>Nothing found...</em></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -65,68 +65,68 @@
                         </div>
                         <div role="tabpanel" class="tab-pane" id="widgeting">
                             <div class="padded">
-                                <h1>Rozhraní widgetu</h1>
+                                <h1>Widget interface</h1>
                             </div>
                             <table class="table small table-condensed table-striped">
                                 <tr>
-                                    <td><strong>středový čas</strong></td>
+                                    <td><strong>central time</strong></td>
                                     <td class="text-right" id="center_time_td">?</td>
                                 </tr>
                                 <tr>
-                                    <td><strong>rozsah průhledu</strong></td>
+                                    <td><strong>view boundaries</strong></td>
                                     <td class="text-right" id="viewport_range_td">?<div>?</div></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>úroveň přiblížení</strong></td>
+                                    <td><strong>zoom level</strong></td>
                                     <td class="text-right" id="zoom_level_td">?<div>?</div></td>
                                 </tr>
                                 <tr>
-                                    <td><strong>vybraný záznam</strong></td>
-                                    <td class="text-right"><div style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden" id="focused_entity_td"><em>žádný</em></div></td>
+                                    <td><strong>selected item</strong></td>
+                                    <td class="text-right"><div style="white-space: nowrap; text-overflow: ellipsis; overflow: hidden" id="focused_entity_td"><em>none</em></div></td>
                                 </tr>
                             </table>
                             <div class="padded">
                                 <div>
                                     <div class="btn-group btn-group-justified">
-                                        <a class="btn btn-default" id="zoomin_btn">Přiblížit</a>
-                                        <a class="btn btn-default" id="zoomout_btn">Oddálit</a>
+                                        <a class="btn btn-default" id="zoomin_btn">zoom in</a>
+                                        <a class="btn btn-default" id="zoomout_btn">zoom out</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a class="btn btn-default" id="slideLeft_btn">Posun vzad</a>
-                                        <a class="btn btn-default" id="slideRight_btn">Posun vpřed</a>
+                                        <a class="btn btn-default" id="slideLeft_btn">slide back</a>
+                                        <a class="btn btn-default" id="slideRight_btn">slide forward</a>
                                     </div>
                                     <div class="btn-group btn-group-justified">
-                                        <a class="btn btn-default" id="jump_ad_btn">Přejít na počátek letopočtu</a>
+                                        <a class="btn btn-default" id="jump_ad_btn">Go to epoch begining</a>
                                     </div>
                                     <div class="form-group">
                                         <div class="checkbox">
                                             <label for="bandLabels_chb">
-                                                <input type="checkbox" checked id="bandLabels_chb">Zobrazit popisky pásů
+                                                <input type="checkbox" checked id="bandLabels_chb">Show bar labels
                                             </label>
                                         </div>
                                         <div class="checkbox">
                                             <label for="zoombar_chb">
-                                                <input type="checkbox" checked id="zoombar_chb">Zobrazit zoom panel
+                                                <input type="checkbox" checked id="zoombar_chb">Show zoom panel
                                             </label>
                                         </div>
                                         <div class="checkbox">
                                             <label for="timepointer_chb">
-                                                <input type="checkbox" checked id="timepointer_chb">Zobrazit ukazatel středového času
+                                                <input type="checkbox" checked id="timepointer_chb">Show central time pointer
                                             </label>
                                         </div>
                                         <div class="checkbox">
                                             <label for="popover_chb">
-                                                <input type="checkbox" checked id="popover_chb">Zobrazovat náhledy záznamů a vztahů
+                                                <input type="checkbox" checked id="popover_chb">Show item and relation tooltips
                                             </label>
                                         </div>
                                         <div class="checkbox">
                                             <label for="guidelines_chb">
-                                                <input type="checkbox" checked id="guidelines_chb">Zobrazovat vodící linky záznamů
+                                                <input type="checkbox" checked id="guidelines_chb">Show item (vodící) lines
                                             </label>
                                         </div>
                                         <div class="checkbox">
                                             <label for="relations_chb">
-                                                <input type="checkbox" checked id="relations_chb">Zobrazovat vztahy mezi záznamy
+                                                <input type="checkbox" checked id="relations_chb">Show otems relations
                                             </label>
                                         </div>
                                     </div>

@@ -2,7 +2,7 @@ define([
     'moment'
 ], function(moment) {
     
-moment.locale("cs"); 
+moment.locale("en-gb");
 moment.defaultFormat = "YYYY-MM-DDTHH:mm:ss";
     
 moment.Y1BC = moment.utc("0000-01-01 00:00:00.000");

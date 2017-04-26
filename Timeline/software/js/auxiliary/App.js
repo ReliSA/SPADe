@@ -35,7 +35,7 @@ var App = new Class("App", {
     /** @member {Object} relation translations */
     _RELATION_TRANSLATE : {
         "part_of" : "součást",
-        "relationship" : "vztah",
+        "relationship" : "relation",
         "participation" : "účast",
         "takes_place" : "místo konání",
         "creation" : "zapříčinění vzniku",
