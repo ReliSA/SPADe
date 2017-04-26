@@ -523,6 +523,14 @@ public abstract class DataPump<RootObjectType> {
     }
 
     private void assignDefaultResolution(WorkUnit unit) {
+        if (unit.getStatus().getClassification().getaClass().equals(StatusClass.INVALID)) {
+            for (Resolution resolution : pi.getResolutions()) {
+                if (resolution.getClassification().getaClass().equals(ResolutionClass.INVALID)) {
+                    unit.setResolution(resolution);
+                    break;
+                }
+            }
+        }
         if (unit.getStatus().getClassification().getSuperClass().equals(StatusSuperClass.OPEN)) return;
         if (unit.getResolution() == null) {
             for (Resolution resolution : pi.getResolutions()) {

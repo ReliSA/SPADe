@@ -198,6 +198,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         configuration.setAuthor(artifact.getAuthor());
         configuration.getChanges().add(change);
         configuration.getRelatedItems().addAll(artifact.getRelatedItems());
+        pi.getProject().getConfigurations().add(configuration);
 
         return artifact;
     }
@@ -303,7 +304,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             mineAllMentionedItems(unit);
 
             generateCreationConfig(unit);
-            generateClosureConfig(unit, issue.getClosedOn());
+            if (issue.getClosedOn() != null) generateClosureConfig(unit, issue.getClosedOn());
         }
     }
 
@@ -340,17 +341,14 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     private void mineRelations(Issue issue, WorkUnit unit) {
 
         if (issue.getParentId() != null) {
-            generateRelation(unit, "child of", issue.getParentId());
+            WorkUnit parent = pi.getProject().addUnit(new WorkUnit(issue.getParentId()));
+            unit.getRelatedItems().add(new WorkItemRelation(parent, resolveRelation("child of")));
+            parent.getRelatedItems().add(new WorkItemRelation(unit, resolveRelation("parent of")));
         }
         for (IssueRelation relation : issue.getRelations()) {
-            System.out.println(relation.getIssueId() + " " + relation.getType() + " " + relation.getIssueToId());
-            generateRelation(unit, relation.getType(), relation.getIssueToId());
+            WorkUnit related = pi.getProject().addUnit(new WorkUnit(relation.getIssueToId()));
+            unit.getRelatedItems().add(new WorkItemRelation(related, resolveRelation(relation.getType())));
         }
-    }
-
-    private void generateRelation(WorkUnit left, String name, int rightNumber) {
-        WorkUnit right = pi.getProject().addUnit(new WorkUnit(rightNumber));
-        left.getRelatedItems().add(new WorkItemRelation(right, resolveRelation(name)));
     }
 
     private void mineRevisions(WorkUnit unit, Collection<Changeset> changesets) {
@@ -362,8 +360,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             commit.setCommitted(changeset.getCommittedOn());
 
             generateMentionRelation(commit, unit);
-
-            pi.getProject().getConfigurations().add(commit);
         }
     }
 
@@ -424,6 +420,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
             item.getRelatedItems().add(new WorkItemRelation(artifact, resolveRelation("has attached")));
             artifact.getRelatedItems().add(new WorkItemRelation(item, resolveRelation("attached to")));
+
+            pi.getProject().getConfigurations().add(configuration);
         }
     }
 
