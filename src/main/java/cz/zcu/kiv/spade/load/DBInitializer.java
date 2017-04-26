@@ -108,23 +108,11 @@ public class DBInitializer {
         RoleClassification teamMemberClass = dao.findByClass(RoleClass.TEAMMEMBER);
         RoleClassification stakeholderClass = dao.findByClass(RoleClass.STAKEHOLDER);
 
-        roles.add(new Role("analyst", analystClass));
-        roles.add(new Role("bussiness analyst", analystClass));
-
-        roles.add(new Role("designer", designerClass));
-        roles.add(new Role("architect", designerClass));
-        roles.add(new Role("system architect", designerClass));
-        roles.add(new Role("ux designer", designerClass));
-
-        roles.add(new Role("developer", developerClass));
-
-        roles.add(new Role("documenter", documenterClass));
+        roles.add(new Role("non-member", nonmemberClass));
+        roles.add(new Role("anonymous", nonmemberClass));
 
         roles.add(new Role("mentor", mentorClass));
         roles.add(new Role("scrum master", mentorClass));
-
-        roles.add(new Role("non-member", nonmemberClass));
-        roles.add(new Role("anonymous", nonmemberClass));
 
         roles.add(new Role("project manager", projectManagerClass));
         roles.add(new Role("manager", projectManagerClass));
@@ -136,11 +124,6 @@ public class DBInitializer {
         roles.add(new Role("administrator", projectManagerClass));
         roles.add(new Role("tempo project manager", projectManagerClass));
 
-        roles.add(new Role("tester", testerClass));
-
-        roles.add(new Role("team member", teamMemberClass));
-        roles.add(new Role("member", teamMemberClass));
-
         roles.add(new Role("project admin", stakeholderClass));
         roles.add(new Role("stakeholder", stakeholderClass));
         roles.add(new Role("product owner", stakeholderClass));
@@ -150,6 +133,23 @@ public class DBInitializer {
         roles.add(new Role("reporter", stakeholderClass));
         roles.add(new Role("user", stakeholderClass));
         roles.add(new Role("customer", stakeholderClass));
+
+        roles.add(new Role("team member", teamMemberClass));
+        roles.add(new Role("member", teamMemberClass));
+
+        roles.add(new Role("analyst", analystClass));
+        roles.add(new Role("bussiness analyst", analystClass));
+
+        roles.add(new Role("designer", designerClass));
+        roles.add(new Role("architect", designerClass));
+        roles.add(new Role("system architect", designerClass));
+        roles.add(new Role("ux designer", designerClass));
+
+        roles.add(new Role("developer", developerClass));
+
+        roles.add(new Role("tester", testerClass));
+
+        roles.add(new Role("documenter", documenterClass));
 
         return roles;
     }
@@ -270,25 +270,25 @@ public class DBInitializer {
         ResolutionClassification incompleteClass = dao.findByClass(ResolutionClass.INCOMPLETE);
         ResolutionClassification unfinishedClass = dao.findByClass(ResolutionClass.UNFINISHED);
 
-        resolutions.add(new Resolution("invalid", invalidClass));
-
         resolutions.add(new Resolution("duplicate", duplicateClass));
+
+        resolutions.add(new Resolution("invalid", invalidClass));
 
         resolutions.add(new Resolution("won't fix", wontFixClass));
         resolutions.add(new Resolution("won't do", wontFixClass));
+
+        resolutions.add(new Resolution("works as designed", worksAsDesignedClass));
 
         resolutions.add(new Resolution("fixed", fixedClass));
         resolutions.add(new Resolution("done", fixedClass));
         resolutions.add(new Resolution("fixed upstream", fixedClass));
 
-        resolutions.add(new Resolution("works as designed", worksAsDesignedClass));
-
         resolutions.add(new Resolution("finished", finishedClass));
-
-        resolutions.add(new Resolution("works for me", worksForMeClass));
 
         resolutions.add(new Resolution("incomplete", incompleteClass));
         resolutions.add(new Resolution("cannot reproduce", incompleteClass));
+
+        resolutions.add(new Resolution("works for me", worksForMeClass));
 
         resolutions.add(new Resolution("unfinished", unfinishedClass));
 
