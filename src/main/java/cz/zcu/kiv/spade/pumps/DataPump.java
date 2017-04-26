@@ -488,10 +488,10 @@ public abstract class DataPump<RootObjectType> {
                     return;
                 }
             }
+            Priority defaultPriority = new Priority("unassigned", priorityDao.findByClass(PriorityClass.UNASSIGNED));
+            pi.getPriorities().add(defaultPriority);
+            unit.setPriority(defaultPriority);
         }
-        Priority defaultPriority = new Priority("unassigned", priorityDao.findByClass(PriorityClass.UNASSIGNED));
-        pi.getPriorities().add(defaultPriority);
-        unit.setPriority(defaultPriority);
     }
 
     private void assignDefaultSeverity(WorkUnit unit) {
@@ -499,13 +499,13 @@ public abstract class DataPump<RootObjectType> {
             for (Severity severity : pi.getSeverities()) {
                 if (severity.getName().equals("unassigned")) {
                     unit.setSeverity(severity);
-                    break;
+                    return;
                 }
             }
+            Severity defaultSeverity = new Severity("unassigned", severityDao.findByClass(SeverityClass.UNASSIGNED));
+            pi.getSeverities().add(defaultSeverity);
+            unit.setSeverity(defaultSeverity);
         }
-        Severity defaultSeverity = new Severity("unassigned", severityDao.findByClass(SeverityClass.UNASSIGNED));
-        pi.getSeverities().add(defaultSeverity);
-        unit.setSeverity(defaultSeverity);
     }
 
     private void assignDefaultStatus(WorkUnit unit) {
@@ -513,13 +513,13 @@ public abstract class DataPump<RootObjectType> {
             for (Status status : pi.getStatuses()) {
                 if (status.getName().equals("unassigned")) {
                     unit.setStatus(status);
-                    break;
+                    return;
                 }
             }
+            Status defaultStatus = new Status("unassigned", statusDao.findByClass(StatusClass.UNASSIGNED));
+            pi.getStatuses().add(defaultStatus);
+            unit.setStatus(defaultStatus);
         }
-        Status defaultStatus = new Status("unassigned", statusDao.findByClass(StatusClass.UNASSIGNED));
-        pi.getStatuses().add(defaultStatus);
-        unit.setStatus(defaultStatus);
     }
 
     private void assignDefaultResolution(WorkUnit unit) {
@@ -527,7 +527,7 @@ public abstract class DataPump<RootObjectType> {
             for (Resolution resolution : pi.getResolutions()) {
                 if (resolution.getClassification().getaClass().equals(ResolutionClass.INVALID)) {
                     unit.setResolution(resolution);
-                    break;
+                    return;
                 }
             }
         }
@@ -536,13 +536,13 @@ public abstract class DataPump<RootObjectType> {
             for (Resolution resolution : pi.getResolutions()) {
                 if (resolution.getName().equals("unassigned")) {
                     unit.setResolution(resolution);
-                    break;
+                    return;
                 }
             }
+            Resolution defaultResolution = new Resolution("unassigned", resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+            pi.getResolutions().add(defaultResolution);
+            unit.setResolution(defaultResolution);
         }
-        Resolution defaultResolution = new Resolution("unassigned", resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
-        pi.getResolutions().add(defaultResolution);
-        unit.setResolution(defaultResolution);
     }
 
     private void assignDefaultWuType(WorkUnit unit) {
@@ -550,13 +550,13 @@ public abstract class DataPump<RootObjectType> {
             for (WorkUnitType type : pi.getWuTypes()) {
                 if (type.getName().equals("unassigned")) {
                     unit.setType(type);
-                    break;
+                    return;
                 }
             }
+            WorkUnitType defaultType = new WorkUnitType("unassigned", typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
+            pi.getWuTypes().add(defaultType);
+            unit.setType(defaultType);
         }
-        WorkUnitType defaultType = new WorkUnitType("unassigned", typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
-        pi.getWuTypes().add(defaultType);
-        unit.setType(defaultType);
     }
 
     protected void addDeletedStatus() {
