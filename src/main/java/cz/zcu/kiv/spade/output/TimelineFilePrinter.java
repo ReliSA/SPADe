@@ -54,6 +54,12 @@ public class TimelineFilePrinter {
                     if (unit.getAssignee() != null && unit.getAssignee().equals(person)) {
                         if (item.getCreated().before(startDate)) startDate = item.getCreated();
                         if (item.getCreated().after(endDate)) endDate = item.getCreated();
+
+                        if (unit.getStartDate().before(startDate)) startDate = unit.getStartDate();
+                        if (unit.getStartDate().after(endDate)) endDate = unit.getStartDate();
+
+                        if (unit.getDueDate().before(startDate)) startDate = unit.getDueDate();
+                        if (unit.getDueDate().after(endDate)) endDate = unit.getDueDate();
                     }
                 }
             }
