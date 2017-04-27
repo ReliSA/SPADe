@@ -50,7 +50,18 @@ var App = new Class("App", {
         "CAUSEDBY" : "causal: caused by",
         "RESOLVES" : "causal: resolves",
         "RESOLVEDBY" : "causal: resolved by",
-        "CHANGES" : "changes"
+        "ADD" : "added",
+        "MODIFY" : "modified",
+        "LOGTIME" : "spent time on",
+        "DELETE" : "deleted",
+        "MOVE" : "moved",
+        "COPY" : "copied",
+        "MOVE AND MODIFY" : "moved and modified",
+        "COPY AND MODIFY" : "copied and modified",
+        "COMMENT" : "added comment",
+        "FOOTLINE" : "reviewed",
+        "ASSIGNEE" : "responsible for",
+        "AUTHOR" : "created"
     },
     
     
