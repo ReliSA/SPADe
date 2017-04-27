@@ -11,6 +11,7 @@ import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
+import cz.zcu.kiv.spade.output.CocaexFilePrinter;
 import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.impl.GitHubPump;
@@ -92,10 +93,14 @@ public class App {
 
         Loader loader = new Loader(updateManager);
         loader.loadProjectInstance(pi);
+    }
 
-        TimelineFilePrinter printer = new TimelineFilePrinter();
+    public void printProjectInstance(ProjectInstance pi) {
+        TimelineFilePrinter timelinePrinter = new TimelineFilePrinter();
+        CocaexFilePrinter cocaexPrinter = new CocaexFilePrinter();
         try {
-            printer.print(pi);
+            timelinePrinter.print(pi);
+            cocaexPrinter.print(pi);
         } catch (JSONException e) {
             e.printStackTrace();
         }
