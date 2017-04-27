@@ -58,8 +58,10 @@ public class TimelineFilePrinter {
                         if (unit.getStartDate().before(startDate)) startDate = unit.getStartDate();
                         if (unit.getStartDate().after(endDate)) endDate = unit.getStartDate();
 
-                        if (unit.getDueDate().before(startDate)) startDate = unit.getDueDate();
-                        if (unit.getDueDate().after(endDate)) endDate = unit.getDueDate();
+                        if (unit.getDueDate() != null) {
+                            if (unit.getDueDate().before(startDate)) startDate = unit.getDueDate();
+                            if (unit.getDueDate().after(endDate)) endDate = unit.getDueDate();
+                        }
                     }
                 }
             }
@@ -153,6 +155,7 @@ public class TimelineFilePrinter {
 
             for (WorkItemRelation relation : item.getRelatedItems()) {
 
+                if (!nodeMap.containsKey(item) || !nodeMap.containsKey(relation.getRelatedItem())) continue;
                 JSONObject relNode = new JSONObject();
                 relNode.put("id", edgesId++);
                 relNode.put("stereotype", relation.getRelation().getClassification().getaClass().name());
