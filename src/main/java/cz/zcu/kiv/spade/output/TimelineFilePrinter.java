@@ -59,15 +59,15 @@ public class TimelineFilePrinter {
             }
 
             if (startDate.getTime() < Long.MAX_VALUE) {
-                personNode.put("startDate", format.format(startDate));
+                personNode.put("begin", format.format(startDate));
             } else {
-                personNode.put("startDate", format.format(pi.getProject().getStartDate()));
+                personNode.put("begin", format.format(pi.getProject().getStartDate()));
             }
 
             if (endDate.getTime() > Long.MIN_VALUE) {
-                personNode.put("endDate", format.format(endDate));
+                personNode.put("end", format.format(endDate));
             } else {
-                personNode.put("endDate", format.format(new Date()));
+                personNode.put("end", format.format(new Date()));
 
             }
 
