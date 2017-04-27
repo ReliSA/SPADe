@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.output;
 
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,9 +22,64 @@ public class TimelineFilePrinter {
         Collection<JSONObject> nodes = new ArrayList<>();
         Collection<JSONObject> edges = new ArrayList<>();
 
-
         int nodesId = 0;
-        Map<WorkItem, Integer> itemMap = new HashMap<>();
+        Map<NamedEntity, Integer> nodeMap = new HashMap<>();
+
+        for (Person person : pi.getProject().getPeople()) {
+            JSONObject personNode = new JSONObject();
+
+            personNode.put("id", nodesId);
+            personNode.put("name", person.getName());
+            personNode.put("stereotype", "person");
+
+            Date startDate = new Date(Long.MAX_VALUE);
+            Date endDate = new Date(Long.MIN_VALUE);
+
+            for (WorkItem item : pi.getProject().getAllItems()) {
+                if (item.getAuthor() != null && item.getAuthor().equals(person)) {
+                    if (item.getCreated().before(startDate)) startDate = item.getCreated();
+                    if (item.getCreated().after(endDate)) endDate = item.getCreated();
+                }
+                if (item instanceof Commit) {
+                    Commit commit = (Commit) item;
+                    for (ConfigPersonRelation relation : commit.getRelations()) {
+                        if (relation.getPerson().equals(person)) {
+                            if (item.getCreated().before(startDate)) startDate = item.getCreated();
+                            if (item.getCreated().after(endDate)) endDate = item.getCreated();
+                        }
+                    }
+                }
+                if (item instanceof WorkUnit) {
+                    WorkUnit unit = (WorkUnit) item;
+                    if (unit.getAssignee() != null && unit.getAssignee().equals(person)) {
+                        if (item.getCreated().before(startDate)) startDate = item.getCreated();
+                        if (item.getCreated().after(endDate)) endDate = item.getCreated();
+                    }
+                }
+            }
+
+            if (startDate.getTime() < Long.MAX_VALUE) {
+                personNode.put("startDate", format.format(startDate));
+            } else {
+                personNode.put("startDate", format.format(pi.getProject().getStartDate()));
+            }
+
+            if (endDate.getTime() > Long.MIN_VALUE) {
+                personNode.put("endDate", format.format(endDate));
+            } else {
+                personNode.put("endDate", format.format(new Date()));
+
+            }
+
+
+            JSONObject properties = new JSONObject();
+            properties.put("startPrecision", "day");
+            properties.put("endPrecision", "day");
+            personNode.put("properties", properties);
+
+            nodes.add(personNode);
+            nodeMap.put(person, nodesId++);
+        }
 
         for (WorkItem item : pi.getProject().getAllItems()) {
 
@@ -45,33 +101,83 @@ public class TimelineFilePrinter {
             itemNode.put("id", nodesId);
 
             nodes.add(itemNode);
-            itemMap.put(item, nodesId++);
+            nodeMap.put(item, nodesId++);
         }
 
         int edgesId = 1;
 
         for (WorkItem item : pi.getProject().getAllItems()) {
+
+            if (item.getAuthor() != null) {
+                JSONObject authorNode = new JSONObject();
+                authorNode.put("id", edgesId++);
+                authorNode.put("stereotype", "AUTHOR");
+                authorNode.put("name", "authors");
+                authorNode.put("from", nodeMap.get(item.getAuthor()));
+                authorNode.put("to", nodeMap.get(item));
+                edges.add(authorNode);
+            }
+
+
+            if (item instanceof WorkUnit) {
+                WorkUnit unit = (WorkUnit) item;
+                if (unit.getAssignee() != null) {
+                    JSONObject assigneeNode = new JSONObject();
+                    assigneeNode.put("id", edgesId++);
+                    assigneeNode.put("stereotyp", "ASSIGNEE");
+                    assigneeNode.put("name", "responsible for");
+                    assigneeNode.put("from", nodeMap.get(unit.getAssignee()));
+                    assigneeNode.put("to", nodeMap.get(unit));
+                    edges.add(assigneeNode);
+                }
+            }
+
+            if (item instanceof Commit) {
+                Commit commit = (Commit) item;
+                for (ConfigPersonRelation relation : commit.getRelations()) {
+                    JSONObject relNode = new JSONObject();
+                    relNode.put("id", edgesId++);
+                    relNode.put("stereotype", "FOOTLINE");
+                    relNode.put("name", relation.getName());
+                    relNode.put("from", nodeMap.get(relation.getPerson()));
+                    relNode.put("to", nodeMap.get(commit));
+                    edges.add(relNode);
+                }
+            }
+
             for (WorkItemRelation relation : item.getRelatedItems()) {
+
                 JSONObject relNode = new JSONObject();
                 relNode.put("id", edgesId++);
                 relNode.put("stereotype", relation.getRelation().getClassification().getaClass().name());
                 if (relation.getRelation() != null) relNode.put("name", relation.getRelation().getName());
                 else relNode.put("name", relation.getRelation().getName());
-                relNode.put("from", itemMap.get(item));
-                relNode.put("to", itemMap.get(relation.getRelatedItem()));
+                relNode.put("from", nodeMap.get(item));
+                relNode.put("to", nodeMap.get(relation.getRelatedItem()));
                 edges.add(relNode);
             }
+
             if (item instanceof Configuration) {
                 Configuration configuration = (Configuration) item;
                 for (WorkItemChange change : configuration.getChanges()) {
                     WorkItem changedItem = change.getChangedItem();
                     JSONObject relNode = new JSONObject();
                     relNode.put("id", edgesId++);
-                    relNode.put("stereotype", "CHANGES");
-                    relNode.put("name", "changes");
-                    relNode.put("from", itemMap.get(configuration));
-                    relNode.put("to", itemMap.get(changedItem));
+                    relNode.put("stereotype", change.getName());
+                    relNode.put("name", change.getDescription());
+                    relNode.put("from", nodeMap.get(configuration));
+                    relNode.put("to", nodeMap.get(changedItem));
                     edges.add(relNode);
+
+                    if (configuration.getAuthor() == null) continue;
+
+                    JSONObject editorNode = new JSONObject();
+                    editorNode.put("id", edgesId++);
+                    editorNode.put("stereotype", change.getName());
+                    editorNode.put("name", change.getDescription());
+                    editorNode.put("from", nodeMap.get(configuration.getAuthor()));
+                    editorNode.put("to", nodeMap.get(changedItem));
+                    edges.add(editorNode);
                 }
             }
         }
@@ -82,7 +188,7 @@ public class TimelineFilePrinter {
 
         PrintWriter pw = null;
         try {
-             pw = new PrintWriter(
+            pw = new PrintWriter(
                                 new OutputStreamWriter(
                                 new FileOutputStream("Timeline/software/data/" + pi.getName() + "-" + pi.getToolInstance().getTool().name() + ".js")
                                 , StandardCharsets.UTF_8), true);
@@ -102,27 +208,24 @@ public class TimelineFilePrinter {
         JSONObject unitNode = new JSONObject();
 
         String description = "Type: " + unit.getType().getName();
-        if (unit.getAssignee() != null) description = description + "&lt;br /&gt;Assignee: " + unit.getAssignee().getName();
-        else description = description + "&lt;br /&gt;Assignee: ";
-        description = description + "&lt;br /&gt;Estimate: " + Math.round(100.0 * unit.getEstimatedTime()) / 100.0 + " hours";
-        description = description + "&lt;br /&gt;Spent time: " + Math.round(100.0 * unit.getSpentTime()) / 100.0 + " hours";
-        description = description + "&lt;br /&gt;Status: " + unit.getStatus().getName();
-        description = description + "&lt;br /&gt;Progress: " + unit.getProgress() + "%";
-        description = description + "&lt;br /&gt;Priority: " + unit.getPriority().getName();
-        description = description + "&lt;br /&gt;Severity: " + unit.getSeverity().getName();
-        if (unit.getResolution() != null) description = description + "&lt;br /&gt;Resolution: " + unit.getResolution().getName();
-        else description = description + "&lt;br /&gt;Resolution: ";
-        description = description + "&lt;br /&gt;Categories: " + unit.getCategories().toString();
-        description = description + "&lt;br /&gt;Author: " + unit.getAuthor().getName();
-        if (unit.getIteration() != null) description = description + "&lt;br /&gt;Iteration: " + unit.getIteration().getName();
-        else description = description + "&lt;br /&gt;Iteration: ";
-        description = description + "&lt;br /&gt;&lt;br /&gt;Description: " + unit.getDescription();
-        description = description + "&lt;br /&gt;URL: " + unit.getUrl();
+        description = description + "\nEstimate: " + Math.round(100.0 * unit.getEstimatedTime()) / 100.0 + " hours";
+        description = description + "\nSpent time: " + Math.round(100.0 * unit.getSpentTime()) / 100.0 + " hours";
+        description = description + "\nStatus: " + unit.getStatus().getName();
+        description = description + "\nProgress: " + unit.getProgress() + "%";
+        description = description + "\nPriority: " + unit.getPriority().getName();
+        description = description + "\nSeverity: " + unit.getSeverity().getName();
+        description = description + "\nResolution: ";
+        if (unit.getResolution() != null) description = description + unit.getResolution().getName();
+        description = description + "\nCategories: " + unit.getCategories().toString();
+        description = description + "\nIteration: ";
+        if (unit.getIteration() != null) description = description + unit.getIteration().getName();
+        description = description + "\n\nDescription: " + unit.getDescription();
+        description = description + "\nURL: " + unit.getUrl();
 
         unitNode.put("description", description);
         if (unit.getCreated() != null)
             unitNode.put("begin", format.format(unit.getCreated()));
-        unitNode.put("stereotype", "person");
+        unitNode.put("stereotype", "place");
         unitNode.put("name", "#" + unit.getNumber() + " " + unit.getName());
         if (unit.getDueDate() != null)
             unitNode.put("end", format.format(unit.getDueDate()));
@@ -138,12 +241,9 @@ public class TimelineFilePrinter {
     private JSONObject generateArtifactNode(Artifact artifact) throws JSONException {
         JSONObject artifactNode = new JSONObject();
 
-        String description = "";
-        description = description + "&lt;br /&gt;Type: " + artifact.getArtifactClass().name();
-        description = description + "&lt;br /&gt;Mime type: " + artifact.getMimeType();
-        if (artifact.getAuthor() != null) description = description + "&lt;br /&gt;Author: " + artifact.getAuthor().getName();
-        else description = description + "&lt;br /&gt;Author: ";
-        description = description + "&lt;br /&gt;URL: " + artifact.getUrl();
+        String description = "\nType: " + artifact.getArtifactClass().name();
+        description = description + "\nMime type: " + artifact.getMimeType();
+        description = description + "\nURL: " + artifact.getUrl();
 
         artifactNode.put("description", description);
         artifactNode.put("begin", format.format(artifact.getCreated()));
@@ -161,17 +261,15 @@ public class TimelineFilePrinter {
     private JSONObject generateConfigurationNode(Configuration configuration) throws JSONException {
         JSONObject configurationNode = new JSONObject();
 
-        String description = "";
-        description = description + "Author: " + configuration.getAuthor().getName();
-        description = description + "&lt;br /&gt;URL: " + configuration.getUrl();
+        StringBuilder descriptionBuilder = new StringBuilder("\nURL: " + configuration.getUrl());
         for (WorkItemChange change : configuration.getChanges()) {
             for (FieldChange fieldChange : change.getFieldChanges()) {
-                description = description + "&lt;br /&gt;- changed " + fieldChange.getName() + " from " + fieldChange.getOldValue() + " to " + fieldChange.getNewValue();
+                descriptionBuilder.append("\n- changed ").append(fieldChange.getName()).append(" from ").append(fieldChange.getOldValue()).append(" to ").append(fieldChange.getNewValue());
             }
         }
-        description = description + "&lt;br /&gt;&lt;br /&gt;Comment: " + configuration.getDescription();
+        descriptionBuilder.append("\n\nComment: ").append(configuration.getDescription());
 
-        configurationNode.put("description", description);
+        configurationNode.put("description", descriptionBuilder.toString());
         if (configuration.getCreated() != null)
             configurationNode.put("begin", format.format(configuration.getCreated()));
         configurationNode.put("stereotype", "device");
@@ -188,17 +286,15 @@ public class TimelineFilePrinter {
     private JSONObject generateCommitedConfigurationNode(CommittedConfiguration committed) throws JSONException {
         JSONObject committedNode = new JSONObject();
 
-        String description = "";
-        description = description + "Author: " + committed.getAuthor().getName();
-        description = description + "&lt;br /&gt;URL: " + committed.getUrl();
+        StringBuilder descriptionBuilder = new StringBuilder("\nURL: " + committed.getUrl());
         for (WorkItemChange change : committed.getChanges()) {
             for (FieldChange fieldChange : change.getFieldChanges()) {
-                description = description + "&lt;br /&gt;- changed " + fieldChange.getName() + " from " + fieldChange.getOldValue() + " to " + fieldChange.getNewValue();
+                descriptionBuilder.append("\n- changed ").append(fieldChange.getName()).append(" from ").append(fieldChange.getOldValue()).append(" to ").append(fieldChange.getNewValue());
             }
         }
-        description = description + "&lt;br /&gt;&lt;br /&gt;Comment: " + committed.getDescription();
+        descriptionBuilder.append("\n\nComment: ").append(committed.getDescription());
 
-        committedNode.put("description", description);
+        committedNode.put("description", descriptionBuilder.toString());
         committedNode.put("begin", format.format(committed.getCreated()));
         committedNode.put("stereotype", "device");
         committedNode.put("name", committed.getChanges().get(0).getName());
@@ -215,29 +311,21 @@ public class TimelineFilePrinter {
     private JSONObject generateCommitNode(Commit commit) throws JSONException {
         JSONObject commitNode = new JSONObject();
 
-        String description = "";
-        description = description + "Author: " + commit.getAuthor().getName();
-        description = description + "&lt;br /&gt;URL: " + commit.getUrl();
-        description = description + "&lt;br /&gt;Branches: ";
+        StringBuilder descriptionBuilder = new StringBuilder("\nURL: " + commit.getUrl());
+        descriptionBuilder.append("\nBranches: ");
         for (Branch branch : commit.getBranches()) {
-            description = description + branch.getName() + ", ";
-        }
-        description = description + "&lt;br /&gt;Tags: ";
-        for (VCSTag tag : commit.getTags()) {
-            description = description + tag.getName() + ", ";
-        }
-        for (WorkItemChange change : commit.getChanges()) {
-            description = description + "&lt;br /&gt;File: " + change.getChangedItem().getName();
-            description = description + "&lt;br /&gt;--" + change.getDescription();
-            for (FieldChange fieldChange : change.getFieldChanges()) {
-                description = description + "&lt;br /&gt;--- changed " + fieldChange.getName() + " from " + fieldChange.getOldValue() + " to " + fieldChange.getNewValue();
-            }
+            descriptionBuilder.append(branch.getName()).append(", ");
         }
 
-        commitNode.put("description", commit.getDescription());
+        descriptionBuilder.append("\nTags: ");
+        for (VCSTag tag : commit.getTags()) {
+            descriptionBuilder.append(tag.getName()).append(", ");
+        }
+
+        commitNode.put("description", descriptionBuilder.toString());
         commitNode.put("begin", format.format(commit.getCreated()));
         commitNode.put("stereotype", "device");
-        commitNode.put("name", "#" + commit.getIdentifier());
+        commitNode.put("name", commit.getIdentifier());
         commitNode.put("end", format.format(commit.getCommitted()));
 
         JSONObject properties = new JSONObject();
