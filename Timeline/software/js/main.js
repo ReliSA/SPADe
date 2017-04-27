@@ -46,29 +46,29 @@ function($, BandItemRenderer, App, Timeline) {
     var timelineOpts = {
         data : null,
         bands : [
-         /*   {
-                id: "place",
-                label: "Místa",
-                itemRenderer: new BandItemRenderer("#7DD968"),
-                color: "#f5f5f5"
-            },*/
             {
                 id: "person",
-                label: "Tickets",
+                label: "People",
                 itemRenderer: new BandItemRenderer("#FFB182"),
                 color: "#fafafa"
+            },
+            {
+                id: "place",
+                label: "Issues",
+                itemRenderer: new BandItemRenderer("#7DD968"),
+                color: "#f5f5f5"
             },
             {
                 id: "device",
                 label: "Configurations",
                 itemRenderer: new BandItemRenderer("#F2BC53"),
-                color: "#f5f5f5"
+                color: "#fafafa"
             },
             {
                 id: "theory",
                 label: "Artifacts",
                 itemRenderer: new BandItemRenderer("#78B4FF"),
-                color: "#fafafa"
+                color: "#f5f5f5"
             }
         ],
 
@@ -129,7 +129,7 @@ function($, BandItemRenderer, App, Timeline) {
                     var death = entity.getEndFormatted();
                     var div = new $("<div class='info'>")
                             .append(new $("<h3>" + entity.getTitle() + "</h3>"))
-                            .append("<p class='description'><div>created: " + birth + (death !== null ? "</div><div>due on: " + death : "") +
+                            .append("<p class='description'><div>" + birth + (death !== null ? "</div><div>" + death : "") +
                                 "<span class='text-muted'> (" + entity.getDuration().humanize() + ")</span></div></p>");
                         
                     return elm.append(div).append($("<div class='clearfix'>"));
