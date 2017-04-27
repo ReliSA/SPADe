@@ -91,7 +91,7 @@ public class MiningTab extends SPADeTab {
         newBox.setPromptText("Project URL");
         for (Tool tool : Tool.values()) {
             toolBox.getItems().add(tool.name());
-            if (tool.equals(Tool.GIT)) toolBox.getSelectionModel().select(tool.name());
+            if (tool.equals(Tool.REDMINE)) toolBox.getSelectionModel().select(tool.name());
         }
 
         // behavior
@@ -242,7 +242,7 @@ public class MiningTab extends SPADeTab {
         if (tool == null) pi = gui.getApp().reloadProjectInstance(url, loginResults);
         else pi = gui.getApp().loadProjectInstance(url, loginResults, tool);
 
-        double progress = ((order * 2.0) - 1) / (prjNumber * 2);
+        double progress = ((order * 3.0) - 2) / (prjNumber * 3);
         logLine = String.format("\"%s\" data mined (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
 
         printLogline(logLine);
@@ -251,8 +251,17 @@ public class MiningTab extends SPADeTab {
 
         gui.getApp().loadProjectInstance(pi);
 
-        progress = order * 2.0 / (prjNumber * 2);
+        progress = ((order * 3.0) - 1) / (prjNumber * 3);
         logLine = String.format("\"%s\" data loaded (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
+
+        setProgress(progress);
+        printLogline(logLine);
+        prevTime = System.currentTimeMillis();
+
+        gui.getApp().printProjectInstance(pi);
+
+        progress = order * 3.0 / (prjNumber * 3);
+        logLine = String.format("\"%s\" data printed (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
 
         setProgress(progress);
         printLogline(logLine);
