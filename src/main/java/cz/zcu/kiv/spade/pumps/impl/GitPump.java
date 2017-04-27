@@ -314,11 +314,11 @@ public class GitPump extends VCSPump<Repository> {
                 String email = "";
                 if (parts.length > 1) email = parts[1].substring(0, parts[1].length() - 1).trim();
 
-                relation = new ConfigPersonRelation();
-                relation.setPerson(addPerson(generateIdentity(new PersonIdent(name, email))));
-                relation.setName(line.getKey());
+                ConfigPersonRelation relation2 = new ConfigPersonRelation();
+                relation2.setPerson(addPerson(generateIdentity(new PersonIdent(name, email))));
+                relation2.setName(line.getKey());
 
-                relations.add(relation);
+                relations.add(relation2);
             }
         }
         return relations;
