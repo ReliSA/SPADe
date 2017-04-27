@@ -226,6 +226,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
             try {
                 unit.setCreated(issue.getCreatedAt());
+                unit.setStartDate(issue.getCreatedAt());
                 if (issue.getLabels() != null && !issue.getLabels().isEmpty()) {
                     mineLabels(issue.getLabels(), unit);
                 }

@@ -278,7 +278,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             unit.setDescription(issue.getDescription());
             unit.setAuthor(addPerson(generateIdentity(issue.getAuthorId(), issue.getAuthorName())));
             unit.setCreated(issue.getCreatedOn());
-            unit.setStartDate(issue.getStartDate());
+            unit.setStartDate((issue.getStartDate() == null) ? issue.getCreatedOn() : issue.getStartDate());
             unit.setDueDate(issue.getDueDate());
             unit.setAssignee(addPerson(generateIdentity(issue.getAssigneeId(), issue.getAssigneeName())));
             unit.setStatus(resolveStatus(issue.getStatusName()));
