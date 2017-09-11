@@ -26,9 +26,12 @@ import java.util.*;
 
 /**
  * data pump specific for mining Git repositories
+ *
+ * @author Petr Pícha
  */
 public class GitPump extends VCSPump<Repository> {
 
+    /** regular expression for Git commit hash */
     public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
 
     /**
@@ -340,6 +343,11 @@ public class GitPump extends VCSPump<Repository> {
         return branch;
     }
 
+    /**
+     * generates SPADe Identity instance based on Git user data
+     * @param user Git user
+     * @return Identity instance
+     */
     private Identity generateIdentity(PersonIdent user) {
 
         Identity identity = new Identity();

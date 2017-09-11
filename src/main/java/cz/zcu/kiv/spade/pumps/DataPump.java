@@ -15,48 +15,43 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Generic data pump
+ * generic data pump
  */
 public abstract class DataPump<RootObjectType> {
 
-    /**
-     * temporary directory to transfer necessary data into
-     */
+    /** temporary directory to transfer necessary data into */
     protected static final String ROOT_TEMP_DIR = "repos\\";
+    /** regular expression for SVN revision marker */
     private static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
-
-    /**
-     * root object of the project's representation in a tool (repository/project)
-     */
+    
+    /** root object of the project's representation in a tool (repository/project) */
     protected RootObjectType rootObject;
-    /**
-     * URL of the project
-     */
+    /** URL of the project */
     protected String projectHandle;
-    /**
-     * username for authenticated login
-     */
+    /** username for authenticated login */
     protected String username;
-    /**
-     * password for authenticated login
-     */
+    /** password for authenticated login */
     protected String password;
-    /**
-     * private key location for authenticated login
-     */
+    /** private key location for authenticated login */
     protected String privateKeyLoc;
-
+    /** Project Instance to store all the mined data in */
     protected ProjectInstance pi;
-
+    /** ALM tool of mined Project Instance */
     protected Tool tool;
-
+    /** DAO object for handling Tool Instance */
     private ToolInstanceDAO toolDao;
-    private RelationClassificationDAO relationDao;
+    /** DAO object for handling Status Classification instances */
     protected StatusClassificationDAO statusDao;
+    /** DAO object for handling Priority Classification instances */
     private PriorityClassificationDAO priorityDao;
-    private SeverityClassificationDAO severityDao;
+    /** DAO object for handling Relation Classification instances */
+    private RelationClassificationDAO relationDao;
+    /** DAO object for handling Resolution Classification instances */
     private ResolutionClassificationDAO resolutionDao;
+    /** DAO object for handling Work Unit Type Classification instances */
     private WorkUnitTypeClassificationDAO typeDao;
+    /** DAO object for handling Severity Classification instances */
+    private SeverityClassificationDAO severityDao;
 
     /**
      * @param projectHandle URL of the project instance
@@ -122,6 +117,11 @@ public abstract class DataPump<RootObjectType> {
         return pi;
     }
 
+    /**
+     * assigns appropriate Tool Instance to the Project Instance;
+     * checks whether the Tool Instance already exists in the database,
+     * if not it creates it
+     */
     protected void setToolInstance() {
         ToolInstance ti = toolDao.findByToolInstance(getServer(), tool);
         if (ti == null) {
@@ -181,6 +181,10 @@ public abstract class DataPump<RootObjectType> {
         return cut.substring(0, cut.indexOf('/'));
     }
 
+    /**
+     * gets a new comparator instance for comparing Commit instances based on creation and commit dates
+     * @return a new Commit comparator
+     */
     private static Comparator<Configuration> getConfigurationByDateComparator() {
         return new Comparator<Configuration>() {
             @Override
@@ -193,6 +197,12 @@ public abstract class DataPump<RootObjectType> {
                 else return o1.getCreated().compareTo(o2.getCreated());
             }
 
+            /**
+             * compares two Commit instances based on date of creation and commit date
+             * @param o1 first commit
+             * @param o2 second commit
+             * @return comparisson result
+             */
             private int compareCommits(Commit o1, Commit o2) {
 
                 int ret = o1.getCommitted().compareTo(o2.getCommitted());
@@ -202,8 +212,15 @@ public abstract class DataPump<RootObjectType> {
         };
     }
 
+    /**
+     * gets substrings fitting given regular expression in a string
+     * @param text text to look into
+     * @param regex regular expression for searched substrings
+     * @return set of substring fitting the expression
+     */
     private Set<String> mineMentions(String text, String regex) {
         Set<String> mentions = new HashSet<>();
+        if (text == null) return mentions;
 
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(text);
@@ -216,6 +233,12 @@ public abstract class DataPump<RootObjectType> {
         return mentions;
     }
 
+    /**
+     * tries to find a Relation instance used in the Project corresponding with a given string,
+     * and if it fails, creates and adds a new one (with a UNNASSIGNED class)
+     * @param name Relation name
+     * @return found or new Relation instance
+     */
     protected Relation resolveRelation(String name) {
 
         for (Relation relation : pi.getRelations()) {
@@ -230,19 +253,41 @@ public abstract class DataPump<RootObjectType> {
         return newRelation;
     }
 
+    /**
+     * mines all mentions of other Work Items in a given items's description
+     * and links mentioned items to the given one
+     * @param item given Work Item instance
+     */
     protected  void mineAllMentionedItems(WorkItem item) {
         mineAllMentionedItems(item, item.getDescription());
     }
 
+    /**
+     * mines all mentions of Work Items in a given string
+     * and links mentioned items to the given one
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     protected void mineAllMentionedItems(WorkItem item, String text){
         mineMentionedUnits(item, text);
         mineAllMentionedCommits(item, text);
     }
 
+    /**
+     * mines all mentions of other Work Items (possibly to be found in Git ropository data}
+     * in a given items's description and links mentioned items to the given one
+     * @param item given Work Item instance
+     */
     protected  void mineAllMentionedItemsGit(WorkItem item) {
         mineAllMentionedItemsGit(item, item.getDescription());
     }
 
+    /**
+     * mines all mentions of Work Items (possibly to be found in Git ropository data}
+     * in a given string and links mentioned items to the given one
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     protected void mineAllMentionedItemsGit(WorkItem item, String text){
         mineMentionedUnits(item, text);
         mineMentionedGitCommits(item, text);
@@ -261,6 +306,11 @@ public abstract class DataPump<RootObjectType> {
         mineMentionedUnits(item, item.getDescription());
     }*/
 
+    /**
+     * mines all mentions of Work Unit in a given string and links mentioned units to the given Work Item
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     private void mineMentionedUnits(WorkItem item, String text) {
         for (String mention : mineMentions(text, IssueTrackingPump.WU_MENTION_REGEX)) {
             WorkUnit mentioned = pi.getProject().addUnit(new WorkUnit(Integer.parseInt(mention)));
@@ -273,19 +323,41 @@ public abstract class DataPump<RootObjectType> {
         mineMentionedSvnCommits(item, item.getDescription());
     }*/
 
+    /**
+     * mines all mentions of Git or SVN commits in a given string and links mentioned commits to the given Work Item
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     private void mineAllMentionedCommits(WorkItem item, String text) {
         mineMentionedGitCommits(item, text);
         mineMentionedSvnCommits(item, text);
     }
 
+    /**
+     * mines all mentions of Git commits in a given string and links mentioned commits to the given Work Item
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     private void mineMentionedGitCommits(WorkItem item, String text) {
         mineMentionedItemsCommit(item, text, GitPump.GIT_COMMIT_REGEX);
     }
 
+    /**
+     * mines all mentions of SVN commits in a given string and links mentioned commits to the given Work Item
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     */
     private void mineMentionedSvnCommits(WorkItem item, String text) {
         mineMentionedItemsCommit(item, text, SVN_REVISION_REGEX);
     }
 
+    /**
+     * mines all mentions of Git or SVN (base on the given regular expression) commits
+     * in a given string and links mentioned commits to the given Work Item
+     * @param item given Work Item instance
+     * @param text text to search mentions in
+     * @param regex regular expression for mentions to look for
+     */
     private void mineMentionedItemsCommit(WorkItem item, String text, String regex) {
         for (String mention : mineMentions(text, regex)) {
             Commit mentioned = pi.getProject().addCommit(new Commit(mention));
@@ -293,6 +365,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * generaten a Work Item Relation instance between two given Work Items
+     * @param mentioner the item where mentioned was found
+     * @param mentionee mentioned item
+     */
     protected void generateMentionRelation(WorkItem mentioner, WorkItem mentionee) {
         Relation mentionsRelation = resolveRelation("mentions");
         Relation mentionedByRelation = resolveRelation("mentioned by");
@@ -441,6 +518,9 @@ public abstract class DataPump<RootObjectType> {
         else return path;
     }
 
+    /**
+     * adds correct authors to Work Item instances
+     */
     protected void addWorkItemAuthors() {
 
         for (Configuration conf : pi.getProject().getConfigurations()) {
@@ -453,6 +533,11 @@ public abstract class DataPump<RootObjectType> {
 
     }
 
+    /**
+     * transforms the given string leaving only letters converted to lower case if necessary and cutting any other characters
+     * @param anyString string to transform
+     * @return letters only lower case version of the string
+     */
     protected String toLetterOnlyLowerCase(String anyString) {
         StringBuilder compressed = new StringBuilder();
         for (int i = 0; i < anyString.length(); i++) {
@@ -470,6 +555,9 @@ public abstract class DataPump<RootObjectType> {
         deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
     }
 
+    /**
+     * assigns default sets of enumeration values (priorities, severities, statuses, resolutions and Work Unit types) to the Project Instance
+     */
     protected void assignDefaultEnums() {
         for (WorkUnit unit : pi.getProject().getUnits()) {
             assignDefaultPriority(unit);
@@ -480,6 +568,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * assigns a default priority ("unassigned") to the given Work Unit instance;
+     * creates and adds this priority to the Project if necessary
+     * @param unit given Work Unit instance
+     */
     private void assignDefaultPriority(WorkUnit unit) {
         if (unit.getPriority() == null) {
             for (Priority priority : pi.getPriorities()) {
@@ -494,6 +587,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * assigns a default severity ("unassigned") to the given Work Unit instance;
+     * creates and adds this severity to the Project if necessary
+     * @param unit given Work Unit instance
+     */
     private void assignDefaultSeverity(WorkUnit unit) {
         if (unit.getSeverity() == null) {
             for (Severity severity : pi.getSeverities()) {
@@ -508,6 +606,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * assigns a default status ("unassigned") to the given Work Unit instance;
+     * creates and adds this status to the Project if necessary
+     * @param unit given Work Unit instance
+     */
     private void assignDefaultStatus(WorkUnit unit) {
         if (unit.getStatus() == null) {
             for (Status status : pi.getStatuses()) {
@@ -522,6 +625,12 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * assigns a resolution to the given Work Unit instance - "invalid" if the Status class is INVALID,
+     * default ("unassigned") otherwise if Status class is CLOSED;
+     * creates and adds the default resolution to the Project if necessary
+     * @param unit given Work Unit instance
+     */
     private void assignDefaultResolution(WorkUnit unit) {
         if (unit.getStatus().getClassification().getaClass().equals(StatusClass.INVALID)) {
             for (Resolution resolution : pi.getResolutions()) {
@@ -545,6 +654,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * assigns a default Work Unit type ("unassigned") to the given Work Unit instance;
+     * creates and adds this status to the Project if necessary
+     * @param unit given Work Unit instance
+     */
     private void assignDefaultWuType(WorkUnit unit) {
         if (unit.getType() == null) {
             for (WorkUnitType type : pi.getWuTypes()) {
@@ -559,6 +673,11 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * adds a new Status ("deleted") to the Work Units which have apparently been deleted from the project
+     * (a mention of them exist, but URL can't be found); if at least one such unit exists,
+     * it adds the new status to the Project instance as well
+     */
     protected void addDeletedStatus() {
         Status delStatus = new Status("deleted", statusDao.findByClass(StatusClass.DELETED));
         boolean add = true;

@@ -14,6 +14,11 @@ import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * data pump for mining GitHub repositories
+ *
+ * @author Petr Pícha
+ */
 public class GitHubPump extends ComplexPump<GHRepository> {
 
     /**
@@ -92,6 +97,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return pi;
     }
 
+    /**
+     * adds correct URLs to commits mined from Git
+     */
     private void enhanceCommits() {
         for (Configuration configuration : pi.getProject().getConfigurations()) {
             Commit commit = null;
@@ -140,6 +148,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * adds release names and description to SPADe tag descriptions mined from Git
+     */
     private void getTagDescriptions() {
         for (Configuration conf : pi.getProject().getConfigurations()) {
             if (!(conf instanceof Commit)) continue;
@@ -159,6 +170,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * mines milestones and saves each one as Iteration, Phase and Activity
+     * for further analysis
+     * @return collection of Iterations, Phases and Activities
+     */
     public Collection<ProjectSegment> mineIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
         for (GHMilestone milestone : rootObject.listMilestones(GHIssueState.ALL)) {
@@ -205,6 +221,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     @Override
     public void addTags() {}
 
+    /**
+     * mines issues (not pull requests)
+     */
     public void mineTickets() {
 
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
@@ -239,6 +258,12 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * gets a correct Status instance base on name of issue state in GitHub
+     * or null if project doesn't use this status name
+     * @param gitHubName name of the issue state in GitHub
+     * @return Status instance or null
+     */
     private Status resolveStatus(String gitHubName) {
 
         for (Status status : pi.getStatuses()) {
@@ -249,6 +274,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return null;
     }
 
+    /**
+     * mines issue changes (creation, comments and closure)
+     * @param issue GitHub issue
+     * @param unit SPADe Work Unit to link the changes to
+     */
     private void mineChanges(GHIssue issue, WorkUnit unit) {
 
         pi.getProject().getConfigurations().add(generateCreationConfig(unit));
@@ -266,6 +296,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * generates a Configuration representing the creation of a Work Unit (issue)
+     * @param unit Work Unit to link the creation Configuration to
+     * @return creation Configuration
+     */
     private Configuration generateCreationConfig(WorkUnit unit) {
         WorkItemChange change = new WorkItemChange();
         change.setChangedItem(unit);
@@ -282,6 +317,12 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return configuration;
     }
 
+    /**
+     * generates a Configuration representing a comment being added to a Work Unit (issue)
+     * @param unit Work Unit to link the comment Configuration to
+     * @param comment an issue comment form GitHub
+     * @return comment Configuration
+     */
     private Configuration generateCommentConfig(WorkUnit unit, GHIssueComment comment) {
         WorkItemChange change = new WorkItemChange();
         change.setName("COMMENT");
@@ -304,6 +345,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return configuration;
     }
 
+    /**
+     * generates a Configuration representing the closure of a Work Unit (issue)
+     * @param unit Work Unit to link to the closure Configuration
+     * @param closedAt date of closure
+     * @param closedBy a GitHub User who closed the issue
+     * @return closure Configuration
+     */
     private Configuration generateClosureConfig(WorkUnit unit, Date closedAt, GHUser closedBy) {
         WorkItemChange change = new WorkItemChange();
         change.setChangedItem(unit);
@@ -320,6 +368,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return configuration;
     }
 
+    /**
+     * generates SPADe Identity instance based on GitHub user data
+     * @param user GitHub user
+     * @return Identity instance
+     */
     private Identity generateIdentity(GHUser user) {
 
         Identity identity = new Identity();
@@ -350,6 +403,14 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return identity;
     }
 
+    /**
+     * mine labels of a Work Unit (issue);
+     * if they correspond with Work Unit type, resolution, priority or severity
+     * used in the project the method assigns appropriate attributes,
+     * if not in ads the label to Work Unit's categories
+     * @param labels labels of the issue
+     * @param unit Work Unit to resolve the labels for
+     */
     private void mineLabels(Collection<GHLabel> labels, WorkUnit unit) {
         for (GHLabel label : labels) {
             if (!resolveType(unit, label.getName())
@@ -365,6 +426,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * if a label name corresponds with a Work Unit type used in the project
+     * it assigns it to the Work Unit and returns true, otherwise returns false
+     * @param unit Wurk Unit to resolve the type for
+     * @param label a label name
+     * @return true if the type is assigned, else false
+     */
     private boolean resolveType(WorkUnit unit, String label) {
 
         for (WorkUnitType type : pi.getWuTypes()) {
@@ -376,6 +444,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * if a label name corresponds with a Work Unit priority used in the project
+     * it assigns it to the Work Unit and returns true, otherwise returns false
+     * @param unit Wurk Unit to resolve the priority for
+     * @param label a label name
+     * @return true if the priority is assigned, else false
+     */
     private boolean resolvePriority(WorkUnit unit, String label) {
 
         for (Priority priority : pi.getPriorities()) {
@@ -387,6 +462,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * if a label name corresponds with a Work Unit severity used in the project
+     * it assigns it to the Work Unit and returns true, otherwise returns false
+     * @param unit Wurk Unit to resolve the severity for
+     * @param label a label name
+     * @return true if the severity is assigned, else false
+     */
     private boolean resolveSeverity(WorkUnit unit, String label) {
 
         for (Severity severity : pi.getSeverities()) {
@@ -398,6 +480,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * if a label name corresponds with a Work Unit resolution used in the project
+     * it assigns it to the Work Unit and returns true, otherwise returns false
+     * @param unit Wurk Unit to resolve the resolution for
+     * @param label a label name
+     * @return true if the resolution is assigned, else false
+     */
     private boolean resolveResolution(WorkUnit unit, String label) {
 
         for (Resolution resolution : pi.getResolutions()) {
@@ -434,6 +523,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * checks if GitHub label name corresponds with any severity value used in the project
+     * @param label label to check
+     * @return true if label name is severity, else false
+     */
     private boolean isSeverity(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
         for (Severity severity : pi.getSeverities()) {
@@ -446,6 +540,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * checks if GitHub label name corresponds with any priority value used in the project
+     * @param label label to check
+     * @return true if label name is priority, else false
+     */
     private boolean isPriority(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
         for (Priority priority : pi.getPriorities()) {
@@ -458,6 +557,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * checks if GitHub label name corresponds with any resolution value used in the project
+     * @param label label to check
+     * @return true if label name is resolution, else false
+     */
     private boolean isResolution(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
         for (Resolution resolution : pi.getResolutions()) {
@@ -470,6 +574,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * checks if GitHub label name corresponds with any Work Unit type value used in the project
+     * @param label label to check
+     * @return true if label name is Work Unit type, else false
+     */
     private boolean isWUType(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
         for (WorkUnitType type : pi.getWuTypes()) {
@@ -482,6 +591,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
+    /**
+     * mines statuses from GitHub and adds corresponding Statuses to the Project Instance
+     */
     private void mineStatuses() {
         for (GHIssueState state : GHIssueState.values()) {
             if (state == GHIssueState.ALL) continue;
