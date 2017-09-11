@@ -12,6 +12,7 @@ public class SPADeGUI {
     private App app;
     private SPADeTab mineTab, chartTab;
     private TimelineTab timelineTab;
+    //private CocaexTab cocaexTab;
 
     public void showMainWindow(Stage stage) {
         stage.setTitle("SPADe - Software Process Anti-patterns Detector");
@@ -22,9 +23,10 @@ public class SPADeGUI {
         mineTab = new MiningTab(this);
         chartTab = new ChartTab(this);
         timelineTab = new TimelineTab(this);
+        //cocaexTab = new CocaexTab(this);
 
         mineTab.setClosable(false);
-        TabPane tabPane = new TabPane(mineTab, chartTab, timelineTab);
+        TabPane tabPane = new TabPane(mineTab, chartTab, timelineTab/*, cocaexTab*/);
 
         refreshProjects();
 
@@ -39,6 +41,7 @@ public class SPADeGUI {
         mineTab.refreshProjects(app.getProjects());
         chartTab.refreshProjects(app.getProjects());
         timelineTab.refreshProjects(timelineTab.getDataFiles());
+        //cocaexTab.refreshProjects(cocaexTab.getDataFiles());
     }
 
     public App getApp() {
