@@ -5,6 +5,8 @@ import cz.zcu.kiv.spade.domain.abstracts.NamedEntity;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 @Entity
 @Table(name = "person")
@@ -51,5 +53,13 @@ public class Person extends NamedEntity {
 
     public void setRoles(Collection<Role> roles) {
         this.roles = roles;
+    }
+
+    public Set<String> getEmails() {
+        Set<String> emails = new TreeSet<>();
+        for (Identity identity : identities) {
+            emails.add(identity.getEmail());
+        }
+        return emails;
     }
 }
