@@ -10,6 +10,7 @@ import cz.zcu.kiv.spade.pumps.impl.GitPump;
 
 import javax.persistence.EntityManager;
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,9 @@ public abstract class DataPump<RootObjectType> {
     protected static final String ROOT_TEMP_DIR = "repos\\";
     /** regular expression for SVN revision marker */
     private static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
-    
+    /** a format for timestamps */
+    public static final SimpleDateFormat TIME = new SimpleDateFormat("HH:mm:ss.SSSS");
+
     /** root object of the project's representation in a tool (repository/project) */
     protected RootObjectType rootObject;
     /** URL of the project */
@@ -690,5 +693,22 @@ public abstract class DataPump<RootObjectType> {
                 unit.setStatus(delStatus);
             }
         }
+    }
+
+    /**
+     * prints timestamp and a message tothe console
+     * @param message the message to print
+     */
+    protected void printLogMsg(String message) {
+        String timeStamp = getTimeStamp();
+        System.out.println(timeStamp + ": " + message);
+    }
+
+    /**
+     * gets a timestamp in a form of a string
+     * @return the timestamp string
+     */
+    private String getTimeStamp() {
+        return TIME.format(System.currentTimeMillis());
     }
 }
