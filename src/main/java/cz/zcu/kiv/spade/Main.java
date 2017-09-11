@@ -17,8 +17,8 @@ public class Main extends Application {
 
             Map<String, String> loginResults = new TreeMap<>();
             loginResults.put("privateKey", null);
-            loginResults.put("username", "ppicha");
-            loginResults.put("password", "RATMKoRn48");
+            loginResults.put("username", "");
+            loginResults.put("password", "");
 
             App app = new App();
 
