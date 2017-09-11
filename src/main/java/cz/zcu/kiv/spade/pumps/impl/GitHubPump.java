@@ -64,8 +64,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         mineEnums();
         Collection<ProjectSegment> iterations = mineIterations();
+        printLogMsg("milestones mining done");
 
         mineTickets();
+        printLogMsg("tickets mining done");
 
         for (WorkUnit unit : pi.getProject().getUnits()) {
             for (ProjectSegment iteration : iterations) {
@@ -91,6 +93,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         addDeletedStatus();
 
         getTagDescriptions();
+        printLogMsg("tags mining done");
 
         assignDefaultEnums();
 
@@ -242,6 +245,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 iteration.setExternalId(issue.getMilestone().getId() + "");
                 unit.setIteration(iteration);
             }
+        printLogMsg(issues.size() + " issues listed");
 
             try {
                 unit.setCreated(issue.getCreatedAt());
