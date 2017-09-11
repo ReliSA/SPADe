@@ -67,7 +67,7 @@ public class GitPump extends VCSPump<Repository> {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-        printLogMsg("Git repository cloned");
+        App.printLogMsg("Git repository cloned");
         return repo;
     }
 
@@ -106,7 +106,7 @@ public class GitPump extends VCSPump<Repository> {
         int i = 1;
         for (Ref branchRef : branches) {
             Branch branch = generateBranch(branchRef);
-            printLogMsg("started mining branch \"" + branch.getName() + "\" (" + i + "/" + branches.size() + ")");
+            App.printLogMsg("started mining branch \"" + branch.getName() + "\" (" + i + "/" + branches.size() + ")");
             mineCommits(branch);
             i++;
         }
@@ -182,10 +182,10 @@ public class GitPump extends VCSPump<Repository> {
             }
             commit = pi.getProject().addCommit(new Commit(shortSHA));
             commit.getBranches().add(branch);
-            if ((count % 5000) == 0) printLogMsg(count + " commits mined");
+            if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
             count++;
         }
-        printLogMsg((count - 1) + " commits mined");
+        App.printLogMsg((count - 1) + " commits mined");
         revWalk.dispose();
     }
 

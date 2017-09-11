@@ -23,12 +23,15 @@ import org.json.JSONException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public class App {
 
+    /** a format for timestamps */
+    public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSSS");
     public static final String GIT_SUFFIX = ".git";
     private static final String PERSISTENCE_UNIT_CREATE = "create";
     private static final String PERSISTENCE_UNIT_UPDATE = "update";
@@ -264,5 +267,14 @@ public class App {
 
         }
         return result;
+    }
+
+    public static void printLogMsg(String message) {
+        String timeStamp = getTimeStamp();
+        System.out.println(timeStamp + ": " + message);
+    }
+
+    public static String getTimeStamp() {
+        return TIMESTAMP.format(System.currentTimeMillis());
     }
 }

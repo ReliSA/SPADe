@@ -22,24 +22,15 @@ public class Main extends Application {
 
             App app = new App();
 
-            printLogMsg("mining started...");
+            App.printLogMsg("mining started...");
             ProjectInstance pi = app.loadProjectInstance("https://github.com/BVLC/caffe.git", loginResults, "GITHUB");
-            printLogMsg("project instance " + pi.getUrl() + " mined");
+            App.printLogMsg("project instance " + pi.getUrl() + " mined");
             app.printProjectInstance(pi);
-            printLogMsg("project instance " + pi.getUrl() + " printed");
+            App.printLogMsg("project instance " + pi.getUrl() + " printed");
             app.loadProjectInstance(pi);
-            printLogMsg("project instance " + pi.getUrl() + " loaded");
+            App.printLogMsg("project instance " + pi.getUrl() + " loaded");
             app.close();
         }
-    }
-
-    private static void printLogMsg(String message) {
-        String timeStamp = getTimeStamp();
-        System.out.println(timeStamp + ": " + message);
-    }
-
-    private static String getTimeStamp() {
-        return DataPump.TIME.format(System.currentTimeMillis());
     }
 
     public void start(Stage primaryStage) {
