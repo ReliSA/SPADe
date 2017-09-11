@@ -9,7 +9,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
-import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
@@ -81,10 +80,7 @@ public class MiningTab extends SPADeTab {
         btnHBox.setAlignment(Pos.CENTER);
         confirmBtn.requestFocus();
 
-        info.setVisible(false);
-        progBar.setVisible(false);
         progBar.setPrefWidth(800);
-        progInd.setVisible(false);
         progHBox.setAlignment(Pos.CENTER);
 
         // data
@@ -93,6 +89,7 @@ public class MiningTab extends SPADeTab {
             toolBox.getItems().add(tool.name());
             if (tool.equals(Tool.REDMINE)) toolBox.getSelectionModel().select(tool.name());
         }
+        setProgress(-1);
 
         // behavior
         reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
@@ -182,9 +179,6 @@ public class MiningTab extends SPADeTab {
         if (!logArea.getText().isEmpty()) separator = "\n" + separator;
         logArea.setText(logArea.getText() + separator);
         info.setText("");
-        info.setVisible(true);
-        progBar.setVisible(true);
-        progInd.setVisible(true);
     }
 
     private void createDb() {
