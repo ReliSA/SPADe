@@ -9,7 +9,7 @@
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.password" value="pia"/>
             <property name="javax.persistence.jdbc.user" value="pia"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://192.168.67.128:3306/ppicha"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://192.168.209.128:3306/ppicha"/>
 
             <!-- Hibernate-specific configuration -->
             <property name="hibernate.hbm2ddl.auto" value="create"/>
@@ -37,7 +37,7 @@
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.password" value="pia"/>
             <property name="javax.persistence.jdbc.user" value="pia"/>
-            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://192.168.67.128:3306/ppicha"/>
+            <property name="javax.persistence.jdbc.url" value="jdbc:mysql://192.168.209.128:3306/ppicha"/>
 
             <!-- Hibernate-specific configuration -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
