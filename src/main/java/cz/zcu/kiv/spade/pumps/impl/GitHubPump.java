@@ -272,7 +272,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         change.setName("ADD");
         change.setDescription("added");
 
-        change.getFieldChanges().add(generateFieldChange("status", null, GHIssueState.OPEN.name()));
+        change.getFieldChanges().add(new FieldChange("status", null, GHIssueState.OPEN.name()));
 
         Configuration configuration = new Configuration();
         configuration.setAuthor(unit.getAuthor());
@@ -310,7 +310,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         change.setName("MODIFY");
         change.setDescription("closed");
 
-        change.getFieldChanges().add(generateFieldChange("status", GHIssueState.OPEN.name(), GHIssueState.CLOSED.name()));
+        change.getFieldChanges().add(new FieldChange("status", GHIssueState.OPEN.name(), GHIssueState.CLOSED.name()));
 
         Configuration configuration = new Configuration();
         configuration.setAuthor(addPerson(generateIdentity(closedBy)));

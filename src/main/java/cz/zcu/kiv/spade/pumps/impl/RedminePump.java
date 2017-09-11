@@ -12,7 +12,6 @@ import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
-import org.kohsuke.github.GHIssueState;
 
 import javax.persistence.EntityManager;
 import java.util.*;
@@ -314,7 +313,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         change.setDescription("issue closed");
         change.setChangedItem(unit);
 
-        change.getFieldChanges().add(generateFieldChange("status", StatusSuperClass.OPEN.name(), StatusSuperClass.CLOSED.name()));
+        change.getFieldChanges().add(new FieldChange("status", StatusSuperClass.OPEN.name(), StatusSuperClass.CLOSED.name()));
 
         Configuration closure = new Configuration();
         closure.setCreated(closedOn);

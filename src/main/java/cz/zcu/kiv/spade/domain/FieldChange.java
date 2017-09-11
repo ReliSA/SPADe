@@ -17,6 +17,13 @@ public class FieldChange extends NamedEntity {
         super();
     }
 
+    public FieldChange(String name, String oldValue, String newValue) {
+        super();
+        this.name = name;
+        this.oldValue = oldValue;
+        this.newValue = newValue;
+    }
+
     @Column(columnDefinition = "longtext")
     public String getOldValue() {
         return oldValue;

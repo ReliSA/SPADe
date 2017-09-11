@@ -572,13 +572,4 @@ public abstract class DataPump<RootObjectType> {
             }
         }
     }
-
-    protected FieldChange generateFieldChange(String field, String oldValue, String newValue) {
-        FieldChange fChange = new FieldChange();
-        fChange.setName(field);
-        fChange.setOldValue(oldValue);
-        fChange.setNewValue(newValue);
-
-        return fChange;
-    }
 }
