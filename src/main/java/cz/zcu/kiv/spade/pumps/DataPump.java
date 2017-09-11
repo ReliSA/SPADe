@@ -483,7 +483,7 @@ public abstract class DataPump<RootObjectType> {
 
                 } else {
                     for (FieldChange fChange : change.getFieldChanges()) {
-                        if (fChange.getName().equals("url")) {
+                        if (fChange.getName().equals("url") && fChange.getOldValue() != null && artifacts.get(fChange.getOldValue()) != null) {
                             Artifact oldVersion = artifacts.get(fChange.getOldValue());
                             if (!change.getName().equals("DELETE")) {
                                 oldVersion.setUrl(changed.getUrl());
@@ -685,7 +685,7 @@ public abstract class DataPump<RootObjectType> {
         Status delStatus = new Status("deleted", statusDao.findByClass(StatusClass.DELETED));
         boolean add = true;
         for (WorkUnit unit : pi.getProject().getUnits()) {
-            if (unit.getUrl() == null) {
+            if (unit.getUrl().isEmpty()) {
                 if (add) {
                     pi.getStatuses().add(delStatus);
                     add = false;
