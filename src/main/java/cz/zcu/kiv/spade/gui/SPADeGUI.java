@@ -1,10 +1,7 @@
 package cz.zcu.kiv.spade.gui;
 
 import cz.zcu.kiv.spade.App;
-import cz.zcu.kiv.spade.gui.tabs.MiningTab;
-import cz.zcu.kiv.spade.gui.tabs.ChartTab;
-import cz.zcu.kiv.spade.gui.tabs.SPADeTab;
-import cz.zcu.kiv.spade.gui.tabs.TimelineTab;
+import cz.zcu.kiv.spade.gui.tabs.*;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
@@ -13,7 +10,8 @@ import javafx.stage.Stage;
 public class SPADeGUI {
 
     private App app;
-    private SPADeTab mineTab, chartTab, timelineTab;
+    private SPADeTab mineTab, chartTab;
+    private TimelineTab timelineTab;
 
     public void showMainWindow(Stage stage) {
         stage.setTitle("SPADe - Software Process Anti-patterns Detector");
@@ -30,9 +28,7 @@ public class SPADeGUI {
 
         refreshProjects();
 
-        Scene scene = new Scene(tabPane);
-
-        stage.setScene(scene);
+        stage.setScene(new Scene(tabPane));
 
         stage.setOnCloseRequest(event -> app.close());
 
@@ -42,7 +38,6 @@ public class SPADeGUI {
     public void refreshProjects() {
         mineTab.refreshProjects(app.getProjects());
         chartTab.refreshProjects(app.getProjects());
-        timelineTab.refreshProjects(app.getProjects());
     }
 
     public App getApp() {
