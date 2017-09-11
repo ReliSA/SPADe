@@ -1,9 +1,12 @@
 package cz.zcu.kiv.spade.gui.tabs;
 
 import cz.zcu.kiv.spade.gui.SPADeGUI;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.HBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
@@ -26,12 +29,18 @@ public abstract class BrowserTab extends SPADeTab {
         prjSelect = new ComboBox<>();
         WebView browser = new WebView();
         webEngine = browser.getEngine();
+        HBox prjBox = new HBox(10);
+        prjBox.setAlignment(Pos.CENTER_LEFT);
+        prjBox.setPadding(new Insets(0, 0, 0, 5));
 
-        grid.add(new Label("Project: "), 0, 0);
-        grid.add(prjSelect, 1, 0);
-        grid.add(browser, 0, 1, 2, 1);
+        grid.setPadding(new Insets(5, 0, 0, 0));
+        grid.setVgap(5);
 
-        setColumnWidths(200, 1000);
+        prjBox.getChildren().addAll(new Label("Project: "), prjSelect);
+        grid.add(prjBox, 0, 0);
+        grid.add(browser, 0, 1);
+
+        setColumnWidths(1000);
 
         browser.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.F5) webEngine.reload();
@@ -57,12 +66,7 @@ public abstract class BrowserTab extends SPADeTab {
     }
 
     @Override
-    public void refreshProjects(List<String> projects) {
-        if (projects.isEmpty()) return;
-        prjSelect.getItems().clear();
-        prjSelect.getItems().addAll(projects);
-        prjSelect.getSelectionModel().selectFirst();
-    }
+    public abstract void refreshProjects(List<String> projects);
 
     protected abstract void selectProject();
 }
