@@ -38,6 +38,7 @@ public class SPADeGUI {
     public void refreshProjects() {
         mineTab.refreshProjects(app.getProjects());
         chartTab.refreshProjects(app.getProjects());
+        timelineTab.refreshProjects(timelineTab.getDataFiles());
     }
 
     public App getApp() {
