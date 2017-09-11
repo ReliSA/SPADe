@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.pumps.impl;
 
+import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.Category;
@@ -11,7 +12,9 @@ import cz.zcu.kiv.spade.pumps.abstracts.ComplexPump;
 import org.kohsuke.github.*;
 
 import javax.persistence.EntityManager;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -20,6 +23,9 @@ import java.util.*;
  * @author Petr Pícha
  */
 public class GitHubPump extends ComplexPump<GHRepository> {
+
+    /** GitHub instance for getting items. */
+    private GitHub gitHub;
 
     /**
      * @param projectHandle URL of the project instance
@@ -34,12 +40,21 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     protected GHRepository init() {
-        GHRepository repo = null;
-        try {
-            GitHub gitHub = GitHub.connectUsingPassword(username, password);
-            repo = gitHub.getRepository(getProjectFullName());
-        } catch (IOException e) {
-            e.printStackTrace();
+        GHRepository repo;
+        while (true) {
+            try {
+                Thread.sleep(5000);
+                gitHub = GitHub.connectUsingPassword(username, password);
+                GHRateLimit limit = gitHub.getRateLimit();
+                printLogMsg("connected...");
+                System.out.println("\t remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
+                repo = gitHub.getRepository(getProjectFullName());
+                break;
+            } catch (IOException e) {
+                System.out.println("Socket Exception!");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         return repo;
     }
@@ -59,6 +74,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         pi.getProject().setDescription(rootObject.getDescription());
 
         enhanceCommits();
+        mineCommitComments();
 
         new DBInitializer(em).setDefaultEnums(pi);
 
@@ -105,49 +121,102 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private void enhanceCommits() {
         for (Configuration configuration : pi.getProject().getConfigurations()) {
-            Commit commit = null;
             if (configuration instanceof Commit) {
-                commit = (Commit) configuration;
-            }
-            GHCommit ghCommit = null;
-            try {
-                ghCommit = rootObject.getCommit(configuration.getName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (ghCommit != null && commit != null) {
-                commit.setUrl(ghCommit.getHtmlUrl().toString());
-                mineCommitComments(commit, ghCommit);
+                String commitUrlPrefix = projectHandle.substring(0, projectHandle.lastIndexOf(App.GIT_SUFFIX)) + "/commit/";
+                configuration.setUrl(commitUrlPrefix + configuration.getName());
             }
         }
     }
 
-    private void mineCommitComments(Commit commit, GHCommit ghCommit) {
-        for (GHCommitComment comment : ghCommit.listComments()) {
+    /**
+     * mines commit comments
+     */
+    private void mineCommitComments() {
+        List<GHCommitComment> comments = rootObject.listCommitComments().asList();
+        int count = 1;
+        for (GHCommitComment comment : comments) {
+            Commit commit;
             ConfigPersonRelation relation = new ConfigPersonRelation();
-            try {
-                relation.setPerson(addPerson(generateIdentity(comment.getUser())));
-            } catch (IOException e) {
-                e.printStackTrace();
+
+            GHCommit ghCommit = null;
+
+            while (true) {
+                try {
+                    ghCommit = comment.getCommit();
+                    break;
+                } catch (IOException e) {
+                   if (e instanceof FileNotFoundException) break;
+                   else rootObject = init();
+                }
             }
-            if (relation.getPerson() != null) {
+
+            if (ghCommit == null) {
+                count++;
+                continue;
+            }
+
+            GHUser user;
+            while (true) {
+                try {
+                    user = comment.getUser();
+                    break;
+                } catch (IOException e) {
+                     rootObject = init();
+                }
+            }
+            relation.setPerson(addPerson(generateIdentity(user)));
+
+            commit = pi.getProject().getCommit(ghCommit.getSHA1().substring(0, 7));
+
+            if (relation.getPerson() != null && commit != null) {
                 relation.setName("Commented-on-by");
                 relation.setExternalId(comment.getId() + "");
-                String date = "";
-                try {
-                    date = comment.getCreatedAt().toString();
-                } catch (IOException e) {
-                    e.printStackTrace();
+
+                Date date;
+                while(true) {
+                    try {
+                        date = comment.getCreatedAt();
+                        break;
+                    } catch (IOException e) {
+                        rootObject = init();
+                    }
                 }
                 relation.setDescription(comment.getBody() + "\n" +
-                        "Date: " + date +
+                        "Date: " + new SimpleDateFormat("HH:mm:ss.SSSS").format(date) +
                         "File: " + comment.getPath() + "\n" +
                         "Line:" + comment.getLine() + "\n" +
                         "URL: " + comment.getHtmlUrl());
                 commit.getRelations().add(relation);
 
-                mineAllMentionedItemsGit(commit);
+                mineAllMentionedItemsGit(commit, comment.getBody());
+
             }
+            if ((count % 100) == 0) {
+                printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
+                checkRateLimit();
+            }
+            count++;
+            if (count == comments.size()) {
+                printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
+            }
+        }
+    }
+
+    /**
+     * checks current access rate limit for GitHub server
+     */
+    private void checkRateLimit() {
+        GHRateLimit limit;
+        while (true) {
+            try {
+                limit = gitHub.getRateLimit();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
+            }
+        }
+        if (limit != null && limit.remaining < 300) {
+            System.out.println("\t remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
         }
     }
 
@@ -155,19 +224,27 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      * adds release names and description to SPADe tag descriptions mined from Git
      */
     private void getTagDescriptions() {
-        for (Configuration conf : pi.getProject().getConfigurations()) {
-            if (!(conf instanceof Commit)) continue;
-            Commit commit = (Commit) conf;
-            for (VCSTag tag : commit.getTags()) {
-                try {
-                    for (GHRelease release : rootObject.listReleases()) {
-                        if (tag.getName().equals(release.getTagName())) {
-                            tag.setDescription(release.getName() + "\n" + release.getBody());
-                            mineAllMentionedItemsGit(commit, release.getBody());
-                        }
+
+        List<GHRelease> releases;
+        List<GHTag> tags;
+        while (true) {
+            try {
+                releases = rootObject.listReleases().asList();
+                tags = rootObject.listTags().asList();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
+            }
+        }
+
+        for (GHRelease release : releases) {
+            for (GHTag tag : tags) {
+                if (tag.getName().equals(release.getTagName())) {
+                    Commit commit = pi.getProject().getCommit(tag.getCommit().getSHA1().substring(0, 7));
+                    for (VCSTag spadeTag : commit.getTags()) {
+                        spadeTag.setDescription(release.getName() + "\n" + release.getBody());
+                        mineAllMentionedItemsGit(commit, release.getBody());
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }
         }
@@ -186,11 +263,17 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             iteration.setExternalId(milestone.getId() + "");
             iteration.setName(milestone.getTitle());
             iteration.setDescription(milestone.getDescription());
-            try {
-                iteration.setCreated(milestone.getCreatedAt());
-            } catch (IOException e) {
-                e.printStackTrace();
+
+            Date creation;
+            while (true) {
+                try {
+                    creation = milestone.getCreatedAt();
+                    break;
+                } catch (IOException e) {
+                    rootObject = init();
+                }
             }
+            iteration.setCreated(creation);
             iteration.setStartDate(iteration.getCreated());
             iteration.setEndDate(milestone.getDueOn());
 
@@ -228,37 +311,71 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      * mines issues (not pull requests)
      */
     public void mineTickets() {
-
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
-        for (GHIssue issue : issues) {
-            WorkUnit unit = pi.getProject().addUnit(new WorkUnit(issue.getNumber()));
-            unit.setExternalId(issue.getId() + "");
-            unit.setUrl(issue.getHtmlUrl().toString());
-            unit.setName(issue.getTitle());
-            unit.setDescription(issue.getBody());
-            unit.setAuthor(addPerson(generateIdentity(issue.getUser())));
-            unit.setAssignee(addPerson(generateIdentity(issue.getAssignee())));
-            unit.setStatus(resolveStatus(issue.getState().name()));
 
-            if (issue.getMilestone() != null) {
-                Iteration iteration = new Iteration();
-                iteration.setExternalId(issue.getMilestone().getId() + "");
-                unit.setIteration(iteration);
-            }
         printLogMsg(issues.size() + " issues listed");
 
+        int prCount;
+        while (true) {
             try {
-                unit.setCreated(issue.getCreatedAt());
-                unit.setStartDate(issue.getCreatedAt());
-                if (issue.getLabels() != null && !issue.getLabels().isEmpty()) {
-                    mineLabels(issue.getLabels(), unit);
-                }
+                prCount = rootObject.getPullRequests(GHIssueState.ALL).size();
+                break;
             } catch (IOException e) {
-                e.printStackTrace();
+                rootObject = init();
             }
-            mineChanges(issue, unit);
+        }
+        printLogMsg(prCount + " pull requests listed");
 
-            mineAllMentionedItemsGit(unit);
+        int sum = issues.size() - prCount;
+
+        int count = 1;
+        for (GHIssue issue : issues) {
+            if (!issue.isPullRequest()) {
+                WorkUnit unit = pi.getProject().addUnit(new WorkUnit(issue.getNumber()));
+                unit.setExternalId(issue.getId() + "");
+                unit.setUrl(issue.getHtmlUrl().toString());
+                unit.setName(issue.getTitle());
+                unit.setDescription(issue.getBody());
+                unit.setAuthor(addPerson(generateIdentity(issue.getUser())));
+                unit.setAssignee(addPerson(generateIdentity(issue.getAssignee())));
+                unit.setStatus(resolveStatus(issue.getState().name()));
+
+                if (issue.getMilestone() != null) {
+                    Iteration iteration = new Iteration();
+                    iteration.setExternalId(issue.getMilestone().getId() + "");
+                    unit.setIteration(iteration);
+                }
+
+                Date creation;
+                Collection<GHLabel> labels;
+                while (true) {
+                    try {
+                        creation = issue.getCreatedAt();
+                        labels = issue.getLabels();
+                        break;
+                    } catch (IOException e) {
+                        rootObject = init();
+                    }
+                }
+
+                unit.setCreated(creation);
+                unit.setStartDate(creation);
+                if (labels != null && !labels.isEmpty()) {
+                    mineLabels(labels, unit);
+                }
+
+                mineChanges(issue, unit);
+
+                mineAllMentionedItemsGit(unit);
+                if ((count % 100) == 0) {
+                    printLogMsg("mined " + count + "/" + sum + " tickets");
+                    checkRateLimit();
+                }
+                count++;
+                if (count == sum) {
+                    printLogMsg("mined " + count + "/" + sum + " tickets");
+                }
+            }
         }
     }
 
@@ -287,12 +404,17 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         pi.getProject().getConfigurations().add(generateCreationConfig(unit));
 
-        try {
-            for (GHIssueComment comment : issue.getComments()) {
-                pi.getProject().getConfigurations().add(generateCommentConfig(unit, comment));
+        Collection<GHIssueComment> comments;
+        while (true) {
+            try {
+                comments = issue.getComments();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        }
+        for (GHIssueComment comment : comments) {
+            pi.getProject().getConfigurations().add(generateCommentConfig(unit, comment));
         }
 
         if (issue.getClosedBy() != null && issue.getClosedAt() != null) {
@@ -335,12 +457,20 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         Configuration configuration = new Configuration();
         configuration.setDescription(comment.getBody());
-        try {
-            configuration.setAuthor(addPerson(generateIdentity(comment.getUser())));
-            configuration.setCreated(comment.getCreatedAt());
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        GHUser user;
+        Date creation;
+        while (true) {
+            try {
+                user = comment.getUser();
+                creation = comment.getCreatedAt();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
+            }
         }
+        configuration.setAuthor(addPerson(generateIdentity(user)));
+        configuration.setCreated(creation);
         configuration.getChanges().add(change);
 
         mineAllMentionedItemsGit(unit, comment.getBody());
@@ -390,18 +520,26 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         if (user.getLogin() != null && !user.getLogin().isEmpty()) {
             identity.setName(user.getLogin());
         }
-        try {
-            if (user.getName() != null && !user.getName().isEmpty()) {
-                identity.setDescription(user.getName());
+
+        String name, email;
+        while (true) {
+            try {
+                name = user.getName();
+                email = user.getEmail();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
             }
-            if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-                if (identity.getName().isEmpty() || identity.getName().equals("unknown")) {
-                    identity.setName(user.getEmail().split("@")[0]);
-                }
-                identity.setEmail(user.getEmail());
+        }
+
+        if (name != null && !name.isEmpty()) {
+            identity.setDescription(name);
+        }
+        if (email != null && !email.isEmpty()) {
+            if (identity.getName().isEmpty() || identity.getName().equals("unknown")) {
+                identity.setName(email.split("@")[0]);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            identity.setEmail(email);
         }
 
         return identity;
@@ -506,11 +644,14 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     public void mineEnums() {
         mineStatuses();
 
-        List<GHLabel> labels = new ArrayList<>();
-        try {
-            labels = rootObject.listLabels().asList();
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<GHLabel> labels;
+        while (true) {
+            try {
+                labels = rootObject.listLabels().asList();
+                break;
+            } catch (IOException e) {
+                rootObject = init();
+            }
         }
 
         for (GHLabel label : labels) {
