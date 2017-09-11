@@ -13,6 +13,7 @@ import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
 import cz.zcu.kiv.spade.output.CocaexFilePrinter;
 import cz.zcu.kiv.spade.output.TimelineFilePrinter;
+import cz.zcu.kiv.spade.output.CodefacePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.impl.GitHubPump;
 import cz.zcu.kiv.spade.pumps.impl.GitPump;
@@ -104,6 +105,8 @@ public class App {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        CodefacePrinter codefacePrinter = new CodefacePrinter();
+        codefacePrinter.print(pi);
     }
 
     public List<String> getProjects() {

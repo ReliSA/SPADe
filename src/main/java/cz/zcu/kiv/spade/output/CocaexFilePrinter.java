@@ -26,7 +26,11 @@ public class CocaexFilePrinter {
             JSONObject personNode = new JSONObject();
 
             personNode.put("id", nodesId);
-            personNode.put("name", person.getName());
+            personNode.put("name", nodesId);
+            personNode.put("symbolicName", person.getName());
+
+            personNode.put("exportedPackages", new ArrayList<String>());
+            personNode.put("importedPackages", new ArrayList<String>());
 
             nodes.add(personNode);
             nodeMap.put(person, nodesId++);
@@ -50,6 +54,10 @@ public class CocaexFilePrinter {
             }
 
             itemNode.put("id", nodesId);
+            itemNode.put("name", nodesId);
+
+            itemNode.put("exportedPackages", new ArrayList<String>());
+            itemNode.put("importedPackages", new ArrayList<String>());
 
             nodes.add(itemNode);
             nodeMap.put(item, nodesId++);
@@ -63,6 +71,9 @@ public class CocaexFilePrinter {
                 authorNode.put("id", edgesId++);
                 authorNode.put("from", nodeMap.get(item.getAuthor()));
                 authorNode.put("to", nodeMap.get(item));
+                List<String> cons = new ArrayList<>();
+                cons.add("AUTHORS");
+                authorNode.put("packageConnections", cons);
                 edges.add(authorNode);
             }
 
@@ -74,6 +85,9 @@ public class CocaexFilePrinter {
                     assigneeNode.put("id", edgesId++);
                     assigneeNode.put("from", nodeMap.get(unit.getAssignee()));
                     assigneeNode.put("to", nodeMap.get(unit));
+                    List<String> cons = new ArrayList<>();
+                    cons.add("ASSIGNEE");
+                    assigneeNode.put("packageConnections", cons);
                     edges.add(assigneeNode);
                 }
             }
@@ -85,6 +99,9 @@ public class CocaexFilePrinter {
                     relNode.put("id", edgesId++);
                     relNode.put("from", nodeMap.get(relation.getPerson()));
                     relNode.put("to", nodeMap.get(commit));
+                    List<String> cons = new ArrayList<>();
+                    cons.add("FOOTLINE");
+                    relNode.put("packageConnections", cons);
                     edges.add(relNode);
                 }
             }
@@ -95,6 +112,9 @@ public class CocaexFilePrinter {
                 relNode.put("id", edgesId++);
                 relNode.put("from", nodeMap.get(item));
                 relNode.put("to", nodeMap.get(relation.getRelatedItem()));
+                List<String> cons = new ArrayList<>();
+                cons.add(relation.getRelation().getClassification().getaClass().name());
+                relNode.put("packageConnections", cons);
                 edges.add(relNode);
             }
 
@@ -106,6 +126,9 @@ public class CocaexFilePrinter {
                     relNode.put("id", edgesId++);
                     relNode.put("from", nodeMap.get(configuration));
                     relNode.put("to", nodeMap.get(changedItem));
+                    List<String> cons = new ArrayList<>();
+                    cons.add(change.getName());
+                    relNode.put("packageConnections", cons);
                     edges.add(relNode);
 
                     if (configuration.getAuthor() == null) continue;
@@ -114,20 +137,21 @@ public class CocaexFilePrinter {
                     editorNode.put("id", edgesId++);
                     editorNode.put("from", nodeMap.get(configuration.getAuthor()));
                     editorNode.put("to", nodeMap.get(changedItem));
+                    editorNode.put("packageConnections", cons);
                     edges.add(editorNode);
                 }
             }
         }
 
         JSONObject root = new JSONObject();
-        root.put("nodes", nodes);
+        root.put("vertices", nodes);
         root.put("edges", edges);
 
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(
                     new OutputStreamWriter(
-                            new FileOutputStream("cocaex/" + pi.getName() + "-" + pi.getToolInstance().getTool().name() + ".js")
+                            new FileOutputStream("cocaex/" + pi.getName() + "-" + pi.getToolInstance().getTool().name() + ".json")
                             , StandardCharsets.UTF_8), true);
             pw.print(root.toString(1));
         } catch (FileNotFoundException e) {
@@ -141,35 +165,35 @@ public class CocaexFilePrinter {
 
     private JSONObject generateWorkUnitNode(WorkUnit unit) throws JSONException {
         JSONObject unitNode = new JSONObject();
-        unitNode.put("name", "#" + unit.getNumber() + " " + unit.getName());
+        unitNode.put("symbolicName", "#" + unit.getNumber() + " " + unit.getName());
 
         return unitNode;
     }
 
     private JSONObject generateArtifactNode(Artifact artifact) throws JSONException {
         JSONObject artifactNode = new JSONObject();
-        artifactNode.put("name", artifact.getName());
+        artifactNode.put("symbolicName", artifact.getName());
 
         return artifactNode;
     }
 
     private JSONObject generateConfigurationNode(Configuration configuration) throws JSONException {
         JSONObject configurationNode = new JSONObject();
-        configurationNode.put("name", configuration.getChanges().get(0).getName());
+        configurationNode.put("symbolicName", configuration.getChanges().get(0).getName());
 
         return configurationNode;
     }
 
     private JSONObject generateCommitedConfigurationNode(CommittedConfiguration committed) throws JSONException {
         JSONObject committedNode = new JSONObject();
-        committedNode.put("name", committed.getChanges().get(0).getName());
+        committedNode.put("symbolicName", committed.getChanges().get(0).getName());
 
         return committedNode;
     }
 
     private JSONObject generateCommitNode(Commit commit) throws JSONException {
         JSONObject commitNode = new JSONObject();
-        commitNode.put("name", commit.getIdentifier());
+        commitNode.put("symbolicName", commit.getIdentifier());
 
         return commitNode;
     }
