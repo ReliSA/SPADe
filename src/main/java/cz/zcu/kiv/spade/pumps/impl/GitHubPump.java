@@ -106,11 +106,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
 
-        addDeletedStatus();
-
         getTagDescriptions();
         App.printLogMsg("tags mining done");
 
+        addDeletedStatus();
         assignDefaultEnums();
 
         return pi;
