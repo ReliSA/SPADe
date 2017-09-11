@@ -55,6 +55,7 @@ public class Person extends NamedEntity {
         this.roles = roles;
     }
 
+    @Transient
     public Set<String> getEmails() {
         Set<String> emails = new TreeSet<>();
         for (Identity identity : identities) {
