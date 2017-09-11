@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.output;
 
+import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
@@ -124,11 +125,15 @@ public class CodefacePrinter {
     }
 
     public void print(List<CodefaceBean> beans, String name) {
+        ColumnPositionMappingStrategy<CodefaceBean> strategy = new ColumnPositionMappingStrategy<>();
+        strategy.setColumnMapping("externalId", "url", "issueType", "title", "creationDate", "createdBy",
+                "priority", "severity", "version", "startDate", "dueDate", "assignedTo", "estimateTime", "spentTime",
+                "progress", "status", "resolution", "category", "commits", "description");
 
         try {
             Writer writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), StandardCharsets.UTF_8);
             StatefulBeanToCsvBuilder<CodefaceBean> builder = new StatefulBeanToCsvBuilder<CodefaceBean>(writer)
-                    .withSeparator(',').withQuotechar('"').withEscapechar('"');
+                    .withSeparator(',').withQuotechar('"').withEscapechar('"').withMappingStrategy(strategy);
             StatefulBeanToCsv<CodefaceBean> beanToCsv = builder.build();
 
             beanToCsv.write(beans);
