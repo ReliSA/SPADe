@@ -23,16 +23,26 @@ import org.json.JSONException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.*;
 
 public class App {
 
     /** a format for timestamps */
     public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSSS");
     public static final String GIT_SUFFIX = ".git";
+    /** regular expression for Git commit hash */
+    public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
+    /** temporary directory to transfer necessary data into */
+    public static final String ROOT_TEMP_DIR = "repos\\";
+    /** regular expression for SVN revision marker */
+    public static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
+
     private static final String PERSISTENCE_UNIT_CREATE = "create";
     private static final String PERSISTENCE_UNIT_UPDATE = "update";
     private static final String GITHUB_PREFIX = "https://github.com/";

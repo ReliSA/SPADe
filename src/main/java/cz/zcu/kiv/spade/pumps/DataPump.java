@@ -6,11 +6,9 @@ import cz.zcu.kiv.spade.dao.jpa.*;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
-import cz.zcu.kiv.spade.pumps.impl.GitPump;
 
 import javax.persistence.EntityManager;
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,11 +17,6 @@ import java.util.regex.Pattern;
  * generic data pump
  */
 public abstract class DataPump<RootObjectType> {
-
-    /** temporary directory to transfer necessary data into */
-    protected static final String ROOT_TEMP_DIR = "repos\\";
-    /** regular expression for SVN revision marker */
-    private static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
 
     /** root object of the project's representation in a tool (repository/project) */
     protected RootObjectType rootObject;
@@ -340,7 +333,7 @@ public abstract class DataPump<RootObjectType> {
      * @param text text to search mentions in
      */
     private void mineMentionedGitCommits(WorkItem item, String text) {
-        mineMentionedItemsCommit(item, text, GitPump.GIT_COMMIT_REGEX);
+        mineMentionedItemsCommit(item, text, App.GIT_COMMIT_REGEX);
     }
 
     /**
@@ -349,7 +342,7 @@ public abstract class DataPump<RootObjectType> {
      * @param text text to search mentions in
      */
     private void mineMentionedSvnCommits(WorkItem item, String text) {
-        mineMentionedItemsCommit(item, text, SVN_REVISION_REGEX);
+        mineMentionedItemsCommit(item, text, App.SVN_REVISION_REGEX);
     }
 
     /**
@@ -553,7 +546,7 @@ public abstract class DataPump<RootObjectType> {
      * performs the steps necessary to successfully close the instance in a clean way
      */
     public void close() {
-        deleteTempDir(new File(DataPump.ROOT_TEMP_DIR));
+        deleteTempDir(new File(App.ROOT_TEMP_DIR));
     }
 
     /**

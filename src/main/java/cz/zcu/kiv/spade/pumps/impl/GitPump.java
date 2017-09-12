@@ -31,9 +31,6 @@ import java.util.*;
  */
 public class GitPump extends VCSPump<Repository> {
 
-    /** regular expression for Git commit hash */
-    public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
-
     /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
@@ -49,7 +46,7 @@ public class GitPump extends VCSPump<Repository> {
     protected Repository init() {
         Repository repo = null;
 
-        File file = new File(ROOT_TEMP_DIR + getProjectDir());
+        File file = new File(App.ROOT_TEMP_DIR + getProjectDir());
 
         CloneCommand cloneCommand = Git.cloneRepository()
                 .setBare(true)

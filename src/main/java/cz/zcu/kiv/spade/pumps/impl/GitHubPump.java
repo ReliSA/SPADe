@@ -14,7 +14,6 @@ import org.kohsuke.github.*;
 import javax.persistence.EntityManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
