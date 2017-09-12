@@ -4,7 +4,11 @@ import cz.zcu.kiv.spade.gui.SPADeGUI;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
 public class Main extends Application {
@@ -13,13 +17,22 @@ public class Main extends Application {
         if (args.length > 0) launch(args);
         else {
 
+            Properties props = new Properties();
+            try {
+                props.load(new InputStreamReader(new FileInputStream("login.properties"), "UTF8"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             Map<String, String> loginResults = new TreeMap<>();
-            loginResults.put("privateKey", null);
-            loginResults.put("username", "ppicha");
-            loginResults.put("password", "RATMKoRn48");
+            for (String key : props.stringPropertyNames()) {
+                loginResults.put(key, props.getProperty(key));
+            }
 
             App app = new App();
-            app.processProjectInstance("https://github.com/BVLC/caffe.git", loginResults, "GITHUB");
+            //app.createBlankDB();
+            app.processProjectInstance(loginResults.get("url"), loginResults, loginResults.get("tool"));
+            System.exit(0);
         }
     }
 
