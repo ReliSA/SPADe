@@ -35,12 +35,10 @@ public class CodefacePrinter {
             if (wu.getCreated() != null) bean.setCreationDate(format.format(wu.getCreated()));
 
             StringBuilder author = new StringBuilder();
-            int i = 1;
             if (wu.getAuthor() != null) {
                 for (String email : wu.getAuthor().getEmails()) {
+                    if (!author.toString().isEmpty()) author.append("@@");
                     author.append(email);
-                    if (i < wu.getAuthor().getEmails().size()) author.append("@@");
-                    i++;
                 }
             }
 
@@ -52,12 +50,11 @@ public class CodefacePrinter {
             if (wu.getDueDate() != null) bean.setDueDate(format.format(wu.getDueDate()));
 
             StringBuilder asignee = new StringBuilder();
-            i = 1;
             if (wu.getAssignee() != null) {
                 for (String email : wu.getAssignee().getEmails()) {
+                    if (email.equals("unknown")) continue;
+                    if (!asignee.toString().isEmpty()) asignee.append("@@");
                     asignee.append(email);
-                    if (i < wu.getAssignee().getEmails().size()) asignee.append("@@");
-                    i++;
                 }
             }
 
@@ -69,23 +66,19 @@ public class CodefacePrinter {
             if (wu.getResolution() != null) bean.setResolution(wu.getResolution().getName());
 
             StringBuilder categories = new StringBuilder();
-            i = 1;
             for (Category category : wu.getCategories()) {
+                if (!categories.toString().isEmpty()) categories.append(";");
                 categories.append(category.getName());
-                if (i < wu.getCategories().size()) categories.append(";");
-                i++;
             }
 
             bean.setCategory(categories.toString());
 
             StringBuilder related = new StringBuilder();
-            i = 1;
             for (WorkItemRelation wir : wu.getRelatedItems()) {
                 if (wir.getRelatedItem() instanceof Commit) {
-                    if (i > 1) related.append(";");
+                    if (!related.toString().isEmpty()) related.append(";");
                     related.append(((Commit) wir.getRelatedItem()).getIdentifier());
                 }
-                i++;
             }
 
             bean.setCommits(related.toString());
@@ -107,11 +100,9 @@ public class CodefacePrinter {
                     bean.setCreationDate(format.format(con.getCreated()));
 
                     StringBuilder author = new StringBuilder();
-                    int i = 1;
                     for (String email : con.getAuthor().getEmails()) {
+                        if (!author.toString().isEmpty()) author.append("@@");
                         author.append(email);
-                        if (i < con.getAuthor().getEmails().size()) author.append("@@");
-                        i++;
                     }
 
                     bean.setCreatedBy(author.toString());
