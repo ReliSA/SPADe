@@ -27,6 +27,7 @@ public class Main extends Application {
             Map<String, String> loginResults = new TreeMap<>();
             for (String key : props.stringPropertyNames()) {
                 loginResults.put(key, props.getProperty(key));
+                if (props.getProperty(key).isEmpty()) loginResults.put(key, null);
             }
 
             App app = new App();
