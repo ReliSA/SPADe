@@ -12,8 +12,8 @@ import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
 import cz.zcu.kiv.spade.output.CocaexFilePrinter;
-import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.output.CodefacePrinter;
+import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.impl.GitHubPump;
 import cz.zcu.kiv.spade.pumps.impl.GitPump;
@@ -26,9 +26,6 @@ import javax.persistence.Persistence;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.*;
 
 public class App {
@@ -47,24 +44,53 @@ public class App {
     private static final String PERSISTENCE_UNIT_UPDATE = "update";
     private static final String GITHUB_PREFIX = "https://github.com/";
 
+    public static PrintStream log;
     private EntityManager updateManager;
     private EntityManager createManager;
 
     public App() {
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
         this.updateManager = factory.createEntityManager();
+        log = System.out;
+    }
+
+    public App(PrintStream logOutput) {
+        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
+        this.updateManager = factory.createEntityManager();
+        log = logOutput;
     }
 
     public void createBlankDB() {
+        printLogMsg("Initializing DB ...");
+
         if (createManager == null || !createManager.isOpen()) {
             EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_CREATE);
             createManager = factory.createEntityManager();
         }
 
         new DBInitializer(createManager).initializeDatabase();
+
+        printLogMsg("DB initialized");
+
+        this.close();
     }
 
-    public ProjectInstance loadProjectInstance(String url, Map<String, String> loginResults, String toolName) {
+    private void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
+        printLogMsg("mining of " + url + " started...");
+
+        ProjectInstance pi;
+        if (toolName == null) pi = this.remineProjectInstance(url, loginResults);
+        else pi = this.mineProjectInstance(url, loginResults, toolName);
+        printLogMsg("project instance " + pi.getUrl() + " mined");
+
+        this.printProjectInstance(pi);
+        printLogMsg("project instance " + pi.getUrl() + " printed");
+
+        this.loadProjectInstance(pi);
+        printLogMsg("project instance " + pi.getUrl() + " loaded");
+    }
+
+    private ProjectInstance mineProjectInstance(String url, Map<String, String> loginResults, String toolName) {
 
         Tool tool = Tool.valueOf(toolName);
 
@@ -99,17 +125,16 @@ public class App {
                 pump.close();
             }
         }
-
+        
         return pi;
     }
 
-    public void loadProjectInstance(ProjectInstance pi) {
-
+    private void loadProjectInstance(ProjectInstance pi) {
         Loader loader = new Loader(updateManager);
         loader.loadProjectInstance(pi);
     }
 
-    public void printProjectInstance(ProjectInstance pi) {
+    private void printProjectInstance(ProjectInstance pi) {
         TimelineFilePrinter timelinePrinter = new TimelineFilePrinter();
         CocaexFilePrinter cocaexPrinter = new CocaexFilePrinter();
         try {
@@ -128,10 +153,10 @@ public class App {
         return dao.selectAllUrls();
     }
 
-    public ProjectInstance reloadProjectInstance(String url, Map<String, String> loginResults) {
+    private ProjectInstance remineProjectInstance(String url, Map<String, String> loginResults) {
         ToolInstanceDAO dao = new ToolInstanceDAO_JPA(updateManager);
         Tool tool = dao.findToolByProjectInstanceUrl(url);
-        return loadProjectInstance(url, loginResults, tool.name());
+        return mineProjectInstance(url, loginResults, tool.name());
     }
 
     public void close() {
@@ -280,11 +305,45 @@ public class App {
     }
 
     public static void printLogMsg(String message) {
-        String timeStamp = getTimeStamp();
-        System.out.println(timeStamp + ": " + message);
+        log.println(getTimeStamp() + ": " + message);
     }
 
-    public static String getTimeStamp() {
+    private static String getTimeStamp() {
         return TIMESTAMP.format(System.currentTimeMillis());
+    }
+
+    public void mineFromFile(String tool) {
+        List<String> lines = readFile(tool + ".txt");
+
+        Map<String, String> loginResults = new HashMap<>();
+        loginResults.put("username", lines.get(0));
+        loginResults.put("password", lines.get(1));
+        if (lines.get(2).isEmpty()) loginResults.put("privateKey", null);
+        else loginResults.put("privateKey", lines.get(2));
+
+        for (int i = 3; i < lines.size(); i ++) {
+            this.processProjectInstance(lines.get(i), loginResults, tool);
+        }
+        this.close();
+    }
+
+    private List<String> readFile(String file) {
+        List<String> lines = new ArrayList<>();
+        BufferedReader reader;
+
+        try {
+            reader = new BufferedReader(
+                        new InputStreamReader(
+                            new FileInputStream(file), StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.startsWith("//")) break;
+                lines.add(line.trim());
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lines;
     }
 }

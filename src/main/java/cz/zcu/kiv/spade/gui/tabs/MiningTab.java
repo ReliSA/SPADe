@@ -1,6 +1,5 @@
 package cz.zcu.kiv.spade.gui.tabs;
 
-import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.gui.SPADeGUI;
 import javafx.application.Platform;
@@ -12,12 +11,9 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MiningTab extends SPADeTab {
@@ -27,11 +23,6 @@ public class MiningTab extends SPADeTab {
     private TextArea logArea;
     private RadioButton reloadBtn;
     private ListView<String> reloadBox;
-    private Text info;
-    private ProgressBar progBar;
-    private ProgressIndicator progInd;
-
-    private long startTime;
 
     public MiningTab(SPADeGUI gui) {
         super("Mining", gui);
@@ -46,10 +37,6 @@ public class MiningTab extends SPADeTab {
         Button confirmBtn = new Button("Mine projects");
         Button blankBtn = new Button("Create blank database");
         HBox btnHBox = new HBox(10);
-        info = new Text();
-        progBar = new ProgressBar();
-        HBox progHBox = new HBox(10);
-        progInd = new ProgressIndicator();
 
         // layout
         grid.add(newBtn, 0, 0);
@@ -61,10 +48,7 @@ public class MiningTab extends SPADeTab {
         grid.add(reloadBox, 1, 1, 3, 1);
         grid.add(logArea, 4, 1);
         btnHBox.getChildren().addAll(confirmBtn, blankBtn);
-        grid.add(btnHBox, 0, 2, 6, 1);
-        grid.add(info, 0, 3, 6, 1);
-        progHBox.getChildren().addAll(progBar, progInd);
-        grid.add(progHBox, 0, 4, 6, 1);
+        grid.add(btnHBox, 0, 2, 5, 1);
 
         setColumnWidths(120, 200, 30, 100, 450);
         setColumnHalignment(HPos.RIGHT, 3);
@@ -80,16 +64,12 @@ public class MiningTab extends SPADeTab {
         btnHBox.setAlignment(Pos.CENTER);
         confirmBtn.requestFocus();
 
-        progBar.setPrefWidth(800);
-        progHBox.setAlignment(Pos.CENTER);
-
         // data
         newBox.setPromptText("Project URL");
         for (Tool tool : Tool.values()) {
             toolBox.getItems().add(tool.name());
             if (tool.equals(Tool.REDMINE)) toolBox.getSelectionModel().select(tool.name());
         }
-        setProgress(-1);
 
         // behavior
         reloadBox.disableProperty().bind(Bindings.not(reloadBtn.selectedProperty()));
@@ -99,8 +79,6 @@ public class MiningTab extends SPADeTab {
     }
 
     private void startJob(boolean mine) {
-        setProgress(0);
-        setStartJobLog();
         if (mine) {
             boolean reload = reloadBtn.isSelected();
             String newProject = newBox.getText();
@@ -109,8 +87,8 @@ public class MiningTab extends SPADeTab {
             if (!checkInputs(reload, newProject, tool, selectedProjects)) return;
             processForm(reload, newProject, tool, selectedProjects);
         } else
-            createDb();
-        setProgress(1);
+            gui.getApp().createBlankDB();
+        gui.refreshProjects();
     }
 
     private boolean checkInputs(boolean reload, String newProject, String tool, List<String> selectedProjects) {
@@ -140,138 +118,32 @@ public class MiningTab extends SPADeTab {
     }
 
     private void processForm(boolean reload, String newProject, String tool, List<String> selectedProjects) {
-        Map<String, String> loginResults = new HashMap<>();
+        Map<String, String> loginResults;
 
         if (!reload) {
             // one new project
             if (!newProject.trim().isEmpty()) {
                 loginResults = showLoginDialog(tool);
                 if (loginResults != null) {
-                    mineSingleProject(1, 1, newProject, tool, loginResults);
+                    gui.getApp().procesProjectInstance(newProject, loginResults, tool);
                 }
             // project list from file
             } else {
-                List<String> lines = readFile(tool + ".txt");
-
-                loginResults.put("username", lines.get(0));
-                loginResults.put("password", lines.get(1));
-                if (lines.get(2).isEmpty()) loginResults.put("privateKey", null);
-                else loginResults.put("privateKey", lines.get(2));
-
-                for (int i = 3; i < lines.size(); i ++) {
-                    mineSingleProject(lines.size() - 3, i - 2, lines.get(i), tool, loginResults);
-                }
+                gui.getApp().mineFromFile(tool + ".txt");
             }
         // reload projects
         } else {
-            int i = 1;
             for (String url : selectedProjects) {
                 loginResults = showLoginDialog(url);
-                mineSingleProject(selectedProjects.size(), i++, url, null, loginResults);
+                gui.getApp().procesProjectInstance(url, loginResults, null);
             }
         }
-    }
-
-    private void setStartJobLog() {
-        startTime = System.currentTimeMillis();
-
-        String separator = "----------New Job----------";
-        if (!logArea.getText().isEmpty()) separator = "\n" + separator;
-        logArea.setText(logArea.getText() + separator);
-        info.setText("");
-    }
-
-    private void createDb() {
-        String logLine = "Initializing DB ...";
-        printLogline(logLine);
-
-        gui.getApp().createBlankDB();
-
-        logLine = "DB initialized";
-        printLogline(logLine);
-
-        gui.refreshProjects();
-    }
-
-    private void printLogline(String logLine) {
-        logLine = getTimeStamp(startTime) + " - " + logLine;
-        info.setText(logLine);
-        System.out.println(logLine);
-        logArea.setText(logArea.getText().concat("\n" + logLine));
-    }
-
-    private String getTimeStamp(long time) {
-        long elapsed = System.currentTimeMillis() - time - 3600000;
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss.SSSS");
-        return format.format(new Date(elapsed));
-    }
-
-    private List<String> readFile(String file) {
-        List<String> lines = new ArrayList<>();
-        BufferedReader reader;
-
-        try {
-            reader = new BufferedReader(
-                        new InputStreamReader(
-                        new FileInputStream(file)
-                        , StandardCharsets.UTF_8));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                if (line.startsWith("//")) break;
-                lines.add(line.trim());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return lines;
-    }
-
-    private void mineSingleProject(int prjNumber, int order, String url, String tool, Map<String, String> loginResults) {
-        String logLine = "Now mining "+ url + " ...";
-        printLogline(logLine);
-
-        long prevTime = System.currentTimeMillis();
-
-        ProjectInstance pi;
-        if (tool == null) pi = gui.getApp().reloadProjectInstance(url, loginResults);
-        else pi = gui.getApp().loadProjectInstance(url, loginResults, tool);
-
-        double progress = ((order * 3.0) - 2) / (prjNumber * 3);
-        logLine = String.format("\"%s\" data mined (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
-
-        printLogline(logLine);
-        setProgress(progress);
-        prevTime = System.currentTimeMillis();
-
-        gui.getApp().loadProjectInstance(pi);
-
-        progress = ((order * 3.0) - 1) / (prjNumber * 3);
-        logLine = String.format("\"%s\" data loaded (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
-
-        setProgress(progress);
-        printLogline(logLine);
-        prevTime = System.currentTimeMillis();
-
-        gui.getApp().printProjectInstance(pi);
-
-        progress = order * 3.0 / (prjNumber * 3);
-        logLine = String.format("\"%s\" data printed (%s/%s - %.2f%%) - took %s", pi.getName(), order, prjNumber, progress * 100, getTimeStamp(prevTime));
-
-        setProgress(progress);
-        printLogline(logLine);
-
-        gui.refreshProjects();
     }
 
     @Override
     public void refreshProjects(List<String> projects) {
         reloadBox.getItems().clear();
         reloadBox.getItems().addAll(projects);
-    }
-
-    private void setProgress(double progress) {
-        progBar.setProgress(progress);
-        progInd.setProgress(progress);
     }
 
     private Map<String, String> showLoginDialog(String url) {
@@ -342,5 +214,9 @@ public class MiningTab extends SPADeTab {
         alert.setHeaderText(header);
         alert.setContentText(content);
         alert.showAndWait();
+    }
+
+    public TextArea getLogArea() {
+        return logArea;
     }
 }

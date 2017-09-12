@@ -7,10 +7,15 @@ import javafx.scene.control.TabPane;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 public class SPADeGUI {
 
     private App app;
-    private SPADeTab mineTab, chartTab;
+    private MiningTab mineTab;
+    private SPADeTab chartTab;
     private TimelineTab timelineTab;
     //private CocaexTab cocaexTab;
 
@@ -18,12 +23,17 @@ public class SPADeGUI {
         stage.setTitle("SPADe - Software Process Anti-patterns Detector");
         stage.getIcons().add(new Image("file:SPADe.png"));
 
-        app = new App();
-
         mineTab = new MiningTab(this);
         chartTab = new ChartTab(this);
         timelineTab = new TimelineTab(this);
         //cocaexTab = new CocaexTab(this);
+
+        app = new App(new PrintStream(new OutputStream() {
+            @Override
+            public void write(int b) throws IOException {
+                mineTab.getLogArea().setText(mineTab.getLogArea().getText() + b);
+            }
+        }));
 
         mineTab.setClosable(false);
         TabPane tabPane = new TabPane(mineTab, chartTab, timelineTab/*, cocaexTab*/);
