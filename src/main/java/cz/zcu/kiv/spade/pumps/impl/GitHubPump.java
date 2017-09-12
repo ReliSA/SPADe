@@ -76,6 +76,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         enhanceCommits();
         mineCommitComments();
+        App.printLogMsg("commit comments mining done");
 
         new DBInitializer(em).setDefaultEnums(pi);
 
@@ -196,9 +197,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 checkRateLimit();
             }
             count++;
-            if (count == comments.size()) {
-                App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
-            }
         }
     }
 
@@ -237,6 +235,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
 
+        System.out.println("releases " + releases.size());
+        System.out.println("tags " + tags.size());
+        int i = 1;
         for (GHRelease release : releases) {
             for (GHTag tag : tags) {
                 if (tag.getName().equals(release.getTagName())) {
@@ -249,6 +250,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     }
                 }
             }
+            if ((i % 10) == 0) {
+                App.printLogMsg("mined " + i + "/" + releases.size() + " releases");
+                checkRateLimit();
+            }
+            i++;
         }
     }
 
@@ -259,7 +265,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     public Collection<ProjectSegment> mineIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
-        for (GHMilestone milestone : rootObject.listMilestones(GHIssueState.ALL)) {
+        int i = 1;
+        List<GHMilestone> milestones = rootObject.listMilestones(GHIssueState.ALL).asList();
+        for (GHMilestone milestone : milestones) {
             Iteration iteration = new Iteration();
             iteration.setProject(pi.getProject());
             iteration.setExternalId(milestone.getId() + "");
@@ -299,7 +307,17 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             iterations.add(phase);
             iterations.add(activity);
             iterations.add(iteration);
+
+            if ((i % 100) == 0) {
+                App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
+                checkRateLimit();
+            }
+            i++;
+            if (i == milestones.size()) {
+                App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
+            }
         }
+
         return iterations;
     }
 
@@ -374,9 +392,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     checkRateLimit();
                 }
                 count++;
-                if (count == sum) {
-                    App.printLogMsg("mined " + count + "/" + sum + " tickets");
-                }
             }
         }
     }
