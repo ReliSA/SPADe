@@ -126,22 +126,32 @@ public class CodefacePrinter {
 
     public void print(List<CodefaceBean> beans, String name) {
         ColumnPositionMappingStrategy<CodefaceBean> strategy = new ColumnPositionMappingStrategy<>();
-        strategy.setColumnMapping("externalId", "url", "issueType", "title", "creationDate", "createdBy",
+        strategy.setType(CodefaceBean.class);
+        String[] columns = new String[]{"externalId", "url", "issueType", "title", "creationDate", "createdBy",
                 "priority", "severity", "version", "startDate", "dueDate", "assignedTo", "estimateTime", "spentTime",
-                "progress", "status", "resolution", "category", "commits", "description");
+                "progress", "status", "resolution", "category", "commits", "description"};
+        strategy.setColumnMapping(columns);
 
+        Writer writer = null;
         try {
-            Writer writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), StandardCharsets.UTF_8);
+            writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), StandardCharsets.UTF_8);
             StatefulBeanToCsvBuilder<CodefaceBean> builder = new StatefulBeanToCsvBuilder<CodefaceBean>(writer)
                     .withSeparator(',').withQuotechar('"').withEscapechar('"').withMappingStrategy(strategy);
             StatefulBeanToCsv<CodefaceBean> beanToCsv = builder.build();
 
             beanToCsv.write(beans);
 
-            writer.flush();
-            writer.close();
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException e) {
             e.printStackTrace();
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
