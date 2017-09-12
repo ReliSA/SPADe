@@ -341,11 +341,15 @@ public class GitPump extends VCSPump<Repository> {
     private Branch generateBranch(Ref branchRef) {
         Branch branch = new Branch();
         branch.setExternalId(branchRef.getName());
-        branch.setName(stripFileName(branchRef.getName()));
+        branch.setName(stripBranchName(branchRef.getName()));
         if (branchRef.getName().endsWith("master")) {
             branch.setIsMain(true);
         }
         return branch;
+    }
+
+    private String stripBranchName(String name) {
+        return name.replace("refs/heads/", "");
     }
 
     /**
