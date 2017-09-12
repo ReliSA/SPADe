@@ -125,7 +125,7 @@ public class MiningTab extends SPADeTab {
             if (!newProject.trim().isEmpty()) {
                 loginResults = showLoginDialog(tool);
                 if (loginResults != null) {
-                    gui.getApp().procesProjectInstance(newProject, loginResults, tool);
+                    gui.getApp().processProjectInstance(newProject, loginResults, tool);
                 }
             // project list from file
             } else {
@@ -135,7 +135,7 @@ public class MiningTab extends SPADeTab {
         } else {
             for (String url : selectedProjects) {
                 loginResults = showLoginDialog(url);
-                gui.getApp().procesProjectInstance(url, loginResults, null);
+                gui.getApp().processProjectInstance(url, loginResults, null);
             }
         }
     }

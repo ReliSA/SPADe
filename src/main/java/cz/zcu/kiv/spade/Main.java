@@ -19,7 +19,7 @@ public class Main extends Application {
             loginResults.put("password", "RATMKoRn48");
 
             App app = new App();
-            app.procesProjectInstance("https://github.com/BVLC/caffe.git", loginResults, "GITHUB");
+            app.processProjectInstance("https://github.com/BVLC/caffe.git", loginResults, "GITHUB");
         }
     }
 

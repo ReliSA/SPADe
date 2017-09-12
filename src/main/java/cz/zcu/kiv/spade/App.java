@@ -75,7 +75,7 @@ public class App {
         this.close();
     }
 
-    private void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
+    public void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
         printLogMsg("mining of " + url + " started...");
 
         ProjectInstance pi;
@@ -125,7 +125,7 @@ public class App {
                 pump.close();
             }
         }
-        
+
         return pi;
     }
 
