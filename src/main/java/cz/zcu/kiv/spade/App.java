@@ -313,7 +313,7 @@ public class App {
     }
 
     public void mineFromFile(String tool) {
-        List<String> lines = readFile(tool + ".txt");
+        List<String> lines = readFile("input\\" + tool + ".txt");
 
         Map<String, String> loginResults = new HashMap<>();
         loginResults.put("username", lines.get(0));
