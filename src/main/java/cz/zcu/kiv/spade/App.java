@@ -31,7 +31,7 @@ import java.util.*;
 public class App {
 
     /** a format for timestamps */
-    public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSSS");
+    public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSS");
     public static final String GIT_SUFFIX = ".git";
     /** regular expression for Git commit hash */
     public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
