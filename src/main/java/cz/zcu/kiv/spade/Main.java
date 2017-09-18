@@ -33,6 +33,8 @@ public class Main extends Application {
             App app = new App();
             //app.createBlankDB();
             app.processProjectInstance(loginResults.get("url"), loginResults, loginResults.get("tool"));
+
+            app.close();
             System.exit(0);
         }
     }

@@ -71,8 +71,6 @@ public class App {
         new DBInitializer(createManager).initializeDatabase();
 
         printLogMsg("DB initialized");
-
-        this.close();
     }
 
     public void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
@@ -324,7 +322,6 @@ public class App {
         for (int i = 3; i < lines.size(); i ++) {
             this.processProjectInstance(lines.get(i), loginResults, tool);
         }
-        this.close();
     }
 
     private List<String> readFile(String file) {
