@@ -267,8 +267,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         System.out.println("releases " + releases.size());
         System.out.println("tags " + tags.size());
         int i = 1;
-        for (GHRelease release : releases) {
-            for (GHTag tag : tags) {
+        for (GHTag tag : tags) {
+            for (GHRelease release : releases) {
                 if (tag.getName().equals(release.getTagName())) {
                     Commit commit = pi.getProject().getCommit(tag.getCommit().getSHA1().substring(0, 7));
                     for (VCSTag spadeTag : commit.getTags()) {
@@ -280,11 +280,14 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     }
                 }
             }
-            if ((i % 10) == 0) {
-                App.printLogMsg("mined " + i + "/" + releases.size() + " releases");
+            if ((i % 100) == 0) {
+                App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
                 checkRateLimit();
             }
             i++;
+            if (i == tags.size()) {
+                App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
+            }
         }
     }
 
