@@ -266,6 +266,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         System.out.println("releases " + releases.size());
         System.out.println("tags " + tags.size());
+
         int i = 1;
         for (GHTag tag : tags) {
             for (GHRelease release : releases) {
