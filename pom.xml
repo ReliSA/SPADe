@@ -106,6 +106,12 @@
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
             </resource>
+            <resource>
+                <directory>.</directory>
+                <includes>
+                    <include>lib/*.jar</include>
+                </includes>
+            </resource>
         </resources>
 
         <plugins>
@@ -159,6 +165,7 @@
                             <mainClass>cz.zcu.kiv.spade.Main</mainClass>
                         </manifest>
                     </archive>
+                    <outputDirectory>.</outputDirectory>
                 </configuration>
             </plugin>
 
