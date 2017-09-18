@@ -9,7 +9,7 @@
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.password" value="${dbpassword}"/>
             <property name="javax.persistence.jdbc.user" value="${dbusername}"/>
-            <property name="javax.persistence.jdbc.url" value="${dburl}"/>
+            <property name="javax.persistence.jdbc.url" value="${dburl}?useUnicode=yes&amp;characterEncoding=UTF-8"/>
 
             <!-- Hibernate-specific configuration -->
             <property name="hibernate.hbm2ddl.auto" value="create"/>
@@ -37,7 +37,7 @@
             <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver"/>
             <property name="javax.persistence.jdbc.password" value="${dbpassword}"/>
             <property name="javax.persistence.jdbc.user" value="${dbusername}"/>
-            <property name="javax.persistence.jdbc.url" value="${dburl}"/>
+            <property name="javax.persistence.jdbc.url" value="${dburl}?useUnicode=yes&amp;characterEncoding=UTF-8"/>
 
             <!-- Hibernate-specific configuration -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
