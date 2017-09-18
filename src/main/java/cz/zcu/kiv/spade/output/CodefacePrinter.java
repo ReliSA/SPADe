@@ -30,8 +30,7 @@ public class CodefacePrinter {
             bean.setUrl(wu.getUrl());
             bean.setIssueType(wu.getType().getName());
             bean.setTitle(wu.getName());
-            String tmp = wu.getDescription().replace("\r\n", " ");
-            bean.setDescription(tmp.replace("\n", " "));
+            bean.setDescription(wu.getDescription());
             if (wu.getCreated() != null) bean.setCreationDate(format.format(wu.getCreated()));
 
             StringBuilder author = new StringBuilder();
@@ -95,8 +94,7 @@ public class CodefacePrinter {
 
                     bean.setExternalId(wu.getExternalId());
                     bean.setIssueType("COMMENT");
-                    String tmp = con.getDescription().replace("\r\n", " ");
-                    bean.setDescription(tmp.replace("\n", " "));
+                    bean.setDescription(con.getDescription());
                     bean.setCreationDate(format.format(con.getCreated()));
 
                     StringBuilder author = new StringBuilder();
