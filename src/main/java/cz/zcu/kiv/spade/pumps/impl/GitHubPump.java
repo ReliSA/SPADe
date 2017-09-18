@@ -212,7 +212,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
         if (limit != null && limit.remaining < 300) {
-            System.out.println("\t remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
+            System.out.println("username: " + username + ", remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
         }
     }
 
