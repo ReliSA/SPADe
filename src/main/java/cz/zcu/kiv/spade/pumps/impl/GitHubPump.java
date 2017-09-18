@@ -95,7 +95,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         mineEnums();
         Collection<ProjectSegment> iterations = mineIterations();
-        App.printLogMsg("milestones mining done");
 
         mineTickets();
         App.printLogMsg("tickets mining done");
