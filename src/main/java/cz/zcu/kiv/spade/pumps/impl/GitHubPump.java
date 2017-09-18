@@ -74,7 +74,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         pi.getToolInstance().setTool(tool);
         setToolInstance();
 
-        pi.getProject().setDescription(rootObject.getDescription());
+        if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
         Date creation = null;
         try {
             creation = rootObject.getCreatedAt();
@@ -212,7 +212,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                         rootObject = init(true);
                     }
                 }
-                relation.setDescription(comment.getBody() + "\n" +
+                relation.setDescription(comment.getBody().trim() + "\n" +
                         "Date: " + App.TIMESTAMP.format(date) +
                         "File: " + comment.getPath() + "\n" +
                         "Line:" + comment.getLine() + "\n" +
@@ -274,7 +274,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     Commit commit = pi.getProject().getCommit(tag.getCommit().getSHA1().substring(0, 7));
                     for (VCSTag spadeTag : commit.getTags()) {
                         if (spadeTag.getName().equals(tag.getName())) {
-                            spadeTag.setDescription(release.getName() + "\n" + release.getBody());
+                            spadeTag.setDescription(release.getName());
+                            if (release.getBody() != null) spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
                             mineAllMentionedItemsGit(commit, release.getBody());
                         }
                     }
@@ -302,7 +303,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             iteration.setProject(pi.getProject());
             iteration.setExternalId(milestone.getId() + "");
             iteration.setName(milestone.getTitle());
-            iteration.setDescription(milestone.getDescription());
+            if (milestone.getDescription() != null) iteration.setDescription(milestone.getDescription().trim());
 
             Date creation;
             while (true) {
@@ -385,7 +386,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 unit.setExternalId(issue.getId() + "");
                 unit.setUrl(issue.getHtmlUrl().toString());
                 unit.setName(issue.getTitle());
-                unit.setDescription(issue.getBody());
+                if (issue.getBody() != null) unit.setDescription(issue.getBody().trim());
                 unit.setAuthor(addPerson(generateIdentity(issue.getUser())));
                 unit.setAssignee(addPerson(generateIdentity(issue.getAssignee())));
                 unit.setStatus(resolveStatus(issue.getState().name()));
@@ -503,7 +504,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         change.setChangedItem(unit);
 
         Configuration configuration = new Configuration();
-        configuration.setDescription(comment.getBody());
+        configuration.setDescription(comment.getBody().trim());
 
         GHUser user;
         Date creation;
