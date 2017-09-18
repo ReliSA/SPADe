@@ -75,6 +75,16 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         setToolInstance();
 
         pi.getProject().setDescription(rootObject.getDescription());
+        Date creation = null;
+        try {
+            creation = rootObject.getCreatedAt();
+        } catch (IOException e) {
+            this.init(true);
+        }
+        if (creation != null && creation.before(pi.getProject().getStartDate())) {
+            pi.getProject().setStartDate(creation);
+        }
+
 
         enhanceCommits();
         mineCommitComments();
