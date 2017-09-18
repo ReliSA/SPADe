@@ -14,7 +14,6 @@ import org.kohsuke.github.*;
 import javax.persistence.EntityManager;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.util.*;
 
 /**
@@ -51,8 +50,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 repo = gitHub.getRepository(getProjectFullName());
                 break;
             } catch (IOException e) {
-                if (e instanceof SocketTimeoutException) System.out.println("Socket Exception!");
-                else e.printStackTrace();
+                System.out.println(e.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
