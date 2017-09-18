@@ -198,7 +198,7 @@ public class GitPump extends VCSPump<Repository> {
 
         commit.setExternalId(gitCommit.getId().toString());
         commit.setName(gitCommit.getId().getName());
-        commit.setDescription(gitCommit.getFullMessage());
+        commit.setDescription(gitCommit.getFullMessage().trim());
         commit.setCommitted(gitCommit.getCommitterIdent().getWhen());
         commit.setCreated(gitCommit.getAuthorIdent().getWhen());
         commit.setAuthor(addPerson(generateIdentity(gitCommit.getAuthorIdent())));
