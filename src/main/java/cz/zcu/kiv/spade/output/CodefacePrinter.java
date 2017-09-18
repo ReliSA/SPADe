@@ -128,6 +128,7 @@ public class CodefacePrinter {
                     .withSeparator(',').withQuotechar('"').withEscapechar('"').withMappingStrategy(strategy);
             StatefulBeanToCsv<CodefaceBean> beanToCsv = builder.build();
 
+            beanToCsv.write(getHeader());
             beanToCsv.write(beans);
 
         } catch (IOException | CsvRequiredFieldEmptyException | CsvDataTypeMismatchException e) {
@@ -142,5 +143,32 @@ public class CodefacePrinter {
                 }
             }
         }
+    }
+
+    private CodefaceBean getHeader() {
+        CodefaceBean header = new CodefaceBean();
+
+        header.setExternalId("externalId");
+        header.setUrl("url");
+        header.setIssueType("issueType");
+        header.setTitle("title");
+        header.setCreationDate("creationDate");
+        header.setCreatedBy("createdBy");
+        header.setPriority("priority");
+        header.setSeverity("severity");
+        header.setVersion("version");
+        header.setStartDate("startDate");
+        header.setDueDate("dueDate");
+        header.setAssignedTo("assignedTo");
+        header.setEstimateTime("estimateTime");
+        header.setSpentTime("spentTime");
+        header.setProgress("progress");
+        header.setStatus("status");
+        header.setResolution("resolution");
+        header.setCategory("category");
+        header.setCommits("commits");
+        header.setDescription("description");
+
+        return header;
     }
 }
