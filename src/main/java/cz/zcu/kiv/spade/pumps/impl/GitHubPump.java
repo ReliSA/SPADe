@@ -39,10 +39,14 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     protected GHRepository init() {
+        return init(false);
+    }
+
+    private GHRepository init(boolean wait) {
         GHRepository repo;
         while (true) {
             try {
-                Thread.sleep(5000);
+                if (wait) Thread.sleep(5000);
                 gitHub = GitHub.connectUsingPassword(username, password);
                 GHRateLimit limit = gitHub.getRateLimit();
                 App.printLogMsg("connected...");
@@ -145,7 +149,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     break;
                 } catch (IOException e) {
                    if (e instanceof FileNotFoundException) break;
-                   else rootObject = init();
+                   else rootObject = init(true);
                 }
             }
 
@@ -160,7 +164,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     user = comment.getUser();
                     break;
                 } catch (IOException e) {
-                     rootObject = init();
+                     rootObject = init(true);
                 }
             }
             relation.setPerson(addPerson(generateIdentity(user)));
@@ -177,7 +181,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                         date = comment.getCreatedAt();
                         break;
                     } catch (IOException e) {
-                        rootObject = init();
+                        rootObject = init(true);
                     }
                 }
                 relation.setDescription(comment.getBody() + "\n" +
@@ -208,7 +212,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 limit = gitHub.getRateLimit();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
         if (limit != null && limit.remaining < 300) {
@@ -229,7 +233,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 tags = rootObject.listTags().asList();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
 
@@ -278,7 +282,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     creation = milestone.getCreatedAt();
                     break;
                 } catch (IOException e) {
-                    rootObject = init();
+                    rootObject = init(true);
                 }
             }
             iteration.setCreated(creation);
@@ -339,7 +343,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 prCount = rootObject.getPullRequests(GHIssueState.ALL).size();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
         App.printLogMsg(prCount + " pull requests listed");
@@ -372,7 +376,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                         labels = issue.getLabels();
                         break;
                     } catch (IOException e) {
-                        rootObject = init();
+                        rootObject = init(true);
                     }
                 }
 
@@ -425,7 +429,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 comments = issue.getComments();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
         for (GHIssueComment comment : comments) {
@@ -481,7 +485,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 creation = comment.getCreatedAt();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
         configuration.setAuthor(addPerson(generateIdentity(user)));
@@ -543,7 +547,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 email = user.getEmail();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
 
@@ -665,7 +669,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 labels = rootObject.listLabels().asList();
                 break;
             } catch (IOException e) {
-                rootObject = init();
+                rootObject = init(true);
             }
         }
 
