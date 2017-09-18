@@ -85,6 +85,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             pi.getProject().setStartDate(creation);
         }
 
+        setDefaultBranch();
 
         enhanceCommits();
         mineCommitComments();
@@ -127,6 +128,23 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         assignDefaultEnums();
 
         return pi;
+    }
+
+    private void setDefaultBranch() {
+        Map<String, Branch> branches = new HashMap<>();
+        for (Configuration configuration : pi.getProject().getConfigurations()) {
+            if (configuration instanceof Commit) {
+                Commit commit = (Commit) configuration;
+                for (Branch branch : commit.getBranches()) {
+                    if (!branches.containsKey(branch.getName())) {
+                        branch.setIsMain(false);
+                        branches.put(branch.getName(), branch);
+                    }
+                }
+            }
+        }
+
+        branches.get(rootObject.getDefaultBranch()).setIsMain(true);
     }
 
     /**
