@@ -184,7 +184,7 @@ public class GitPump extends VCSPump<Repository> {
             e.printStackTrace();
         }
 
-        int count = 1;
+        int count = 0, original = 0;
         for (RevCommit gitCommit : revWalk) {
             Commit commit;
             String shortSHA = gitCommit.getId().getName().substring(0, 7);
@@ -193,10 +193,10 @@ public class GitPump extends VCSPump<Repository> {
             }
             commit = pi.getProject().addCommit(new Commit(shortSHA));
             commit.getBranches().add(branch);
-            if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
             count++;
+            if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
         }
-        App.printLogMsg((count - 1) + " commits mined");
+        App.printLogMsg(count + " commits mined (" + original + " originals)");
         revWalk.dispose();
     }
 
