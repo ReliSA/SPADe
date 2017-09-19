@@ -190,6 +190,7 @@ public class GitPump extends VCSPump<Repository> {
             String shortSHA = gitCommit.getId().getName().substring(0, 7);
             if (!pi.getProject().containsCommit(shortSHA)) {
                 mineCommit(gitCommit);
+                original++;
             }
             commit = pi.getProject().addCommit(new Commit(shortSHA));
             commit.getBranches().add(branch);
