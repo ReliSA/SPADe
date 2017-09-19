@@ -52,12 +52,6 @@
             <version>${hibernate.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <version>2.9.9</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
@@ -105,12 +99,6 @@
             <resource>
                 <filtering>true</filtering>
                 <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>.</directory>
-                <includes>
-                    <include>lib/*.jar</include>
-                </includes>
             </resource>
         </resources>
 
