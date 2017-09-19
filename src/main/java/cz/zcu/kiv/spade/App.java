@@ -327,9 +327,9 @@ public class App {
     void mineFromFile(String tool, Map<String, String> loginResults) {
         List<String> lines = readFile("input\\" + tool + ".txt");
         for (int i = 0; i < lines.size(); i++) {
-            printLogMsg("======================================");
-            printLogMsg("project: " + (i+1) + "/" + lines.size());
-            printLogMsg("======================================");
+            log.println("======================================");
+            log.println("\t\tproject: " + (i+1) + "/" + lines.size());
+            log.println("======================================");
             this.processProjectInstance(lines.get(i), loginResults, tool);
         }
     }
