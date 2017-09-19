@@ -39,7 +39,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     protected GHRepository init() {
-        return init(false);
+        return null;
     }
 
     private GHRepository init(boolean wait) {
@@ -73,6 +73,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         this.tool = Tool.GITHUB;
         pi.getToolInstance().setTool(tool);
         setToolInstance();
+
+        rootObject = init(true);
 
         if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
         Date creation = null;
