@@ -25,6 +25,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     /** GitHub instance for getting items. */
     private GitHub gitHub;
+    private List<String> usernames = new ArrayList<>();
+    private List<String> passwords = new ArrayList<>();
 
     /**
      * @param projectHandle URL of the project instance
@@ -35,6 +37,12 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     public GitHubPump(String projectHandle, String privateKeyLoc, String username, String password) {
         super(projectHandle, privateKeyLoc, username, password);
         this.tool = Tool.GITHUB;
+        usernames.add(0, username);
+        usernames.add(1, "spade01");
+        usernames.add(2, "spade02");
+        passwords.add(0, password);
+        passwords.add(1, "papepi48");
+        passwords.add(2, "papepi48");
     }
 
     @Override
@@ -47,6 +55,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         while (true) {
             try {
                 if (wait) Thread.sleep(5000);
+                else {
+                    int index = (usernames.indexOf(username) + 1) % 3;
+                    username = usernames.get(index);
+                    password = passwords.get(index);
+                }
                 gitHub = GitHub.connectUsingPassword(username, password);
                 GHRateLimit limit = gitHub.getRateLimit();
                 App.printLogMsg("connected...");
@@ -242,8 +255,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 rootObject = init(true);
             }
         }
-        if (limit != null && limit.remaining < 300) {
+        if (limit != null && limit.remaining < 500) {
             System.out.println("username: " + username + ", remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
+            rootObject = init(false);
         }
     }
 
@@ -362,23 +376,24 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     public void mineTickets() {
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
-
         App.printLogMsg(issues.size() + " issues listed");
 
-        int prCount;
-        while (true) {
-            try {
-                prCount = rootObject.getPullRequests(GHIssueState.ALL).size();
-                break;
-            } catch (IOException e) {
-                rootObject = init(true);
-            }
-        }
-
-        int sum = issues.size() - prCount;
-
         int count = 1;
-        for (GHIssue issue : issues) {
+        for (int id = issues.size(); id > 0;) {
+
+            GHIssue issue;
+            try {
+                issue = rootObject.getIssue(id);
+            } catch (IOException e) {
+                if (e instanceof FileNotFoundException) {
+                    id--;
+                    continue;
+                } else {
+                    rootObject = init(true);
+                    continue;
+                }
+            }
+
             if (!issue.isPullRequest()) {
                 WorkUnit unit = pi.getProject().addUnit(new WorkUnit(issue.getNumber()));
                 unit.setExternalId(issue.getId() + "");
@@ -422,6 +437,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 }
                 count++;
             }
+            id--;
         }
         App.printLogMsg("mined " + (count - 1) + " tickets");
     }
