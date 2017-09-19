@@ -305,10 +305,12 @@ public abstract class DataPump<RootObjectType> {
      * @param item given Work Item instance
      * @param text text to search mentions in
      */
-    private void mineMentionedUnits(WorkItem item, String text) {
+    protected void mineMentionedUnits(WorkItem item, String text) {
         for (String mention : mineMentions(text, IssueTrackingPump.WU_MENTION_REGEX)) {
-            WorkUnit mentioned = pi.getProject().addUnit(new WorkUnit(Integer.parseInt(mention)));
-            generateMentionRelation(item, mentioned);
+            if (pi.getProject().containsUnit(mention)) {
+                WorkUnit mentioned = pi.getProject().getUnit(mention);
+                generateMentionRelation(item, mentioned);
+            }
         }
     }
 
@@ -332,7 +334,7 @@ public abstract class DataPump<RootObjectType> {
      * @param item given Work Item instance
      * @param text text to search mentions in
      */
-    private void mineMentionedGitCommits(WorkItem item, String text) {
+    protected void mineMentionedGitCommits(WorkItem item, String text) {
         mineMentionedItemsCommit(item, text, App.GIT_COMMIT_REGEX);
     }
 
@@ -354,8 +356,10 @@ public abstract class DataPump<RootObjectType> {
      */
     private void mineMentionedItemsCommit(WorkItem item, String text, String regex) {
         for (String mention : mineMentions(text, regex)) {
-            Commit mentioned = pi.getProject().addCommit(new Commit(mention));
-            generateMentionRelation(item, mentioned);
+            if (pi.getProject().containsCommit(mention)) {
+                Commit mentioned = pi.getProject().getCommit(mention);
+                generateMentionRelation(item, mentioned);
+            }
         }
     }
 
@@ -684,5 +688,13 @@ public abstract class DataPump<RootObjectType> {
                 unit.setStatus(delStatus);
             }
         }
+    }
+
+    protected abstract void mineMentions();
+
+    protected void finalTouches() {
+        addDeletedStatus();
+        assignDefaultEnums();
+        mineMentions();
     }
 }

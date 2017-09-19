@@ -96,11 +96,33 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
 
         mineWiki();
-
-        addDeletedStatus();
-        assignDefaultEnums();
-
+        finalTouches();
         return pi;
+    }
+
+    @Override
+    protected void mineMentions() {
+        // from work unit descriptions
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            mineAllMentionedItems(unit);
+        }
+
+        for (Configuration configuration : pi.getProject().getConfigurations()) {
+            if (!(configuration instanceof Commit || configuration instanceof CommittedConfiguration)) {
+                for (WorkItemChange change : configuration.getChanges()) {
+                    // from wiki page texts
+                    if (change.getChangedItem() instanceof Artifact &&
+                            ((Artifact) change.getChangedItem()).getArtifactClass().equals(ArtifactClass.WIKIPAGE)) {
+                        mineAllMentionedItems(change.getChangedItem());
+                    }
+                    // from work unit changes and logtimes
+                    if (change.getChangedItem() instanceof WorkUnit &&
+                            (change.getName().equals("MODIFY") || change.getName().equals("LOGTIME"))) {
+                        mineAllMentionedItems(change.getChangedItem(), configuration.getDescription());
+                    }
+                }
+            }
+        }
     }
 
     private void mineCategories() {
@@ -185,7 +207,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             artifact.setAuthor(addPerson(generateIdentity(detail.getUser().getId(), detail.getUser().getLogin())));
             mineAttachments(detail.getAttachments(), artifact);
         }
-        mineAllMentionedItems(artifact);
 
         WorkItemChange change = new WorkItemChange();
         change.setName("ADD");
@@ -269,8 +290,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
         for (Issue issue : issues) {
 
-            WorkUnit unit = pi.getProject().addUnit(new WorkUnit(issue.getId()));
-
+            WorkUnit unit = new WorkUnit();
+            unit.setNumber(issue.getId());
             unit.setExternalId(issue.getId().toString());
             unit.setUrl("https://" + getServer() + "/issues/" + issue.getId());
             unit.setName(issue.getSubject());
@@ -289,6 +310,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             unit.getCategories().addAll(resolveCategories(issue));
             unit.setSeverity(resolveSeverity(issue));
 
+            pi.getProject().addUnit(unit);
+
             mineAttachments(issue.getAttachments(), unit);
             mineHistory(unit, issue.getJournals());
             mineRevisions(unit, issue.getChangesets());
@@ -299,8 +322,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
                 iteration.setExternalId(issue.getTargetVersion().getId() + "");
                 unit.setIteration(iteration);
             }
-
-            mineAllMentionedItems(unit);
 
             generateCreationConfig(unit);
             if (issue.getClosedOn() != null) generateClosureConfig(unit, issue.getClosedOn());
@@ -340,25 +361,22 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     private void mineRelations(Issue issue, WorkUnit unit) {
 
         if (issue.getParentId() != null) {
-            WorkUnit parent = pi.getProject().addUnit(new WorkUnit(issue.getParentId()));
+            WorkUnit parent = pi.getProject().getUnit(issue.getParentId());
             unit.getRelatedItems().add(new WorkItemRelation(parent, resolveRelation("child of")));
             parent.getRelatedItems().add(new WorkItemRelation(unit, resolveRelation("parent of")));
         }
         for (IssueRelation relation : issue.getRelations()) {
-            WorkUnit related = pi.getProject().addUnit(new WorkUnit(relation.getIssueToId()));
+            WorkUnit related = pi.getProject().getUnit(relation.getIssueToId());
             unit.getRelatedItems().add(new WorkItemRelation(related, resolveRelation(relation.getType())));
         }
     }
 
     private void mineRevisions(WorkUnit unit, Collection<Changeset> changesets) {
         for (Changeset changeset : changesets) {
-            Commit commit = pi.getProject().addCommit(new Commit(changeset.getRevision()));
-            commit.setAuthor(addPerson(generateIdentity(changeset.getUser().getId(), changeset.getUser().getLogin())));
-            commit.setCreated(changeset.getCommittedOn());
-            commit.setDescription(changeset.getComments());
-            commit.setCommitted(changeset.getCommittedOn());
-
-            generateMentionRelation(commit, unit);
+            if (pi.getProject().containsCommit(changeset.getRevision())) {
+                Commit commit = pi.getProject().getCommit(changeset.getRevision());
+                generateMentionRelation(commit, unit);
+            }
         }
     }
 
@@ -374,8 +392,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             change.setChangedItem(unit);
             change.setName("MODIFY");
             change.setFieldChanges(mineChanges(journal.getDetails()));
-
-            mineAllMentionedItems(unit, journal.getNotes());
 
             configurations.add(configuration);
         }
@@ -508,8 +524,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
         change.getFieldChanges().add(fieldChange);
         configuration.getChanges().add(change);
-
-        mineAllMentionedItems(unit, entry.getComment());
 
         pi.getProject().getConfigurations().add(configuration);
     }

@@ -135,22 +135,55 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         getTagDescriptions();
 
-        addDeletedStatus();
-        assignDefaultEnums();
 
+        finalTouches();
         return pi;
+    }
+
+    @Override
+    protected void mineMentions() {
+        Set<VCSTag> tags = new HashSet<>();
+        for (Commit commit : pi.getProject().getCommits()) {
+            // unit mentions from commit messages
+            mineMentionedUnits(commit, commit.getDescription());
+            for (ConfigPersonRelation relation : commit.getRelations()) {
+                if (relation.getName().equals("Commented-on-by")) {
+                    // from commit comments
+                    mineAllMentionedItemsGit(commit, relation.getDescription());
+                }
+            }
+            for (VCSTag tag : commit.getTags()) {
+                if (!tags.contains(tag)) {
+                    // from release descriptions
+                    mineAllMentionedItemsGit(commit, tag.getDescription());
+                    tags.add(tag);
+                }
+            }
+        }
+        // from work unit descriptions
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            mineAllMentionedItemsGit(unit);
+        }
+        for (Configuration configuration : pi.getProject().getConfigurations()) {
+            if (!(configuration instanceof Commit || configuration instanceof CommittedConfiguration)) {
+                for (WorkItemChange change : configuration.getChanges()) {
+                    // from issue comments
+                    if (change.getChangedItem() instanceof WorkUnit &&
+                            change.getName().equals("COMMENT")) {
+                        mineAllMentionedItemsGit(change.getChangedItem(), configuration.getDescription());
+                    }
+                }
+            }
+        }
     }
 
     private void setDefaultBranch() {
         Map<String, Branch> branches = new HashMap<>();
-        for (Configuration configuration : pi.getProject().getConfigurations()) {
-            if (configuration instanceof Commit) {
-                Commit commit = (Commit) configuration;
-                for (Branch branch : commit.getBranches()) {
-                    if (!branches.containsKey(branch.getName())) {
-                        branch.setIsMain(false);
-                        branches.put(branch.getName(), branch);
-                    }
+        for (Commit commit : pi.getProject().getCommits()) {
+            for (Branch branch : commit.getBranches()) {
+                if (!branches.containsKey(branch.getName())) {
+                    branch.setIsMain(false);
+                    branches.put(branch.getName(), branch);
                 }
             }
         }
@@ -162,11 +195,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      * adds correct URLs to commits mined from Git
      */
     private void enhanceCommits() {
-        for (Configuration configuration : pi.getProject().getConfigurations()) {
-            if (configuration instanceof Commit) {
-                String commitUrlPrefix = projectHandle.substring(0, projectHandle.lastIndexOf(App.GIT_SUFFIX)) + "/commit/";
-                configuration.setUrl(commitUrlPrefix + configuration.getName());
-            }
+        for (Commit commit : pi.getProject().getCommits()) {
+            String commitUrlPrefix = projectHandle.substring(0, projectHandle.lastIndexOf(App.GIT_SUFFIX)) + "/commit/";
+            commit.setUrl(commitUrlPrefix + commit.getName());
         }
     }
 
@@ -229,9 +260,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                         "Line:" + comment.getLine() + "\n" +
                         "URL: " + comment.getHtmlUrl());
                 commit.getRelations().add(relation);
-
-                mineAllMentionedItemsGit(commit, comment.getBody());
-
             }
             if ((count % 100) == 0) {
                 App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
@@ -289,8 +317,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     for (VCSTag spadeTag : commit.getTags()) {
                         if (spadeTag.getName().equals(tag.getName())) {
                             spadeTag.setDescription(release.getName());
-                            if (release.getBody() != null) spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
-                            mineAllMentionedItemsGit(commit, release.getBody());
+                            if (release.getBody() != null) {
+                                spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
+                            }
                         }
                     }
                 }
@@ -395,7 +424,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
 
             if (!issue.isPullRequest()) {
-                WorkUnit unit = pi.getProject().addUnit(new WorkUnit(issue.getNumber()));
+                WorkUnit unit = new WorkUnit(issue.getNumber());
+                unit.setNumber(issue.getNumber());
                 unit.setExternalId(issue.getId() + "");
                 unit.setUrl(issue.getHtmlUrl().toString());
                 unit.setName(issue.getTitle());
@@ -428,9 +458,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     mineLabels(labels, unit);
                 }
 
+                pi.getProject().addUnit(unit);
+
                 mineChanges(issue, unit);
 
-                mineAllMentionedItemsGit(unit);
                 if ((count % 100) == 0) {
                     App.printLogMsg("mined " + count + " tickets");
                     checkRateLimit();
@@ -536,7 +567,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         configuration.setCreated(creation);
         configuration.getChanges().add(change);
 
-        mineAllMentionedItemsGit(unit, comment.getBody());
         configuration.getRelatedItems().addAll(unit.getRelatedItems());
 
         return configuration;

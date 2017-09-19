@@ -14,8 +14,7 @@ public class Project extends ProjectSegment {
     private Collection<Person> people;
     private Collection<Configuration> configurations;
     private Map<Integer, WorkUnit> units;
-    @Transient
-    private Map<String, Commit> commits;
+    public Map<String, Commit> commits;
 
     public Project() {
         super();
@@ -71,27 +70,18 @@ public class Project extends ProjectSegment {
     }
 
     @Transient
-    private boolean containsUnit(int number) {
-        return units.containsKey(number);
+    public void addUnit(WorkUnit unit) {
+        units.put(unit.getNumber(), unit);
     }
 
     @Transient
-    public WorkUnit addUnit(WorkUnit unit) {
-        if (containsUnit(unit.getNumber()) && (getUnit(unit.getNumber()).getCreated() != null)) {
-            replaceItem(unit, getUnit(unit.getNumber()));
-            return getUnit(unit.getNumber());
-        } else {
-            WorkUnit oldUnit = units.put(unit.getNumber(), unit);
-            if (oldUnit != null) {
-                replaceItem(oldUnit, unit);
-            }
-            return unit;
-        }
+    public WorkUnit getUnit(String number) {
+        return units.get(Integer.parseInt(number));
     }
 
     @Transient
-    private WorkUnit getUnit(int number) {
-        return units.get(number);
+    public WorkUnit getUnit(int number) {
+        return units.get(number + "");
     }
 
     @Transient
@@ -100,19 +90,14 @@ public class Project extends ProjectSegment {
     }
 
     @Transient
-    public Commit addCommit(Commit commit) {
-        if (containsCommit(commit.getIdentifier()) && (getCommit(commit.getIdentifier()).getCommitted() != null)) {
-            replaceItem(commit, getCommit(commit.getIdentifier()));
-            return getCommit(commit.getIdentifier());
-        } else {
-            Commit oldCommit = commits.put(commit.getIdentifier(), commit);
-            if (oldCommit != null) {
-                replaceItem(oldCommit, commit);
-                configurations.remove(oldCommit);
-            }
-            configurations.add(commit);
-            return commit;
-        }
+    public boolean containsUnit(String number) {
+        return units.containsKey(number);
+    }
+
+    @Transient
+    public void addCommit(Commit commit) {
+        commits.put(commit.getIdentifier(), commit);
+        configurations.add(commit);
     }
 
     @Transient
@@ -123,17 +108,9 @@ public class Project extends ProjectSegment {
     @Transient
     public Set<WorkItem> getAllItems() {
         Set<WorkItem> items = new LinkedHashSet<>();
-        for (WorkUnit unit : getUnits()) {
-            items.add(unit);
-            for (WorkItemRelation relation : unit.getRelatedItems()) {
-                items.add(relation.getRelatedItem());
-            }
-        }
+        items.addAll(units.values());
         for (Configuration configuration : getConfigurations()) {
             items.add(configuration);
-            for (WorkItemRelation relation : configuration.getRelatedItems()) {
-                items.add(relation.getRelatedItem());
-            }
             for (WorkItemChange change : configuration.getChanges()) {
                 items.add(change.getChangedItem());
             }
@@ -141,14 +118,8 @@ public class Project extends ProjectSegment {
         return items;
     }
 
-    private void replaceItem(WorkItem toBeReplaced, WorkItem replacement) {
-        replacement.getRelatedItems().addAll(toBeReplaced.getRelatedItems());
-        for (WorkItem item : getAllItems()) {
-            for (WorkItemRelation relation : item.getRelatedItems()) {
-                if (relation.getRelatedItem().equals(toBeReplaced)) {
-                    relation.setRelatedItem(replacement);
-                }
-            }
-        }
+    @Transient
+    public Collection<Commit> getCommits() {
+        return commits.values();
     }
 }

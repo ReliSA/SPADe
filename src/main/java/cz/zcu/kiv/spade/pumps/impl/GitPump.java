@@ -85,9 +85,17 @@ public class GitPump extends VCSPump<Repository> {
 
         addWorkItemAuthors();
 
-        assignDefaultEnums();
+        mineMentions();
 
         return pi;
+    }
+
+    @Override
+    protected void mineMentions() {
+        // from commit messages
+        for (Commit commit : pi.getProject().getCommits()) {
+            mineMentionedGitCommits(commit, commit.getDescription());
+        }
     }
 
     @Override
@@ -186,13 +194,12 @@ public class GitPump extends VCSPump<Repository> {
 
         int count = 0, original = 0;
         for (RevCommit gitCommit : revWalk) {
-            Commit commit;
             String shortSHA = gitCommit.getId().getName().substring(0, 7);
             if (!pi.getProject().containsCommit(shortSHA)) {
                 mineCommit(gitCommit);
                 original++;
             }
-            commit = pi.getProject().addCommit(new Commit(shortSHA));
+            Commit commit = pi.getProject().getCommit(shortSHA);
             commit.getBranches().add(branch);
             count++;
             if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
@@ -207,10 +214,8 @@ public class GitPump extends VCSPump<Repository> {
      * @param gitCommit commit to mine
      */
     private void mineCommit(RevCommit gitCommit) {
-        String identifier = gitCommit.getId().getName().substring(0, 7);
-
-        Commit commit = pi.getProject().addCommit(new Commit(identifier));
-
+        Commit commit = new Commit();
+        commit.setIdentifier(gitCommit.getId().getName().substring(0, 7));
         commit.setExternalId(gitCommit.getId().toString());
         commit.setName(gitCommit.getId().getName());
         commit.setDescription(gitCommit.getFullMessage().trim());
@@ -220,12 +225,13 @@ public class GitPump extends VCSPump<Repository> {
         commit.setChanges(mineChanges(gitCommit));
         commit.setRelations(collectRelatedPeople(gitCommit));
 
-        mineAllMentionedItemsGit(commit);
         /*for (RevCommit parentCommit : commit.getParents()) {
             Configuration parent = new Configuration();
             parent.setExternalId(parentCommit.getId().toString());
             configuration.getParents().add(parent);
         }*/
+
+        pi.getProject().addCommit(commit);
     }
 
     /**
