@@ -324,6 +324,16 @@ public class App {
         }
     }
 
+    void mineFromFile(String tool, Map<String, String> loginResults) {
+        List<String> lines = readFile("input\\" + tool + ".txt");
+        for (int i = 0; i < lines.size(); i++) {
+            printLogMsg("======================================");
+            printLogMsg("project: " + (i+1) + "/" + lines.size());
+            printLogMsg("======================================");
+            this.processProjectInstance(lines.get(i), loginResults, tool);
+        }
+    }
+
     private List<String> readFile(String file) {
         List<String> lines = new ArrayList<>();
         BufferedReader reader;
