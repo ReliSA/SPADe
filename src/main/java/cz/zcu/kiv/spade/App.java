@@ -331,7 +331,7 @@ public class App {
         try {
             reader = new BufferedReader(
                         new InputStreamReader(
-                            new FileInputStream(file), StandardCharsets.UTF_8));
+                            new FileInputStream(file), "UTF-8"));
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("//")) break;

@@ -123,7 +123,7 @@ public class CodefacePrinter {
 
         Writer writer = null;
         try {
-            writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), StandardCharsets.UTF_8);
+            writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), "UTF-8");
             StatefulBeanToCsvBuilder<CodefaceBean> builder = new StatefulBeanToCsvBuilder<CodefaceBean>(writer)
                     .withSeparator(',').withQuotechar('"').withEscapechar('"').withMappingStrategy(strategy);
             StatefulBeanToCsv<CodefaceBean> beanToCsv = builder.build();
