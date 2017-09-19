@@ -226,7 +226,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
             count++;
         }
-        App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
+        App.printLogMsg("mined " + (count - 1) + "/" + comments.size() + " commit comments");
     }
 
     /**
@@ -287,7 +287,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
             i++;
         }
-        App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
+        App.printLogMsg("mined " + (i - 1) + "/" + tags.size() + " releases");
     }
 
     /**
@@ -346,7 +346,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
             i++;
         }
-        App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
+        App.printLogMsg("mined " + (i - 1) + "/" + milestones.size() + " milestones");
 
         return iterations;
     }
@@ -423,7 +423,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 count++;
             }
         }
-        App.printLogMsg("mined " + count + " tickets");
+        App.printLogMsg("mined " + (count - 1) + " tickets");
     }
 
     /**
