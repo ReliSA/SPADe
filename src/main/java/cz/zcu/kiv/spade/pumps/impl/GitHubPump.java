@@ -89,7 +89,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         enhanceCommits();
         mineCommitComments();
-        App.printLogMsg("commit comments mining done");
 
         new DBInitializer(em).setDefaultEnums(pi);
 
@@ -97,7 +96,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         Collection<ProjectSegment> iterations = mineIterations();
 
         mineTickets();
-        App.printLogMsg("tickets mining done");
 
         for (WorkUnit unit : pi.getProject().getUnits()) {
             for (ProjectSegment iteration : iterations) {
@@ -121,7 +119,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
 
         getTagDescriptions();
-        App.printLogMsg("tags mining done");
 
         addDeletedStatus();
         assignDefaultEnums();
@@ -227,6 +224,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
             count++;
         }
+        App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
     }
 
     /**
@@ -286,10 +284,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 checkRateLimit();
             }
             i++;
-            if (i == tags.size()) {
-                App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
-            }
         }
+        App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
     }
 
     /**
@@ -347,10 +343,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 checkRateLimit();
             }
             i++;
-            if (i == milestones.size()) {
-                App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
-            }
         }
+        App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
 
         return iterations;
     }
@@ -378,7 +372,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 rootObject = init(true);
             }
         }
-        App.printLogMsg(prCount + " pull requests listed");
 
         int sum = issues.size() - prCount;
 
@@ -422,12 +415,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
                 mineAllMentionedItemsGit(unit);
                 if ((count % 100) == 0) {
-                    App.printLogMsg("mined " + count + "/" + sum + " tickets");
+                    App.printLogMsg("mined " + count + " tickets");
                     checkRateLimit();
                 }
                 count++;
             }
         }
+        App.printLogMsg("mined " + count + " tickets");
     }
 
     /**
