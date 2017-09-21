@@ -121,7 +121,9 @@ public class GitPump extends VCSPump<Repository> {
     public void addTags() {
         RevWalk walk = new RevWalk(rootObject);
 
-        for (Map.Entry<String, Ref> entry : rootObject.getTags().entrySet()) {
+        Set<Map.Entry<String, Ref>> refs = rootObject.getTags().entrySet();
+        int count = 0;
+        for (Map.Entry<String, Ref> entry : refs) {
 
             RevObject any = null;
             try {
@@ -166,7 +168,10 @@ public class GitPump extends VCSPump<Repository> {
             if (commit != null) {
                 commit.getTags().add(tag);
             }
+            count++;
+            if (count % 100 == 0) App.printLogMsg(count + "/" + refs.size() + " tags mined");
         }
+        App.printLogMsg(count + "/" + refs.size() + " tags mined");
         walk.dispose();
     }
 

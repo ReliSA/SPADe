@@ -308,10 +308,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
 
-        System.out.println("releases " + releases.size());
-        System.out.println("tags " + tags.size());
-
-        int i = 1;
+        int i = 0;
         for (GHTag tag : tags) {
             for (GHRelease release : releases) {
                 if (tag.getName().equals(release.getTagName())) {
@@ -322,17 +319,17 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                             if (release.getBody() != null) {
                                 spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
                             }
+                            i++;
+                            if ((i % 100) == 0) {
+                                App.printLogMsg("mined " + i + "/" + releases.size());
+                                checkRateLimit();
+                            }
                         }
                     }
                 }
             }
-            if ((i % 100) == 0) {
-                App.printLogMsg("mined " + i + "/" + tags.size() + " releases");
-                checkRateLimit();
-            }
-            i++;
         }
-        App.printLogMsg("mined " + (i - 1) + "/" + tags.size() + " releases");
+        App.printLogMsg("mined " + i + "/" + releases.size() + " releases (/" + tags.size() + ")");
     }
 
     /**
