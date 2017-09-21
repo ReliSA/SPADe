@@ -20,7 +20,8 @@ public abstract class DescribedEntity extends NamedEntity {
 
     public void setDescription(String description) {
         if (description != null) {
-            this.description = Charset.forName("UTF-8").encode(description).toString();
+            byte[] bytes = description.getBytes();
+            this.description = new String(bytes, Charset.forName("UTF-8"));
         }
     }
 

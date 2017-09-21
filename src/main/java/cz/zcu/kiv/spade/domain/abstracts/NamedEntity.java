@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
 import javax.persistence.MappedSuperclass;
+import java.nio.charset.Charset;
 
 @MappedSuperclass
 public abstract class NamedEntity extends ExternalEntity {
@@ -16,7 +17,10 @@ public abstract class NamedEntity extends ExternalEntity {
     }
 
     public void setName(String name) {
-        this.name = name;
+        if (name != null) {
+            byte[] bytes = name.getBytes();
+            this.name = new String(bytes, Charset.forName("UTF-8"));
+        }
     }
 
 }
