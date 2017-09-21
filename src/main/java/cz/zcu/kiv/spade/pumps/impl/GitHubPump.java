@@ -41,8 +41,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         usernames.add(1, "spade01");
         usernames.add(2, "spade02");
         passwords.add(0, password);
+        usernames.add(3, "spade03");
         passwords.add(1, "papepi48");
         passwords.add(2, "papepi48");
+        passwords.add(3, "papepi48");
     }
 
     @Override
@@ -56,7 +58,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             try {
                 if (wait) Thread.sleep(5000);
                 else {
-                    int index = (usernames.indexOf(username) + 1) % 3;
+                    int index = (usernames.indexOf(username) + 1) % 4;
                     username = usernames.get(index);
                     password = passwords.get(index);
                 }
@@ -87,7 +89,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         pi.getToolInstance().setTool(tool);
         setToolInstance();
 
-        rootObject = init(true);
+        rootObject = init(false);
 
         if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
         Date creation = null;
@@ -410,6 +412,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         int count = 1;
         for (int id = issues.size(); id > 0;) {
 
+            if (((issues.size() - (id - 1)) % 100) == 0) {
+                checkRateLimit();
+            }
+
             GHIssue issue;
             try {
                 issue = rootObject.getIssue(id);
@@ -464,7 +470,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
                 if ((count % 100) == 0) {
                     App.printLogMsg("mined " + count + " tickets");
-                    checkRateLimit();
                 }
                 count++;
             }
