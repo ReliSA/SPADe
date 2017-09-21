@@ -12,7 +12,9 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.*;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.revwalk.*;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
@@ -247,25 +249,40 @@ public class GitPump extends VCSPump<Repository> {
      */
     private List<WorkItemChange> mineChanges(RevCommit commit) {
         List<WorkItemChange> changes = new ArrayList<>();
+        RevTree parentTree = null;
+        if (commit.getParentCount() != 0) parentTree = commit.getParent(0).getTree();
+
+        DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
+        df.setRepository(rootObject);
+        df.setDiffComparator(RawTextComparator.DEFAULT);
+        df.setDetectRenames(true);
+
+        List<DiffEntry> diffs = new ArrayList<>();
+
         try {
-            RevTree parentTree = null;
-            if (commit.getParentCount() != 0) parentTree = commit.getParent(0).getTree();
-
-            DiffFormatter df = new DiffFormatter(DisabledOutputStream.INSTANCE);
-            df.setRepository(rootObject);
-            df.setDiffComparator(RawTextComparator.DEFAULT);
-            df.setDetectRenames(true);
-
-            List<DiffEntry> diffs = df.scan(parentTree, commit.getTree());
-
-            for (DiffEntry diff : diffs) {
-                WorkItemChange change = mineChange(diff, df.toFileHeader(diff).toEditList());
-                changes.add(change);
-            }
-
+            diffs = df.scan(parentTree, commit.getTree());
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        for (DiffEntry diff : diffs) {
+            FileHeader header = null;
+            try {
+                header = df.toFileHeader(diff);
+            } catch (IOException e) {
+                if (e instanceof  MissingObjectException) {
+                    System.out.println("Missing object");
+                    continue;
+                }
+                e.printStackTrace();
+            }
+
+            if (header != null) {
+                WorkItemChange change = mineChange(diff, header.toEditList());
+                changes.add(change);
+            }
+        }
+
         return changes;
     }
 
