@@ -14,30 +14,39 @@ import java.util.TreeMap;
 public class Main extends Application {
 
     public static void main(String[] args) {
-        if (args.length > 0) launch(args);
-        else {
 
-            Properties props = new Properties();
-            try {
-                props.load(new InputStreamReader(new FileInputStream("login.properties"), "UTF8"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Map<String, String> loginResults = new TreeMap<>();
-            for (String key : props.stringPropertyNames()) {
-                loginResults.put(key, props.getProperty(key));
-                if (props.getProperty(key).isEmpty()) loginResults.put(key, null);
-            }
-
-            App app = new App();
-            //app.createBlankDB();
-            //app.processProjectInstance(loginResults.get("url"), loginResults, loginResults.get("tool"));
-            app.mineFromFile(loginResults.get("tool"), loginResults);
-
-            app.close();
-            System.exit(0);
+        Properties props = new Properties();
+        try {
+            props.load(new InputStreamReader(new FileInputStream("login.properties"), "UTF8"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        Map<String, String> loginResults = new TreeMap<>();
+        for (String key : props.stringPropertyNames()) {
+            loginResults.put(key, props.getProperty(key));
+            if (props.getProperty(key).isEmpty()) loginResults.put(key, null);
+        }
+
+        App app = new App();
+
+        if (args.length > 0) {
+            switch (args[0]) {
+                case "giu":
+                    launch(args);
+                    break;
+                case "clean":
+                    app.createBlankDB();
+                    break;
+                case "one":
+                    app.processProjectInstance(loginResults.get("url"), loginResults, loginResults.get("tool"));
+                    break;
+            }
+        } else {
+            app.mineFromFile(loginResults.get("tool"), loginResults);
+        }
+        app.close();
+        System.exit(0);
     }
 
     public void start(Stage primaryStage) {
