@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.domain.abstracts;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import java.nio.charset.Charset;
 
 @MappedSuperclass
 public abstract class DescribedEntity extends NamedEntity {
@@ -18,7 +19,9 @@ public abstract class DescribedEntity extends NamedEntity {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        if (description != null) {
+            this.description = Charset.forName("UTF-8").encode(description).toString();
+        }
     }
 
 }
