@@ -792,6 +792,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 pi.getCategories().add(category);
             }
         }
+        App.printLogMsg("mined " + labels.size() + " labels");
     }
 
     /**
