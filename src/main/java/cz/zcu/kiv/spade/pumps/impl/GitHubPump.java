@@ -458,7 +458,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
 
             if (!issue.isPullRequest()) {
-                WorkUnit unit = new WorkUnit(issue.getNumber());
+                WorkUnit unit = new WorkUnit();
                 unit.setNumber(issue.getNumber());
                 unit.setExternalId(issue.getId() + "");
                 unit.setUrl(issue.getHtmlUrl().toString());
