@@ -19,7 +19,11 @@ public abstract class NamedEntity extends ExternalEntity {
     public void setName(String name) {
         if (name != null) {
             byte[] bytes = name.getBytes();
-            this.name = new String(bytes, Charset.forName("UTF-8"));
+            name = new String(bytes, Charset.forName("UTF-8"));
+            if (name.length() > 255) {
+                name = name.substring(0, 252) + "...";
+            }
+            this.name = name;
         }
     }
 
