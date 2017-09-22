@@ -1,11 +1,16 @@
 package cz.zcu.kiv.spade.pumps.impl;
 
 import cz.zcu.kiv.spade.App;
+import cz.zcu.kiv.spade.dao.PriorityClassificationDAO;
+import cz.zcu.kiv.spade.dao.ResolutionClassificationDAO;
+import cz.zcu.kiv.spade.dao.SeverityClassificationDAO;
+import cz.zcu.kiv.spade.dao.jpa.PriorityClassificationDAO_JPA;
+import cz.zcu.kiv.spade.dao.jpa.ResolutionClassificationDAO_JPA;
+import cz.zcu.kiv.spade.dao.jpa.SeverityClassificationDAO_JPA;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.Category;
-import cz.zcu.kiv.spade.domain.enums.StatusClass;
-import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.abstracts.ComplexPump;
@@ -29,6 +34,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     private List<String> usernames = new ArrayList<>();
     /** list of passwords necessary for continuous mining (rate limit workaround) */
     private List<String> passwords = new ArrayList<>();
+
+    /** DAO object for handling Severity Classification instances */
+    private SeverityClassificationDAO severityDao;
+    /** DAO object for handling Priority Classification instances */
+    private PriorityClassificationDAO priorityDao;
+    /** DAO object for handling Resolution Classification instances */
+    private ResolutionClassificationDAO resolutionDao;
 
     /**
      * a constructor, sets project's URL and login credentials
@@ -99,6 +111,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         setToolInstance();
 
         rootObject = init(false);
+
+        severityDao = new SeverityClassificationDAO_JPA(em);
+        priorityDao = new PriorityClassificationDAO_JPA(em);
+        resolutionDao = new ResolutionClassificationDAO_JPA(em);
 
         if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
         Date creation = null;
@@ -785,12 +801,25 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private boolean isSeverity(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
+        boolean createIfNotFound = false;
+        if (name.contains("severity")) {
+            name = name.replace("severity", "");
+            createIfNotFound = true;
+        }
         for (Severity severity : pi.getSeverities()) {
             if (name.equals(toLetterOnlyLowerCase(severity.getName()))) {
-                severity.setDescription(label.getColor() + "\n" + label.getUrl());
+                severity.setExternalId(label.getUrl());
+                severity.setDescription(label.getColor());
                 severity.setName(label.getName());
                 return true;
             }
+        }
+        if (createIfNotFound) {
+            Severity newSeverity = new Severity(label.getName(), severityDao.findByClass(SeverityClass.UNASSIGNED));
+            newSeverity.setExternalId(label.getUrl());
+            newSeverity.setDescription(label.getColor());
+            pi.getSeverities().add(newSeverity);
+            return true;
         }
         return false;
     }
@@ -802,12 +831,25 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private boolean isPriority(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
+        boolean createIfNotFound = false;
+        if (name.contains("priority")) {
+            name = name.replace("priority", "");
+            createIfNotFound = true;
+        }
         for (Priority priority : pi.getPriorities()) {
             if (name.equals(toLetterOnlyLowerCase(priority.getName()))) {
-                priority.setDescription(label.getColor() + "\n" + label.getUrl());
+                priority.setExternalId(label.getUrl());
+                priority.setDescription(label.getColor());
                 priority.setName(label.getName());
                 return true;
             }
+        }
+        if (createIfNotFound) {
+            Priority newPriority = new Priority(label.getName(), priorityDao.findByClass(PriorityClass.UNASSIGNED));
+            newPriority.setExternalId(label.getUrl());
+            newPriority.setDescription(label.getColor());
+            pi.getPriorities().add(newPriority);
+            return true;
         }
         return false;
     }
@@ -819,12 +861,25 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private boolean isResolution(GHLabel label) {
         String name = toLetterOnlyLowerCase(label.getName());
+        boolean createIfNotFound = false;
+        if (name.contains("resolution")) {
+            name = name.replace("resolution", "");
+            createIfNotFound = true;
+        }
         for (Resolution resolution : pi.getResolutions()) {
             if (name.equals(toLetterOnlyLowerCase(resolution.getName()))) {
-                resolution.setDescription(label.getColor() + "\n" + label.getUrl());
+                resolution.setExternalId(label.getUrl());
+                resolution.setDescription(label.getColor());
                 resolution.setName(label.getName());
                 return true;
             }
+        }
+        if (createIfNotFound) {
+            Resolution newResolution = new Resolution(label.getName(), resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+            newResolution.setExternalId(label.getUrl());
+            newResolution.setDescription(label.getColor());
+            pi.getResolutions().add(newResolution);
+            return true;
         }
         return false;
     }
@@ -838,7 +893,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         String name = toLetterOnlyLowerCase(label.getName());
         for (WorkUnitType type : pi.getWuTypes()) {
             if (name.equals(toLetterOnlyLowerCase(type.getName()))) {
-                type.setDescription(label.getColor() + "\n" + label.getUrl());
+                type.setExternalId(label.getUrl());
+                type.setDescription(label.getColor());
                 type.setName(label.getName());
                 return true;
             }
