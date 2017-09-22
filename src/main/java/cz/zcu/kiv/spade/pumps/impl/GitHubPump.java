@@ -25,10 +25,14 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     /** GitHub instance for getting items. */
     private GitHub gitHub;
+    /** list of usernames necessary for continuous mining (rate limit workaround) */
     private List<String> usernames = new ArrayList<>();
+    /** list of passwords necessary for continuous mining (rate limit workaround) */
     private List<String> passwords = new ArrayList<>();
 
     /**
+     * a constructor, sets project's URL and login credentials
+     *
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
      * @param username      username for authenticated login
@@ -52,6 +56,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return null;
     }
 
+    /**
+     * initializes connection to the GitHub server and swaps user acounts and reconnects if necessary (rate limit runs out)
+     * @param wait true if there should be a 5s waiting period before reconecting, false if users should be switched
+     * @return an instance for mining GitHub data
+     */
     private GHRepository init(boolean wait) {
         GHRepository repo;
         while (true) {
@@ -137,6 +146,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
         getTagDescriptions();
 
+        /*DataPump wikiPump = new GitPump(App.GITHUB_WIKI_REPO_PREFIX + getProjectFullName() + App.GIT_SUFFIX, null, null, null);
+        pi = wikiPump.mineData(em, pi);
+        wikiPump.close();*/
 
         finalTouches();
         return pi;
@@ -179,6 +191,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
     }
 
+    /**
+     * finds and sets a default repository branch
+     */
     private void setDefaultBranch() {
         Map<String, Branch> branches = new HashMap<>();
         for (Commit commit : pi.getProject().getCommits()) {

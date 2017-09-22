@@ -28,10 +28,16 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * Class for handling most of the application logic in SPADe
+ *
+ * @author Petr Pícha
+ */
 public class App {
 
     /** a format for timestamps */
     public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSS");
+    /** the extension of Git repository URLs */
     public static final String GIT_SUFFIX = ".git";
     /** regular expression for Git commit hash */
     public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
@@ -39,27 +45,43 @@ public class App {
     public static final String ROOT_TEMP_DIR = "repos\\";
     /** regular expression for SVN revision marker */
     public static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
-
-    private static final String PERSISTENCE_UNIT_CREATE = "create";
-    private static final String PERSISTENCE_UNIT_UPDATE = "update";
+    /** a prefix of a GitHub repository URL */
     private static final String GITHUB_PREFIX = "https://github.com/";
 
+    /** a JPA persistance unit for updating the SPADe database */
+    private static final String PERSISTENCE_UNIT_UPDATE = "update";
+    /** a JPA persistance unit for creating a blank SPADe database */
+    private static final String PERSISTENCE_UNIT_CREATE = "create";
+
+    /** a stream to print log messages into */
     public static PrintStream log;
+    /** JPA entity manager for updating the SPADe database */
     private EntityManager updateManager;
+    /** JPA entity manager for creating a blank SPADe database */
     private EntityManager createManager;
 
+    /**
+     * default constructor, sets default update entity manager and log print stream
+     */
     public App() {
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
         this.updateManager = factory.createEntityManager();
         log = System.out;
     }
 
+    /**
+     * a constructor, sets default update entity manager and a given log print stream
+     * @param logOutput stream for printing log messages
+     */
     public App(PrintStream logOutput) {
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
         this.updateManager = factory.createEntityManager();
         log = logOutput;
     }
 
+    /**
+     * creates a blank SPADe database
+     */
     public void createBlankDB() {
         printLogMsg("Initializing DB ...");
 
@@ -73,6 +95,12 @@ public class App {
         printLogMsg("DB initialized");
     }
 
+    /**
+     * handles a lifeczcle of mining a project instance (mining, printing output files, uploading to database)
+     * @param url project's URL to mine
+     * @param loginResults a map containing username, password and private kez for accessing the project
+     * @param toolName name of the tool storing the project data (all caps, e.g. GITHUB)
+     */
     public void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
         printLogMsg("mining of " + url + " started...");
 
@@ -88,6 +116,13 @@ public class App {
         printLogMsg("project instance " + pi.getUrl() + " loaded");
     }
 
+    /**
+     * mines the project data
+     * @param url project's URL to mine
+     * @param loginResults a map containing username, password and private kez for accessing the project
+     * @param toolName name of the tool storing the project data (all caps, e.g. GITHUB)
+     * @return a ProjectInstance instance with all the data mined
+     */
     private ProjectInstance mineProjectInstance(String url, Map<String, String> loginResults, String toolName) {
 
         Tool tool = Tool.valueOf(toolName);
@@ -127,11 +162,19 @@ public class App {
         return pi;
     }
 
+    /**
+     * uploads the ProjectInstance data to the database
+     * @param pi instance of the project containing all the data
+     */
     private void loadProjectInstance(ProjectInstance pi) {
         Loader loader = new Loader(updateManager);
         loader.loadProjectInstance(pi);
     }
 
+    /**
+     * prints the output files from the data in ProjectInstance
+     * @param pi mined data
+     */
     private void printProjectInstance(ProjectInstance pi) {
         TimelineFilePrinter timelinePrinter = new TimelineFilePrinter();
         CocaexFilePrinter cocaexPrinter = new CocaexFilePrinter();
@@ -145,18 +188,31 @@ public class App {
         codefacePrinter.print(pi);
     }
 
+    /**
+     * gets all the ProjectInstance URLs from the database
+     * @return list of URLs
+     */
     public List<String> getProjects() {
         ProjectInstanceDAO dao = new ProjectInstanceDAO_JPA(updateManager);
 
         return dao.selectAllUrls();
     }
 
+    /**
+     * mines a project already in the database (deletes previous instance and mines a current one)
+     * @param url URL of the project instance
+     * @param loginResults a map containing username, password and private kez for accessing the project
+     * @return current ProjectInstance data
+     */
     private ProjectInstance remineProjectInstance(String url, Map<String, String> loginResults) {
         ToolInstanceDAO dao = new ToolInstanceDAO_JPA(updateManager);
         Tool tool = dao.findToolByProjectInstanceUrl(url);
         return mineProjectInstance(url, loginResults, tool.name());
     }
 
+    /**
+     * closes the application (the entity managers)
+     */
     public void close() {
         updateManager.close();
         if (createManager != null && createManager.isOpen()) {
@@ -164,6 +220,11 @@ public class App {
         }
     }
 
+    /**
+     * tries to guess the source tool of the project base on the URL
+     * @param toolString URL of the project
+     * @return the guessed tool name
+     */
     public String guessTool(String toolString) {
         String toolName = "";
 
@@ -187,6 +248,12 @@ public class App {
         return toolName;
     }
 
+    /**
+     * gets the names of selected enumeration values (e.g. priorities) used in the project from database
+     * @param entity an EntityStrings instance for the particular enumeration (e.g. priority)
+     * @param url project's URL (if null gets for all the projects)
+     * @return collection of enumeration values
+     */
     public Collection<String> getEnumsByPrjUrl(EnumStrings entity, String url) {
         ProjectInstanceDAO dao = new ProjectInstanceDAO_JPA(updateManager);
 
@@ -194,6 +261,12 @@ public class App {
         else return dao.selectEnumsByPrjUrl(entity, url);
     }
 
+    /**
+     * gets a cout of WorkUnits in a project with null value of a given enumeration (e.g. priority) from database
+     * @param entity an EntityStrings instance for the particular enumeration (e.g. priority)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits with enumeration value null
+     */
     public int getUnitCountWithNullEnum(EnumStrings entity, String url) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
 
@@ -201,6 +274,14 @@ public class App {
         else return dao.getUnitCountWithNullEnum(entity, url);
     }
 
+    /**
+     * gets number of WorkUnits in a project with a specific name value (e.g. normal) of a given enumeration (e.g. priority)
+     * from database
+     * @param entity an EntityStrings instance for the particular enumeration (e.g. priority)
+     * @param url project's URL (if null gets for all the projects)
+     * @param name searched enumeration name value
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountByEnumName(EnumStrings entity, String url, String name) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
 
@@ -208,6 +289,14 @@ public class App {
         else return dao.getUnitCountByEnumName(entity, url, name);
     }
 
+    /**
+     * get a count of WorkUnits in a project with a specific value (e.g. NORMAL) of a specific enumeration field
+     * (class or superclass) of priority from the database
+     * @param field class or superclass
+     * @param name field value (e.g. NORMAL)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountByPriority(String field, String name, String url) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
 
@@ -228,6 +317,14 @@ public class App {
         return result;
     }
 
+    /**
+     * get a count of WorkUnits in a project with a specific value (e.g. OPEN) of a specific enumeration field
+     * (class or superclass) of status from the database
+     * @param field class or superclass
+     * @param name field value (e.g. OPEN)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountByStatus(String field, String name, String url) {
 
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
@@ -247,6 +344,14 @@ public class App {
         return result;
     }
 
+    /**
+     * get a count of WorkUnits in a project with a specific value (e.g. INVALID) of a specific enumeration field
+     * (class or superclass) of resolution from the database
+     * @param field class or superclass
+     * @param name field value (e.g. INVALID)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountByResolution(String field, String name, String url) {
 
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
@@ -267,6 +372,14 @@ public class App {
         return result;
     }
 
+    /**
+     * get a count of WorkUnits in a project with a specific value (e.g. NORMAL) of a specific enumeration field
+     * (class or superclass) of severity from the database
+     * @param field class or superclass
+     * @param name field value (e.g. NORMAL)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountBySeverity(String field, String name, String url) {
 
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
@@ -288,6 +401,14 @@ public class App {
         return result;
     }
 
+    /**
+     * get a count of WorkUnits in a project with a specific value (e.g. BUGFIX) of a specific enumeration field
+     * (class or superclass) of type from the database
+     * @param field class or superclass
+     * @param name field value (e.g. BUGFIX)
+     * @param url project's URL (if null gets for all the projects)
+     * @return number of WorkUnits fitting the criteria
+     */
     public int getUnitCountByType(String field, String name, String url) {
 
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
@@ -302,14 +423,27 @@ public class App {
         return result;
     }
 
+    /**
+     * prints a message with a timestamp to the log output
+     * @param message a message
+     */
     public static void printLogMsg(String message) {
         log.println(getTimeStamp() + ": " + message);
     }
 
+    /**
+     * gets a timestamp for a log message
+     * @return timestamp
+     */
     private static String getTimeStamp() {
         return TIMESTAMP.format(System.currentTimeMillis());
     }
 
+    /**
+     * mines multiple projects one by one from an input file named after a tool;
+     * first 3 lines should specify username, password and private key for accessing the projects (in that order)
+     * @param tool tool name (all caps, e.g. GITHUB)
+     */
     public void mineFromFile(String tool) {
         List<String> lines = readFile("input\\" + tool + ".txt");
 
@@ -324,6 +458,11 @@ public class App {
         }
     }
 
+    /**
+     * mines multiple projects one by one from an input file named after a tool
+     * @param tool tool name (all caps, e.g. GITHUB)
+     * @param loginResults a map containing username, password and private key for accessing the projects
+     */
     void mineFromFile(String tool, Map<String, String> loginResults) {
         List<String> lines = readFile("input\\" + tool + ".txt");
         for (int i = 0; i < lines.size(); i++) {
@@ -334,6 +473,11 @@ public class App {
         }
     }
 
+    /**
+     * reads an input file untill the line starting with "\\"
+     * @param file input file name
+     * @return list of lines read
+     */
     private List<String> readFile(String file) {
         List<String> lines = new ArrayList<>();
         BufferedReader reader;

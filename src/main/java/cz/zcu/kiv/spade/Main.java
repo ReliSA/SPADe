@@ -11,8 +11,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
+/**
+ * Main class of the SPADe application
+ *
+ * @author Petr Pícha
+ */
 public class Main extends Application {
 
+    /**
+     * runs the whole application, handles command line parameters
+     */
     public static void main(String[] args) {
 
         Properties props = new Properties();
@@ -49,6 +57,7 @@ public class Main extends Application {
         System.exit(0);
     }
 
+    @Override
     public void start(Stage primaryStage) {
         new SPADeGUI().showMainWindow(primaryStage);
     }

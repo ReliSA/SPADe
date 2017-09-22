@@ -391,6 +391,11 @@ public class GitPump extends VCSPump<Repository> {
         return branch;
     }
 
+    /**
+     * gets branch proper name from its reference name
+     * @param name reference name
+     * @return branch name
+     */
     private String stripBranchName(String name) {
         return name.replace("refs/heads/", "");
     }

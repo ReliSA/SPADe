@@ -13,6 +13,11 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * class for printing Timeline JSON files
+ *
+ * @author Petr Pícha
+ */
 public class TimelineFilePrinter {
 
     private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

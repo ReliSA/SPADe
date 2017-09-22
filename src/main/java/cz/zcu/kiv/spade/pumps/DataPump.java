@@ -14,7 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * generic data pump
+ * Generic data pump
+ *
+ * @author Petr Pícha
  */
 public abstract class DataPump<RootObjectType> {
 
@@ -87,7 +89,7 @@ public abstract class DataPump<RootObjectType> {
 
     /**
      * gathers all data needed from project instance
-     *
+     * @param em JPA entitny manager for accessing the database
      * @return ProjectInstrance with all data
      */
     public ProjectInstance mineData(EntityManager em) {
@@ -690,8 +692,17 @@ public abstract class DataPump<RootObjectType> {
         }
     }
 
+    /**
+     * mines all the mentions of WorkItems from other WorkItem's data and creates links where necessary
+     */
     protected abstract void mineMentions();
 
+    /**
+     * performs a few tasks at the end of mining`
+     * add the "deleted" status to possibly deleted WorkUnits found,
+     * assigns default enumeration values to WorkUnits with none set yet,
+     * mines mentions among the WorkItems
+     */
     protected void finalTouches() {
         addDeletedStatus();
         assignDefaultEnums();

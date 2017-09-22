@@ -16,16 +16,27 @@ import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
 import javax.persistence.EntityManager;
 import java.util.*;
 
+/**
+ * a pump for mining Redmine data
+ *
+ * @author Petr Pícha
+ */
 public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
+    /**  a representation of a Redmine project from taskadapter.redmineapi */
     private com.taskadapter.redmineapi.bean.Project redmineProject;
-
+    /** DAO object for handling Severity Classification instances */
     private SeverityClassificationDAO severityDao;
+    /** DAO object for handling Priority Classification instances */
     private PriorityClassificationDAO priorityDao;
+    /** DAO object for handling Work Unit Type Classification instances */
     private WorkUnitTypeClassificationDAO typeDao;
+    /** DAO object for handling Role Classification instances */
     private RoleClassificationDAO roleDao;
 
     /**
+     * constructor, sets projects URL and login credentials
+     *
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
      * @param username      username for authenticated login
@@ -125,6 +136,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines custom issue categories in Redmine project
+     */
     private void mineCategories() {
         Collection<IssueCategory> issueCategories = new LinkedHashSet<>();
 
@@ -142,6 +156,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines projects wiki
+     */
     private void mineWiki() {
         Map<String, Artifact> wikies = new HashMap<>();
 
@@ -160,6 +177,10 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         linkWikiPages(wikies);
     }
 
+    /**
+     * links parent and children wiki pages
+     * @param wikies map of wiki pages
+     */
     private void linkWikiPages(Map<String, Artifact> wikies) {
         WikiManager wikiMgr = rootObject.getWikiManager();
         List<WikiPage> pages = new ArrayList<>();
@@ -187,6 +208,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mine a sigular wiki page
+     */
     private Artifact mineWikiPage(WikiPage page) {
         WikiManager wikiMgr = rootObject.getWikiManager();
 
@@ -223,6 +247,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return artifact;
     }
 
+    /**
+     * mines data of users with access to the project
+     */
     private void minePeople() {
         Map<String, Group> groupMap = new HashMap<>();
         List<Membership> memberships = new ArrayList<>();
@@ -258,6 +285,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
     }
 
+    /**
+     * gets a Role instance with a given name
+     * @param name role name
+     * @return Role instance or null
+     */
     private Role resolveRole(String name) {
         for (Role role : pi.getRoles()) {
             if (name.equals(role.getName())) {
@@ -328,6 +360,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines a configuration/action of closing an issue
+     * @param unit WorkUnit (issue)
+     * @param closedOn date of closure
+     */
     private void generateClosureConfig(WorkUnit unit, Date closedOn) {
         WorkItemChange change = new WorkItemChange();
         change.setName("MODIFY");
@@ -343,6 +380,10 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.getProject().getConfigurations().add(closure);
     }
 
+    /**
+     * mines a configuration/action of creating an issue
+     * @param unit WorkUnit (issue)
+     */
     private void generateCreationConfig(WorkUnit unit) {
 
         WorkItemChange change = new WorkItemChange();
@@ -358,6 +399,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.getProject().getConfigurations().add(creation);
     }
 
+    /**
+     * mines relation between issues
+     * @param issue (not yet mined) issue
+     * @param unit already mined issue (a.k.a. WorkUnit)
+     */
     private void mineRelations(Issue issue, WorkUnit unit) {
 
         if (issue.getParentId() != null) {
@@ -371,6 +417,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines revisions linked to the issue
+     * @param unit issue
+     * @param changesets changesets (revisions) linked to the issue
+     */
     private void mineRevisions(WorkUnit unit, Collection<Changeset> changesets) {
         for (Changeset changeset : changesets) {
             if (pi.getProject().containsCommit(changeset.getRevision())) {
@@ -380,6 +431,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines issue historz
+     * @param unit issue
+     * @param journals journals (history entries)
+     */
     private void mineHistory(WorkUnit unit, Collection<Journal> journals) {
         Collection<Configuration> configurations = new LinkedHashSet<>();
         for (Journal journal : journals) {
@@ -398,6 +454,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.getProject().getConfigurations().addAll(configurations);
     }
 
+    /**
+     * mines issue field changes from a historz record
+     * @param details historz record
+     * @return list of field changes
+     */
     private List<FieldChange> mineChanges(List<JournalDetail> details) {
         List<FieldChange> changes = new ArrayList<>();
         for (JournalDetail detail : details) {
@@ -410,6 +471,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return changes;
     }
 
+    /**
+     * mines attachements of an issue or wiki page
+     * @param attachments attachments
+     * @param item issue or wiki page
+     */
     private void mineAttachments(Collection<Attachment> attachments, WorkItem item) {
         for (Attachment attachment : attachments) {
             Artifact artifact = new Artifact();
@@ -440,6 +506,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines issue categories and tags/labels, matches them to the ones used in project or creates new ones in the project
+     * @param issue issue
+     * @return collection of categories
+     */
     private Collection<Category> resolveCategories(Issue issue) {
         Collection<Category> categories = new LinkedHashSet<>();
 
@@ -475,6 +546,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return categories;
     }
 
+    /**
+     * matches the issue severity to one of the values used in the project
+     * @param issue issue
+     * @return corresponding Severity instance or null
+     */
     private Severity resolveSeverity(Issue issue) {
         for (CustomField field : issue.getCustomFields()) {
             if (field.getName().toLowerCase().equals("severity")) {
@@ -489,6 +565,12 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return null;
     }
 
+    /**
+     * mines spent time log entries
+     * @param unit issue
+     * @param id issue's id
+     * @return spent time total
+     */
     private double getSpentTimeFromEntries(WorkUnit unit, Integer id) {
         double spentTime = 0;
         List<TimeEntry> entries = new ArrayList<>();
@@ -504,6 +586,12 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return spentTime;
     }
 
+    /**
+     * mines a log time entry
+     * @param unit issue
+     * @param spentTimeBefore time spent on the issue previous to this entry
+     * @param entry log time entry
+     */
     private void generateLogTimeConfiguration(WorkUnit unit, double spentTimeBefore, TimeEntry entry) {
         CommittedConfiguration configuration = new CommittedConfiguration();
         configuration.setExternalId(entry.getId().toString());
@@ -528,6 +616,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.getProject().getConfigurations().add(configuration);
     }
 
+    /**
+     * matches the issue priority to one of the values used in the project
+     * @param name priority value
+     * @return corresponding Priority instance or null
+     */
     private Priority resolvePriorty(String name) {
         for (Priority priority : pi.getPriorities()) {
             if (name.equals(priority.getName())) {
@@ -537,6 +630,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return null;
     }
 
+    /**
+     * matches the issue type to one of the values used in the project
+     * @param name type value
+     * @return corresponding WorkUnitType instance or null
+     */
     private WorkUnitType resolveType(String name) {
         for (WorkUnitType type : pi.getWuTypes()) {
             if (name.equals(type.getName())) {
@@ -546,6 +644,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return null;
     }
 
+    /**
+     * matches the issue status to one of the values used in the project
+     * @param name status value
+     * @return corresponding Status instance or null
+     */
     private Status resolveStatus(String name) {
         for (Status status : pi.getStatuses()) {
             if (name.equals(status.getName())) {
@@ -555,6 +658,12 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return null;
     }
 
+    /**
+     * mines user identity
+     * @param id user ID
+     * @param name user name
+     * @return Identity instance
+     */
     private Identity generateIdentity(Integer id, String name) {
         Identity identity = new Identity();
         if (id == null) {
@@ -624,6 +733,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         mineSeverities();
     }
 
+    /**
+     * mines all the severity values used in the project (if there are any)
+     */
     private void mineSeverities() {
 
         List<CustomFieldDefinition> defs = new ArrayList<>();
@@ -654,6 +766,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines all the roles used in the project
+     */
     private void mineRoles() {
 
         List<com.taskadapter.redmineapi.bean.Role> roles = new ArrayList<>();
@@ -680,6 +795,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines all the status values used in the project
+     */
     private void mineStatuses() {
 
         List<IssueStatus> statuses = new ArrayList<>();
@@ -706,6 +824,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines all the priority values used in the project
+     */
     private void minePriorities() {
 
         List<IssuePriority> priorities = new ArrayList<>();
@@ -732,6 +853,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
+    /**
+     * mines all the issue type values used in the project
+     */
     private void mineWUTypes() {
 
         for (Tracker tracker : redmineProject.getTrackers()) {
