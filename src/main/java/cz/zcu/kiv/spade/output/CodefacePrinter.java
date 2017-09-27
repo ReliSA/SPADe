@@ -17,7 +17,7 @@ public class CodefacePrinter {
 
     public void print(ProjectInstance pi) {
 
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 
         List<CodefaceBean> beans = new ArrayList<>();
 
