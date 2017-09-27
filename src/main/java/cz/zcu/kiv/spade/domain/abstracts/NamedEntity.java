@@ -1,5 +1,8 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
+import com.vdurmont.emoji.EmojiParser;
+import org.mozilla.universalchardet.UniversalDetector;
+
 import javax.persistence.MappedSuperclass;
 import java.nio.charset.Charset;
 
@@ -18,13 +21,11 @@ public abstract class NamedEntity extends ExternalEntity {
 
     public void setName(String name) {
         if (name != null) {
-            byte[] bytes = name.getBytes();
-            name = new String(bytes, Charset.forName("UTF-8"));
+            name = EmojiParser.parseToAliases(name);
             if (name.length() > 255) {
                 name = name.substring(0, 252) + "...";
             }
             this.name = name;
         }
     }
-
 }

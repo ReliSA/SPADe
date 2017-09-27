@@ -1,5 +1,7 @@
 package cz.zcu.kiv.spade.domain.abstracts;
 
+import com.vdurmont.emoji.EmojiParser;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import java.nio.charset.Charset;
@@ -20,8 +22,7 @@ public abstract class DescribedEntity extends NamedEntity {
 
     public void setDescription(String description) {
         if (description != null) {
-            byte[] bytes = description.getBytes();
-            this.description = new String(bytes, Charset.forName("UTF-8"));
+            this.description = EmojiParser.parseToAliases(description);
         }
     }
 
