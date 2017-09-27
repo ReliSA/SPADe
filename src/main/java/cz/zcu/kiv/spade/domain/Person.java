@@ -60,7 +60,7 @@ public class Person extends NamedEntity {
         Set<String> emails = new TreeSet<>();
         for (Identity identity : identities) {
             if (identity.getEmail() == null || identity.getEmail().isEmpty()) {
-                emails.add(identity.getName());
+                if (!identity.getDescription().isEmpty()) emails.add(identity.getDescription());
             }
             else emails.add(identity.getEmail());
         }
