@@ -346,7 +346,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     Commit commit = pi.getProject().getCommit(tag.getCommit().getSHA1().substring(0, 7));
                     for (VCSTag spadeTag : commit.getTags()) {
                         if (spadeTag.getName().equals(tag.getName())) {
-                            spadeTag.setDescription(release.getName());
+                            if (release.getName() != null) spadeTag.setDescription(release.getName());
                             if (release.getBody() != null) {
                                 spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
                             }
