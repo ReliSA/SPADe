@@ -558,7 +558,7 @@ public abstract class DataPump<RootObjectType> {
     /**
      * assigns default sets of enumeration values (priorities, severities, statuses, resolutions and Work Unit types) to the Project Instance
      */
-    protected void assignDefaultEnums() {
+    private void assignDefaultEnums() {
         for (WorkUnit unit : pi.getProject().getUnits()) {
             assignDefaultPriority(unit);
             assignDefaultSeverity(unit);
@@ -678,7 +678,7 @@ public abstract class DataPump<RootObjectType> {
      * (a mention of them exist, but URL can't be found); if at least one such unit exists,
      * it adds the new status to the Project instance as well
      */
-    protected void addDeletedStatus() {
+    private void addDeletedStatus() {
         Status delStatus = new Status("deleted", statusDao.findByClass(StatusClass.DELETED));
         boolean add = true;
         for (WorkUnit unit : pi.getProject().getUnits()) {
