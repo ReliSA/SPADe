@@ -8,7 +8,6 @@ import com.opencsv.exceptions.CsvRequiredFieldEmptyException;
 import cz.zcu.kiv.spade.domain.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +122,7 @@ public class CodefacePrinter {
 
         Writer writer = null;
         try {
-            writer = new OutputStreamWriter(new FileOutputStream("csv/" + name + ".csv"), "UTF-8");
+            writer = new OutputStreamWriter(new FileOutputStream("output/csv/" + name + ".csv"), "UTF-8");
             StatefulBeanToCsvBuilder<CodefaceBean> builder = new StatefulBeanToCsvBuilder<CodefaceBean>(writer)
                     .withSeparator(',').withQuotechar('"').withEscapechar('"').withMappingStrategy(strategy);
             StatefulBeanToCsv<CodefaceBean> beanToCsv = builder.build();

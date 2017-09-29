@@ -151,7 +151,7 @@ public class CocaexFilePrinter {
         try {
             pw = new PrintWriter(
                     new OutputStreamWriter(
-                            new FileOutputStream("cocaex/" + pi.getName() + "-" + pi.getToolInstance().getTool().name() + ".json")
+                            new FileOutputStream("output/cocaex/" + pi.getName() + "-" + pi.getToolInstance().getTool().name() + ".json")
                             , StandardCharsets.UTF_8), true);
             pw.print(root.toString(1));
         } catch (FileNotFoundException e) {
