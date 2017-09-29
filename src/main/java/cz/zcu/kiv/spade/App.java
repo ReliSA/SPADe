@@ -166,6 +166,8 @@ public class App {
                 pump.close();
             }
         }
+        ProjectInstance pi = pump.mineData(updateManager);
+        pump.close();
 
         return pi;
     }
@@ -473,11 +475,40 @@ public class App {
      */
     void mineFromFile(String tool, Map<String, String> loginResults) {
         List<String> lines = readFile("input\\" + tool + ".txt");
-        for (int i = 0; i < lines.size(); i++) {
+        boolean[] successes = new boolean[lines.size()];
+        for (int i = 0; i < successes.length; i++) {
+            successes[i] = false;
+        }
+
+        int i = 0;
+        while (true) {
+            boolean overallSuccess = true;
+
+            for (boolean success : successes) {
+                if (!success){
+                    overallSuccess = false;
+                    break;
+                }
+            }
+            if (overallSuccess) break;
+
+            if (successes[i]) continue;
+
             log.println("======================================");
             log.println("\t\tproject: " + (i+1) + "/" + lines.size());
             log.println("======================================");
-            this.processProjectInstance(lines.get(i), loginResults, tool);
+            for (int attempt = 0; attempt < 3; attempt++) {
+                try {
+                    this.processProjectInstance(lines.get(i), loginResults, tool);
+                    successes[i] = true;
+                    printLogMsg(lines.get(i) + " - mining successful");
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    successes[i] = false;
+                }
+            }
+            i = (i + 1) % lines.size();
         }
     }
 
