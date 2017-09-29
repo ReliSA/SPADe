@@ -88,6 +88,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 App.printLogMsg("connected...");
                 System.out.println("username: " + username + ", remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
                 repo = gitHub.getRepository(getProjectFullName());
+                if (limit.remaining < 500) continue;
                 break;
             } catch (IOException e) {
                 System.out.println(e.toString());
