@@ -1,6 +1,7 @@
 package cz.zcu.kiv.spade.domain;
 
 import cz.zcu.kiv.spade.domain.abstracts.DescribedEntity;
+import cz.zcu.kiv.spade.output.StatsBean;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -21,6 +22,7 @@ public class ProjectInstance extends DescribedEntity {
     private Collection<Role> roles;
     private Collection<Relation> relations;
     private Collection<Category> categories;
+    private StatsBean stats;
 
     public ProjectInstance() {
         super();
@@ -33,6 +35,7 @@ public class ProjectInstance extends DescribedEntity {
         this.roles = new LinkedHashSet<>();
         this.relations = new LinkedHashSet<>();
         this.categories = new LinkedHashSet<>();
+        this.stats = new StatsBean();
     }
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
@@ -142,5 +145,10 @@ public class ProjectInstance extends DescribedEntity {
 
     public void setCategories(Collection<Category> categories) {
         this.categories = categories;
+    }
+
+    @Transient
+    public StatsBean getStats() {
+        return stats;
     }
 }

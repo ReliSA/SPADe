@@ -106,12 +106,15 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         DataPump gitPump = new GitPump(projectHandle, null, null, null);
         pi = gitPump.mineData(em);
         gitPump.close();
+        pi.getStats().setRepo(System.currentTimeMillis());
 
         this.tool = Tool.GITHUB;
         pi.getToolInstance().setTool(tool);
         setToolInstance();
 
         rootObject = init(false);
+
+        pi.getStats().setName(getProjectFullName());
 
         severityDao = new SeverityClassificationDAO_JPA(em);
         priorityDao = new PriorityClassificationDAO_JPA(em);
@@ -208,6 +211,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private void setDefaultBranch() {
         String defaultBranch = rootObject.getDefaultBranch();
+        pi.getStats().setDefaultBranch(defaultBranch);
         if (!defaultBranch.equals("master")) {
             Map<String, Branch> branches = new HashMap<>();
             for (Commit commit : pi.getProject().getCommits()) {
@@ -270,6 +274,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             count++;
         }
         App.printLogMsg("mined " + (count - 1) + "/" + comments.size() + " commit comments");
+        pi.getStats().setCommitComments(comments.size());
     }
 
     private Configuration generateCommitCommentConfig(Commit commit, GHCommitComment comment) {
@@ -366,6 +371,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
         App.printLogMsg("mined " + i + "/" + releases.size() + " releases (/" + tags.size() + ")");
+        pi.getStats().setTags2(i);
+        pi.getStats().setReleases(releases.size());
     }
 
     /**
@@ -425,6 +432,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             i++;
         }
         App.printLogMsg("mined " + (i - 1) + "/" + milestones.size() + " milestones");
+        pi.getStats().setMilestones(milestones.size());
 
         return iterations;
     }
@@ -441,6 +449,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     public void mineTickets() {
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
         App.printLogMsg(issues.size() + " issues listed");
+        pi.getStats().setIssues(issues.size());
 
         int count = 1;
         for (int id = issues.size(); id > 0;) {
@@ -511,6 +520,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             id--;
         }
         App.printLogMsg("mined " + (count - 1) + " tickets");
+        pi.getStats().setRealIssues(count - 1);
     }
 
     /**
@@ -549,6 +559,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 rootObject = init(true);
             }
         }
+        pi.getStats().setIssueComments(pi.getStats().getIssueComments() + comments.size());
+
         for (GHIssueComment comment : comments) {
             pi.getProject().getConfigurations().add(generateUnitCommentConfig(unit, comment));
         }
@@ -803,6 +815,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
         App.printLogMsg("mined " + labels.size() + " labels");
+        pi.getStats().setLabels(labels.size());
+        pi.getStats().setCategories(pi.getCategories().size());
     }
 
     /**

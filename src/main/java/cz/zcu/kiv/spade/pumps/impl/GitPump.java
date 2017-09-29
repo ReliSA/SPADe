@@ -174,6 +174,7 @@ public class GitPump extends VCSPump<Repository> {
             if (count % 100 == 0) App.printLogMsg(count + "/" + refs.size() + " tags mined");
         }
         App.printLogMsg(count + "/" + refs.size() + " tags mined");
+        pi.getStats().setTags(count);
         walk.dispose();
     }
 
@@ -212,6 +213,8 @@ public class GitPump extends VCSPump<Repository> {
             if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
         }
         App.printLogMsg(count + " commits mined (" + original + " originals)");
+        pi.getStats().setCommits(pi.getStats().getCommits() + original);
+        pi.getStats().getBranchList().put(branch.getName(), count);
         revWalk.dispose();
     }
 
