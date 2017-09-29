@@ -103,17 +103,25 @@ public class App {
      */
     public void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
         printLogMsg("mining of " + url + " started...");
+        long startTime = System.currentTimeMillis();
 
         ProjectInstance pi;
         if (toolName == null) pi = this.remineProjectInstance(url, loginResults);
         else pi = this.mineProjectInstance(url, loginResults, toolName);
         printLogMsg("project instance " + pi.getUrl() + " mined");
+        long miningTime = System.currentTimeMillis();
+        printLogMsg("mining took " + TIMESTAMP.format(new Date(miningTime - startTime - 3600000)));
 
         this.printProjectInstance(pi);
         printLogMsg("project instance " + pi.getUrl() + " printed");
+        long printingTime = System.currentTimeMillis();
+        printLogMsg("printing took " + TIMESTAMP.format(new Date(printingTime - miningTime - 3600000)));
 
         this.loadProjectInstance(pi);
         printLogMsg("project instance " + pi.getUrl() + " loaded");
+        long loadingTime = System.currentTimeMillis();
+        printLogMsg("loading took " + TIMESTAMP.format(new Date(loadingTime - printingTime - 3600000)));
+        printLogMsg("processing took " + TIMESTAMP.format(new Date(loadingTime - startTime - 3600000)));
     }
 
     /**
