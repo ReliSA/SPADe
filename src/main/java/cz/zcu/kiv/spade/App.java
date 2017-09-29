@@ -477,6 +477,7 @@ public class App {
         }
 
         int i = 0;
+        Scanner s = new Scanner(System.in, "UTF-8");
         while (true) {
             boolean overallSuccess = true;
 
@@ -502,10 +503,12 @@ public class App {
                 } catch (Exception e) {
                     e.printStackTrace();
                     successes[i] = false;
+                    s.nextLine();
                 }
             }
             i = (i + 1) % lines.size();
         }
+        s.close();
     }
 
     /**
