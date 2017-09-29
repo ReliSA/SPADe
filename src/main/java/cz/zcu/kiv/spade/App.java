@@ -154,18 +154,6 @@ public class App {
 
         }*/
 
-        ProjectInstance pi = null;
-        try {
-            if (pump != null) {
-                pi = pump.mineData(updateManager);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            if (pump != null) {
-                pump.close();
-            }
-        }
         ProjectInstance pi = pump.mineData(updateManager);
         pump.close();
 
