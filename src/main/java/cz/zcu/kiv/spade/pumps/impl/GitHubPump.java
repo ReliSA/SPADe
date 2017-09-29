@@ -212,17 +212,19 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      * finds and sets a default repository branch
      */
     private void setDefaultBranch() {
-        Map<String, Branch> branches = new HashMap<>();
-        for (Commit commit : pi.getProject().getCommits()) {
-            for (Branch branch : commit.getBranches()) {
-                if (!branches.containsKey(branch.getName())) {
-                    branch.setIsMain(false);
-                    branches.put(branch.getName(), branch);
+        String defaultBranch = rootObject.getDefaultBranch();
+        if (!defaultBranch.equals("master")) {
+            Map<String, Branch> branches = new HashMap<>();
+            for (Commit commit : pi.getProject().getCommits()) {
+                for (Branch branch : commit.getBranches()) {
+                    if (!branches.containsKey(branch.getName())) {
+                        branch.setIsMain(false);
+                        branches.put(branch.getName(), branch);
+                    }
                 }
             }
+            branches.get(defaultBranch).setIsMain(true);
         }
-
-        branches.get(rootObject.getDefaultBranch()).setIsMain(true);
     }
 
     /**
