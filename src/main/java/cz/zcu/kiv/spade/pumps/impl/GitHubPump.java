@@ -590,6 +590,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         change.setChangedItem(unit);
 
         Configuration configuration = new Configuration();
+        configuration.setExternalId(comment.getId() + "");
         configuration.setDescription(comment.getBody().trim());
 
         GHUser user;
