@@ -4,10 +4,7 @@ import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -22,11 +19,16 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
         entityManager.getTransaction().begin();
 
         ProjectInstance ret;
-        if (pi.getId() == 0) {
-            entityManager.persist(pi);
-            ret = pi;
-        } else {
-            ret = entityManager.merge(pi);
+        try {
+            if (pi.getId() == 0) {
+                entityManager.persist(pi);
+                ret = pi;
+            } else {
+                ret = entityManager.merge(pi);
+            }
+        } catch (PersistenceException e) {
+            entityManager.getTransaction().rollback();
+            throw e;
         }
 
         entityManager.getTransaction().commit();
