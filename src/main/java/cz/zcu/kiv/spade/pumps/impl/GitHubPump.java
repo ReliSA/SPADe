@@ -177,12 +177,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         for (Commit commit : pi.getProject().getCommits()) {
             // unit mentions from commit messages
             mineMentionedUnits(commit, commit.getDescription());
-            for (ConfigPersonRelation relation : commit.getRelations()) {
-                if (relation.getName().equals("Commented-on-by")) {
-                    // from commit comments
-                    mineAllMentionedItemsGit(commit, relation.getDescription());
-                }
-            }
             for (VCSTag tag : commit.getTags()) {
                 if (!tags.contains(tag)) {
                     // from release descriptions
@@ -199,8 +193,9 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             if (!(configuration instanceof Commit || configuration instanceof CommittedConfiguration)) {
                 for (WorkItemChange change : configuration.getChanges()) {
                     // from issue comments
-                    if (change.getChangedItem() instanceof WorkUnit &&
-                            change.getName().equals("COMMENT")) {
+                    if ((change.getChangedItem() instanceof WorkUnit
+                            || change.getChangedItem() instanceof Commit)
+                            && change.getName().equals("COMMENT")) {
                         mineAllMentionedItemsGit(change.getChangedItem(), configuration.getDescription());
                     }
                 }
@@ -244,8 +239,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         List<GHCommitComment> comments = rootObject.listCommitComments().asList();
         int count = 1;
         for (GHCommitComment comment : comments) {
-            Commit commit;
-            ConfigPersonRelation relation = new ConfigPersonRelation();
 
             GHCommit ghCommit = null;
 
@@ -254,8 +247,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     ghCommit = comment.getCommit();
                     break;
                 } catch (IOException e) {
-                   if (e instanceof FileNotFoundException) break;
-                   else rootObject = init(true);
+                    if (e instanceof FileNotFoundException) break;
+                    else rootObject = init(true);
                 }
             }
 
@@ -264,38 +257,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 continue;
             }
 
-            GHUser user;
-            while (true) {
-                try {
-                    user = comment.getUser();
-                    break;
-                } catch (IOException e) {
-                     rootObject = init(true);
-                }
-            }
-            relation.setPerson(addPerson(generateIdentity(user)));
-
+            Commit commit;
             commit = pi.getProject().getCommit(ghCommit.getSHA1().substring(0, 7));
 
-            if (relation.getPerson() != null && commit != null) {
-                relation.setName("Commented-on-by");
-                relation.setExternalId(comment.getId() + "");
-
-                Date date;
-                while(true) {
-                    try {
-                        date = comment.getCreatedAt();
-                        break;
-                    } catch (IOException e) {
-                        rootObject = init(true);
-                    }
-                }
-                relation.setDescription(comment.getBody().trim() + "\n" +
-                        "Date: " + App.TIMESTAMP.format(date) +
-                        "File: " + comment.getPath() + "\n" +
-                        "Line:" + comment.getLine() + "\n" +
-                        "URL: " + comment.getHtmlUrl());
-                commit.getRelations().add(relation);
+            if (commit != null) {
+                pi.getProject().getConfigurations().add(generateCommitCommentConfig(commit, comment));
             }
             if ((count % 100) == 0) {
                 App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
@@ -304,6 +270,42 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             count++;
         }
         App.printLogMsg("mined " + (count - 1) + "/" + comments.size() + " commit comments");
+    }
+
+    private Configuration generateCommitCommentConfig(Commit commit, GHCommitComment comment) {
+        WorkItemChange change = new WorkItemChange();
+        change.setName("COMMENT");
+        change.setDescription("comment added");
+        change.setChangedItem(commit);
+
+        Configuration configuration = new Configuration();
+        configuration.setExternalId(comment.getId() + "");
+        configuration.setUrl(comment.getHtmlUrl().toString());
+        String specifics = "";
+        if (comment.getLine() != -1) {
+            specifics += "File: " + comment.getPath() + "\n" +
+                            "Line: " + comment.getLine() + "\n\n";
+        }
+        configuration.setDescription(specifics + comment.getBody().trim());
+
+        GHUser user;
+        Date creation;
+        while (true) {
+            try {
+                user = comment.getUser();
+                creation = comment.getCreatedAt();
+                break;
+            } catch (IOException e) {
+                rootObject = init(true);
+            }
+        }
+        configuration.setAuthor(addPerson(generateIdentity(user)));
+        configuration.setCreated(creation);
+        configuration.getChanges().add(change);
+
+        configuration.getRelatedItems().addAll(commit.getRelatedItems());
+
+        return configuration;
     }
 
     /**
@@ -548,7 +550,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
         for (GHIssueComment comment : comments) {
-            pi.getProject().getConfigurations().add(generateCommentConfig(unit, comment));
+            pi.getProject().getConfigurations().add(generateUnitCommentConfig(unit, comment));
         }
 
         if (closer != null && issue.getClosedAt() != null) {
@@ -583,7 +585,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      * @param comment an issue comment form GitHub
      * @return comment Configuration
      */
-    private Configuration generateCommentConfig(WorkUnit unit, GHIssueComment comment) {
+    private Configuration generateUnitCommentConfig(WorkUnit unit, GHIssueComment comment) {
         WorkItemChange change = new WorkItemChange();
         change.setName("COMMENT");
         change.setDescription("comment added");
