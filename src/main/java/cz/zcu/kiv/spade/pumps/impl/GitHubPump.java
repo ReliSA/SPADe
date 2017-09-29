@@ -467,8 +467,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 unit.setUrl(issue.getHtmlUrl().toString());
                 unit.setName(issue.getTitle());
                 if (issue.getBody() != null) unit.setDescription(issue.getBody().trim());
-                unit.setAuthor(addPerson(generateIdentity(issue.getUser())));
-                unit.setAssignee(addPerson(generateIdentity(issue.getAssignee())));
+
                 unit.setStatus(resolveStatus(issue.getState().name()));
 
                 if (issue.getMilestone() != null) {
@@ -479,8 +478,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
                 Date creation;
                 Collection<GHLabel> labels;
+                GHUser author, assignee;
                 while (true) {
                     try {
+                        author = issue.getUser();
+                        assignee = issue.getAssignee();
                         creation = issue.getCreatedAt();
                         labels = issue.getLabels();
                         break;
@@ -489,11 +491,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                     }
                 }
 
+                unit.setAuthor(addPerson(generateIdentity(author)));
+                if (assignee != null) unit.setAssignee(addPerson(generateIdentity(assignee)));
                 unit.setCreated(creation);
                 unit.setStartDate(creation);
-                if (labels != null && !labels.isEmpty()) {
-                    mineLabels(labels, unit);
-                }
+                if (labels != null && !labels.isEmpty()) mineLabels(labels, unit);
 
                 pi.getProject().addUnit(unit);
 
@@ -535,9 +537,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         pi.getProject().getConfigurations().add(generateCreationConfig(unit));
 
         Collection<GHIssueComment> comments;
+        GHUser closer;
         while (true) {
             try {
                 comments = issue.getComments();
+                closer = issue.getClosedBy();
                 break;
             } catch (IOException e) {
                 rootObject = init(true);
@@ -547,8 +551,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             pi.getProject().getConfigurations().add(generateCommentConfig(unit, comment));
         }
 
-        if (issue.getClosedBy() != null && issue.getClosedAt() != null) {
-            pi.getProject().getConfigurations().add(generateClosureConfig(unit, issue.getClosedAt(), issue.getClosedBy()));
+        if (closer != null && issue.getClosedAt() != null) {
+            pi.getProject().getConfigurations().add(generateClosureConfig(unit, issue.getClosedAt(), closer));
         }
     }
 
