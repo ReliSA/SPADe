@@ -349,25 +349,27 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
         }
 
-        int i = 0;
-        for (GHTag tag : tags) {
-            for (GHRelease release : releases) {
-                if (tag.getName().equals(release.getTagName())) {
-                    Commit commit = pi.getProject().getCommit(tag.getCommit().getSHA1().substring(0, 7));
-                    for (VCSTag spadeTag : commit.getTags()) {
-                        if (spadeTag.getName().equals(tag.getName())) {
-                            if (release.getName() != null) spadeTag.setDescription(release.getName());
-                            if (release.getBody() != null) {
-                                spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
-                            }
-                            i++;
-                            if ((i % 100) == 0) {
-                                App.printLogMsg("mined " + i + "/" + releases.size());
-                                checkRateLimit();
-                            }
-                        }
-                    }
+        Map<String, VCSTag> spadeTags = new HashMap<>();
+        for (Commit commit : pi.getProject().getCommits()) {
+            for (VCSTag tag : commit.getTags()) {
+                if (!spadeTags.containsKey(tag.getName())) {
+                    spadeTags.put(tag.getName(), tag);
                 }
+            }
+        }
+
+        int i = 0;
+        for (GHRelease release : releases) {
+            VCSTag spadeTag = spadeTags.get(release.getTagName());
+            if (release.getName() != null) {
+                spadeTag.setDescription(release.getName());
+            }
+            if (release.getBody() != null) {
+                spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
+            }
+            i++;
+            if ((i % 100) == 0) {
+                checkRateLimit();
             }
         }
         App.printLogMsg("mined " + i + "/" + releases.size() + " releases (/" + tags.size() + ")");
