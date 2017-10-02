@@ -78,6 +78,8 @@ public class GitPump extends VCSPump<Repository> {
 
         mineBranches();
         addTags();
+        
+        pi.getStats().setCommits(pi.getProject().getCommits().size());
 
         List<Configuration> list = sortConfigsByDate();
         list = cleanUpCommitList(list);
@@ -171,9 +173,8 @@ public class GitPump extends VCSPump<Repository> {
                 commit.getTags().add(tag);
             }
             count++;
-            if (count % 100 == 0) App.printLogMsg(count + "/" + refs.size() + " tags mined");
+            if (count % 200 == 0) App.printLogMsg(count + "/" + refs.size() + " tags mined");
         }
-        App.printLogMsg(count + "/" + refs.size() + " tags mined");
         pi.getStats().setTags(count);
         walk.dispose();
     }
@@ -200,20 +201,18 @@ public class GitPump extends VCSPump<Repository> {
             e.printStackTrace();
         }
 
-        int count = 0, original = 0;
+        int count = 0;
         for (RevCommit gitCommit : revWalk) {
             String shortSHA = gitCommit.getId().getName().substring(0, 7);
             if (!pi.getProject().containsCommit(shortSHA)) {
                 mineCommit(gitCommit);
-                original++;
             }
             Commit commit = pi.getProject().getCommit(shortSHA);
             commit.getBranches().add(branch);
             count++;
             if ((count % 5000) == 0) App.printLogMsg(count + " commits mined");
         }
-        App.printLogMsg(count + " commits mined (" + original + " originals)");
-        pi.getStats().setCommits(pi.getStats().getCommits() + original);
+        App.printLogMsg(count + " commits mined");
         pi.getStats().getBranchList().put(branch.getName(), count);
         revWalk.dispose();
     }
