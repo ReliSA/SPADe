@@ -268,12 +268,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 pi.getProject().getConfigurations().add(generateCommitCommentConfig(commit, comment));
             }
             if ((count % 100) == 0) {
-                App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
+                if ((count % 500) == 0) {
+                    App.printLogMsg("mined " + count + "/" + comments.size() + " commit comments");
+                }
                 checkRateLimit();
             }
             count++;
         }
-        App.printLogMsg("mined " + (count - 1) + "/" + comments.size() + " commit comments");
         pi.getStats().setCommitComments(comments.size());
     }
 
@@ -428,12 +429,10 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             iterations.add(iteration);
 
             if ((i % 100) == 0) {
-                App.printLogMsg("mined " + i + "/" + milestones.size() + " milestones");
                 checkRateLimit();
             }
             i++;
         }
-        App.printLogMsg("mined " + (i - 1) + "/" + milestones.size() + " milestones");
         pi.getStats().setMilestones(milestones.size());
 
         return iterations;
@@ -450,7 +449,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     public void mineTickets() {
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
-        App.printLogMsg(issues.size() + " issues listed");
+        App.printLogMsg("issues listed");
         pi.getStats().setIssues(issues.size());
 
         int count = 1;
@@ -816,7 +815,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
                 pi.getCategories().add(category);
             }
         }
-        App.printLogMsg("mined " + labels.size() + " labels");
         pi.getStats().setLabels(labels.size());
         pi.getStats().setCategories(pi.getCategories().size());
     }
