@@ -56,8 +56,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         usernames.add(0, username);
         usernames.add(1, "spade01");
         usernames.add(2, "spade02");
-        passwords.add(0, password);
         usernames.add(3, "spade03");
+        passwords.add(0, password);
         passwords.add(1, "papepi48");
         passwords.add(2, "papepi48");
         passwords.add(3, "papepi48");
