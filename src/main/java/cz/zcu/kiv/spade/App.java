@@ -158,8 +158,11 @@ public class App {
 
         }*/
 
-        ProjectInstance pi = pump.mineData(updateManager);
-        pump.close();
+        ProjectInstance pi = null;
+        if (pump != null) {
+            pi = pump.mineData(updateManager);
+            pump.close();
+        }
 
         return pi;
     }
