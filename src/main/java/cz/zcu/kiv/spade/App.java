@@ -112,22 +112,20 @@ public class App {
         pi.getStats().setStart(startTime);
         printLogMsg("project instance " + pi.getUrl() + " mined");
         long miningTime = System.currentTimeMillis();
-        printLogMsg("mining took " + TIMESTAMP.format(new Date(miningTime - startTime - 3600000)));
         pi.getStats().setMining(miningTime);
 
         this.printProjectInstance(pi);
         printLogMsg("project instance " + pi.getUrl() + " printed");
         long printingTime = System.currentTimeMillis();
-        printLogMsg("printing took " + TIMESTAMP.format(new Date(printingTime - miningTime - 3600000)));
         pi.getStats().setPrinting(printingTime);
 
         this.loadProjectInstance(pi);
         printLogMsg("project instance " + pi.getUrl() + " loaded");
         long loadingTime = System.currentTimeMillis();
-        printLogMsg("loading took " + TIMESTAMP.format(new Date(loadingTime - printingTime - 3600000)));
         pi.getStats().setLoading(loadingTime);
 
-        printLogMsg("processing took " + TIMESTAMP.format(new Date(loadingTime - startTime - 3600000)));
+        StatsPrinter statsPrinter = new StatsPrinter();
+        statsPrinter.print(pi);
     }
 
     /**
@@ -190,8 +188,6 @@ public class App {
         }
         CodefacePrinter codefacePrinter = new CodefacePrinter();
         codefacePrinter.print(pi);
-        StatsPrinter statsPrinter = new StatsPrinter();
-        statsPrinter.print(pi);
     }
 
     /**
