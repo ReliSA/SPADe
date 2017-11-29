@@ -18,6 +18,7 @@ import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.impl.GitHubPump;
 import cz.zcu.kiv.spade.pumps.impl.GitPump;
+import cz.zcu.kiv.spade.pumps.impl.JiraPump;
 import cz.zcu.kiv.spade.pumps.impl.RedminePump;
 import org.json.JSONException;
 
@@ -146,11 +147,11 @@ public class App {
             pump = new GitHubPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
         } else if (tool.equals(Tool.REDMINE)) {
             pump = new RedminePump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+        } else if (tool.equals(Tool.JIRA)) {
+            pump = new JiraPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
         } /*else if (tool.equals(Tool.SVN)) {
 
         } else if (tool.equals(Tool.BUGZILLA)) {
-
-        } else if (tool.equals(Tool.JIRA)) {
 
         } else if (tool.equals(Tool.ASSEMBLA)) {
 
@@ -233,17 +234,17 @@ public class App {
     public String guessTool(String toolString) {
         String toolName = "";
 
-        if (toolString.startsWith(App.GITHUB_PREFIX)) {
+        if (toolString.startsWith(GITHUB_PREFIX)) {
             toolName = Tool.GITHUB.name();
-        } else if (toolString.endsWith(App.GIT_SUFFIX)) {
+        } else if (toolString.endsWith(GIT_SUFFIX)) {
             toolName = Tool.GIT.name();
+        } else if (toolString.contains(Tool.JIRA.name().toLowerCase())) {
+            toolName = Tool.JIRA.name();
         } else if (toolString.toUpperCase().contains("REDMINE")) {
             toolName = Tool.REDMINE.name();
         } else if (toolString.toUpperCase().contains("BUGZILLA")) {
             toolName = Tool.REDMINE.name();
         } else if (toolString.toUpperCase().contains("SVN")) {
-            toolName = Tool.REDMINE.name();
-        } else if (toolString.toUpperCase().contains("JIRA")) {
             toolName = Tool.REDMINE.name();
         } else if (toolString.toUpperCase().contains("RTC")) {
             toolName = Tool.REDMINE.name();
