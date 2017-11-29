@@ -92,8 +92,21 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
 
         mineWiki();
+        mineAllRelations();
         finalTouches();
         return pi;
+    }
+
+    private void mineAllRelations() {
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            Issue issue = null;
+            try {
+                issue = rootObject.getIssueManager().getIssueById(unit.getNumber(), Include.relations);
+            } catch (RedmineException e) {
+                e.printStackTrace();
+            }
+            if (issue != null) mineRelations(unit, issue);
+        }
     }
 
     @Override
