@@ -569,6 +569,23 @@ public abstract class DataPump<RootObjectType> {
             assignDefaultResolution(unit);
             assignDefaultWuType(unit);
         }
+        for (Person person : pi.getProject().getPeople()) {
+            assignDefaultRole(person);
+        }
+    }
+
+    private void assignDefaultRole(Person person) {
+        if (person.getRoles().isEmpty()) {
+            for (Role role : pi.getRoles()) {
+                if (role.getName().equals("member")) {
+                    person.getRoles().add(role);
+                    return;
+                }
+            }
+            Role defaultRole = new Role("member", roleDao.findByClass(RoleClass.TEAMMEMBER));
+            pi.getRoles().add(defaultRole);
+            person.getRoles().add(defaultRole);
+        }
     }
 
     /**
