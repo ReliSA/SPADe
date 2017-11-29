@@ -214,7 +214,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         if (detail != null) {
             artifact.setDescription(detail.getText() + "\n\nComments: " + detail.getComments());
             artifact.setAuthor(addPerson(generateIdentity(detail.getUser().getId(), detail.getUser().getLogin())));
-            mineAttachments(detail.getAttachments(), artifact);
+            mineAttachments(artifact, detail.getAttachments());
         }
 
         WorkItemChange change = new WorkItemChange();
@@ -329,10 +329,9 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
             pi.getProject().addUnit(unit);
 
-            mineAttachments(issue.getAttachments(), unit);
+            mineAttachments(unit, issue.getAttachments());
             mineHistory(unit, issue.getJournals());
             mineRevisions(unit, issue.getChangesets());
-            mineRelations(issue, unit);
 
             if (issue.getTargetVersion() != null) {
                 Iteration iteration = new Iteration();
@@ -389,7 +388,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
      * @param issue (not yet mined) issue
      * @param unit already mined issue (a.k.a. WorkUnit)
      */
-    private void mineRelations(Issue issue, WorkUnit unit) {
+    private void mineRelations(WorkUnit unit, Issue issue) {
 
         if (issue.getParentId() != null) {
             WorkUnit parent = pi.getProject().getUnit(issue.getParentId());
@@ -461,7 +460,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
      * @param attachments attachments
      * @param item issue or wiki page
      */
-    private void mineAttachments(Collection<Attachment> attachments, WorkItem item) {
+    private void mineAttachments(WorkItem item, Collection<Attachment> attachments) {
         for (Attachment attachment : attachments) {
             Artifact artifact = new Artifact();
             artifact.setArtifactClass(ArtifactClass.FILE);
