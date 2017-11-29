@@ -39,15 +39,17 @@ public abstract class DataPump<RootObjectType> {
     /** DAO object for handling Status Classification instances */
     protected StatusClassificationDAO statusDao;
     /** DAO object for handling Priority Classification instances */
-    private PriorityClassificationDAO priorityDao;
+    protected PriorityClassificationDAO priorityDao;
     /** DAO object for handling Relation Classification instances */
-    private RelationClassificationDAO relationDao;
+    protected RelationClassificationDAO relationDao;
     /** DAO object for handling Resolution Classification instances */
-    private ResolutionClassificationDAO resolutionDao;
+    protected ResolutionClassificationDAO resolutionDao;
     /** DAO object for handling Work Unit Type Classification instances */
-    private WorkUnitTypeClassificationDAO typeDao;
+    protected WorkUnitTypeClassificationDAO typeDao;
     /** DAO object for handling Severity Classification instances */
-    private SeverityClassificationDAO severityDao;
+    protected SeverityClassificationDAO severityDao;
+    /** DAO object for handling Role Classification instances */
+    protected RoleClassificationDAO roleDao;
 
     /**
      * @param projectHandle URL of the project instance
@@ -102,6 +104,7 @@ public abstract class DataPump<RootObjectType> {
         severityDao = new SeverityClassificationDAO_JPA(em);
         resolutionDao = new ResolutionClassificationDAO_JPA(em);
         typeDao = new WorkUnitTypeClassificationDAO_JPA(em);
+        roleDao = new RoleClassificationDAO_JPA(em);
 
         piDao.deleteByUrl(projectHandle);
 

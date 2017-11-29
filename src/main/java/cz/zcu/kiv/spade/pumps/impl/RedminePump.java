@@ -2,8 +2,6 @@ package cz.zcu.kiv.spade.pumps.impl;
 
 import com.taskadapter.redmineapi.*;
 import com.taskadapter.redmineapi.bean.*;
-import cz.zcu.kiv.spade.dao.*;
-import cz.zcu.kiv.spade.dao.jpa.*;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.Group;
 import cz.zcu.kiv.spade.domain.Project;
@@ -25,14 +23,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
     /**  a representation of a Redmine project from taskadapter.redmineapi */
     private com.taskadapter.redmineapi.bean.Project redmineProject;
-    /** DAO object for handling Severity Classification instances */
-    private SeverityClassificationDAO severityDao;
-    /** DAO object for handling Priority Classification instances */
-    private PriorityClassificationDAO priorityDao;
-    /** DAO object for handling Work Unit Type Classification instances */
-    private WorkUnitTypeClassificationDAO typeDao;
-    /** DAO object for handling Role Classification instances */
-    private RoleClassificationDAO roleDao;
 
     /**
      * constructor, sets projects URL and login credentials
@@ -51,11 +41,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     public ProjectInstance mineData(EntityManager em) {
 
         pi = super.mineData(em);
-
-        severityDao = new SeverityClassificationDAO_JPA(em);
-        priorityDao = new PriorityClassificationDAO_JPA(em);
-        typeDao = new WorkUnitTypeClassificationDAO_JPA(em);
-        roleDao = new RoleClassificationDAO_JPA(em);
 
         setToolInstance();
 

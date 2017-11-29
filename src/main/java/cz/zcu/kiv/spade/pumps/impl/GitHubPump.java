@@ -1,12 +1,6 @@
 package cz.zcu.kiv.spade.pumps.impl;
 
 import cz.zcu.kiv.spade.App;
-import cz.zcu.kiv.spade.dao.PriorityClassificationDAO;
-import cz.zcu.kiv.spade.dao.ResolutionClassificationDAO;
-import cz.zcu.kiv.spade.dao.SeverityClassificationDAO;
-import cz.zcu.kiv.spade.dao.jpa.PriorityClassificationDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.ResolutionClassificationDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.SeverityClassificationDAO_JPA;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.Category;
@@ -34,13 +28,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     private List<String> usernames = new ArrayList<>();
     /** list of passwords necessary for continuous mining (rate limit workaround) */
     private List<String> passwords = new ArrayList<>();
-
-    /** DAO object for handling Severity Classification instances */
-    private SeverityClassificationDAO severityDao;
-    /** DAO object for handling Priority Classification instances */
-    private PriorityClassificationDAO priorityDao;
-    /** DAO object for handling Resolution Classification instances */
-    private ResolutionClassificationDAO resolutionDao;
 
     /**
      * a constructor, sets project's URL and login credentials
@@ -115,10 +102,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         rootObject = init(false);
 
         pi.getStats().setName(getProjectFullName());
-
-        severityDao = new SeverityClassificationDAO_JPA(em);
-        priorityDao = new PriorityClassificationDAO_JPA(em);
-        resolutionDao = new ResolutionClassificationDAO_JPA(em);
 
         if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
         Date creation = null;
