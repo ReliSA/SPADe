@@ -178,7 +178,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         for (Configuration configuration : pi.getProject().getConfigurations()) {
             if (!(configuration instanceof Commit || configuration instanceof CommittedConfiguration)) {
                 for (WorkItemChange change : configuration.getChanges()) {
-                    // from issue comments
+                    // from issue and commit comments
                     if ((change.getChangedItem() instanceof WorkUnit
                             || change.getChangedItem() instanceof Commit)
                             && change.getName().equals("COMMENT")) {
