@@ -555,8 +555,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     private Severity resolveSeverity(Issue issue) {
         for (CustomField field : issue.getCustomFields()) {
             if (field.getName().toLowerCase().equals("severity")) {
+                if (field.getValue() == null || field.getValue().isEmpty()) continue;
                 for (Severity severity : pi.getSeverities()) {
-                    if (field.getValue() == null || field.getValue().isEmpty()) continue;
                     if (field.getValue().equals(severity.getName())) {
                         return severity;
                     }
