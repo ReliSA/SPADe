@@ -438,7 +438,8 @@ public abstract class DataPump<RootObjectType> {
         }
 
         Person newPerson = new Person();
-        newPerson.setName(identity.getName());
+        if (identity.getDescription().isEmpty())  newPerson.setName(identity.getName());
+        else newPerson.setName(identity.getDescription());
         newPerson.getIdentities().add(identity);
 
         pi.getProject().getPeople().add(newPerson);
