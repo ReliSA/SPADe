@@ -27,4 +27,31 @@ public interface IIssueTrackingPump {
      * mines all the enumeration values used in the project
      */
     void mineEnums();
+
+    void mineAllRelations();
+
+    /**
+     * mines custom issue categories (components, tags, labels) in project instance
+     */
+    void mineCategories();
+
+    /**
+     * mines data of users with access to the project
+     */
+    void minePeople();
+
+    /**
+     * mines all the roles used in the project
+     */
+    void mineRoles();
+
+    /**
+     * mines all the priority values used in the project
+     */
+    void minePriorities();
+
+    /**
+     * mines all the issue type values used in the project
+     */
+    void mineWUTypes();
 }

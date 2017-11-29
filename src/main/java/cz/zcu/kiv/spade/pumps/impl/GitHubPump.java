@@ -508,29 +508,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     }
 
     /**
-     * gets a correct Status instance base on name of issue state in GitHub
-     * or null if project doesn't use this status name
-     * @param gitHubName name of the issue state in GitHub
-     * @return Status instance or null
-     */
-    private Status resolveStatus(String gitHubName) {
-
-        for (Status status : pi.getStatuses()) {
-            if (gitHubName.equals(status.getName())) {
-                return status;
-            }
-        }
-        return null;
-    }
-
-    /**
      * mines issue changes (creation, comments and closure)
      * @param issue GitHub issue
      * @param unit SPADe Work Unit to link the changes to
      */
     private void mineChanges(GHIssue issue, WorkUnit unit) {
 
-        pi.getProject().getConfigurations().add(generateCreationConfig(unit));
+        generateCreationConfig(unit);
 
         Collection<GHIssueComment> comments;
         GHUser closer;
@@ -552,27 +536,6 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         if (closer != null && issue.getClosedAt() != null) {
             pi.getProject().getConfigurations().add(generateClosureConfig(unit, issue.getClosedAt(), closer));
         }
-    }
-
-    /**
-     * generates a Configuration representing the creation of a Work Unit (issue)
-     * @param unit Work Unit to link the creation Configuration to
-     * @return creation Configuration
-     */
-    private Configuration generateCreationConfig(WorkUnit unit) {
-        WorkItemChange change = new WorkItemChange();
-        change.setChangedItem(unit);
-        change.setName("ADD");
-        change.setDescription("added");
-
-        change.getFieldChanges().add(new FieldChange("status", null, GHIssueState.OPEN.name()));
-
-        Configuration configuration = new Configuration();
-        configuration.setAuthor(unit.getAuthor());
-        configuration.setCreated(unit.getCreated());
-        configuration.getChanges().add(change);
-
-        return configuration;
     }
 
     /**
@@ -687,95 +650,52 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private void mineLabels(Collection<GHLabel> labels, WorkUnit unit) {
         for (GHLabel label : labels) {
-            if (!resolveType(unit, label.getName())
-                    && !resolveResolution(unit, label.getName())
-                    && !resolvePriority(unit, label.getName())
-                    && !resolveSeverity(unit, label.getName())) {
-                for (Category category : pi.getCategories()) {
-                    if (category.getName().equals(label.getName())) {
-                        unit.getCategories().add(category);
-                    }
+
+            WorkUnitType type = resolveType(label.getName());
+            if (type != null){
+                unit.setType(type);
+                return;
+            }
+
+            Resolution resolution = resolveResolution(label.getName());
+            if (resolution != null){
+                unit.setResolution(resolution);
+                return;
+            }
+
+            Severity severity = resolveSeverity(label.getName());
+            if (severity != null){
+                unit.setSeverity(severity);
+                return;
+            }
+
+            Priority priority = resolvePriority(label.getName());
+            if (priority != null){
+                unit.setPriority(priority);
+                return;
+            }
+
+            for (Category category : pi.getCategories()) {
+                if (category.getName().equals(label.getName())) {
+                    unit.getCategories().add(category);
                 }
             }
         }
     }
 
-    /**
-     * if a label name corresponds with a Work Unit type used in the project
-     * it assigns it to the Work Unit and returns true, otherwise returns false
-     * @param unit Wurk Unit to resolve the type for
-     * @param label a label name
-     * @return true if the type is assigned, else false
-     */
-    private boolean resolveType(WorkUnit unit, String label) {
-
-        for (WorkUnitType type : pi.getWuTypes()) {
-            if (label.equals(type.getName())) {
-                unit.setType(type);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * if a label name corresponds with a Work Unit priority used in the project
-     * it assigns it to the Work Unit and returns true, otherwise returns false
-     * @param unit Wurk Unit to resolve the priority for
-     * @param label a label name
-     * @return true if the priority is assigned, else false
-     */
-    private boolean resolvePriority(WorkUnit unit, String label) {
-
-        for (Priority priority : pi.getPriorities()) {
-            if (label.equals(priority.getName())) {
-                unit.setPriority(priority);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * if a label name corresponds with a Work Unit severity used in the project
-     * it assigns it to the Work Unit and returns true, otherwise returns false
-     * @param unit Wurk Unit to resolve the severity for
-     * @param label a label name
-     * @return true if the severity is assigned, else false
-     */
-    private boolean resolveSeverity(WorkUnit unit, String label) {
-
-        for (Severity severity : pi.getSeverities()) {
-            if (label.equals(severity.getName())) {
-                unit.setSeverity(severity);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * if a label name corresponds with a Work Unit resolution used in the project
-     * it assigns it to the Work Unit and returns true, otherwise returns false
-     * @param unit Wurk Unit to resolve the resolution for
-     * @param label a label name
-     * @return true if the resolution is assigned, else false
-     */
-    private boolean resolveResolution(WorkUnit unit, String label) {
-
-        for (Resolution resolution : pi.getResolutions()) {
-            if (label.equals(resolution.getName())) {
-                unit.setResolution(resolution);
-                return true;
-            }
-        }
-        return false;
-    }
-
     @Override
     public void mineEnums() {
         mineStatuses();
+        mineCategories();
+    }
 
+    @Override
+    public void mineAllRelations() {
+
+    }
+
+    @Override
+    public void mineCategories() {
         List<GHLabel> labels;
         while (true) {
             try {
@@ -800,6 +720,26 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
         pi.getStats().setLabels(labels.size());
         pi.getStats().setCategories(pi.getCategories().size());
+    }
+
+    @Override
+    public void minePeople() {
+        //TODO + resolveRole
+    }
+
+    @Override
+    public void mineRoles() {
+
+    }
+
+    @Override
+    public void minePriorities() {
+
+    }
+
+    @Override
+    public void mineWUTypes() {
+
     }
 
     /**

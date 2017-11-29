@@ -729,4 +729,93 @@ public abstract class DataPump<RootObjectType> {
         assignDefaultEnums();
         mineMentions();
     }
+
+    /**
+     * mines a configuration/action of creating an issue
+     * @param unit WorkUnit (issue)
+     */
+    protected void generateCreationConfig(WorkUnit unit) {
+
+        WorkItemChange change = new WorkItemChange();
+        change.setName("ADD");
+        change.setDescription("issue added");
+        change.setChangedItem(unit);
+
+        Configuration creation = new Configuration();
+        creation.setCreated(unit.getCreated());
+        creation.setAuthor(unit.getAuthor());
+        creation.getChanges().add(change);
+
+        pi.getProject().getConfigurations().add(creation);
+    }
+
+    /**
+     * matches the issue priority to one of the values used in the project
+     * @param name priority value
+     * @return corresponding Priority instance or null
+     */
+    protected Priority resolvePriority(String name) {
+        for (Priority priority : pi.getPriorities()) {
+            if (name.equals(priority.getName())) {
+                return priority;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * matches the issue type to one of the values used in the project
+     * @param name type value
+     * @return corresponding WorkUnitType instance or null
+     */
+    protected WorkUnitType resolveType(String name) {
+        for (WorkUnitType type : pi.getWuTypes()) {
+            if (name.equals(type.getName())) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * matches the issue status to one of the values used in the project
+     * @param name status value
+     * @return corresponding Status instance or null
+     */
+    protected Status resolveStatus(String name) {
+        for (Status status : pi.getStatuses()) {
+            if (name.equals(status.getName())) {
+                return status;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * matches the issue severity to one of the values used in the project
+     * @param name severity value
+     * @return corresponding Severity instance or null
+     */
+    protected Severity resolveSeverity(String name) {
+        for (Severity severity : pi.getSeverities()) {
+            if (name.equals(severity.getName())) {
+                return severity;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * matches the issue resolution to one of the values used in the project
+     * @param name resolution value
+     * @return corresponding Resolution instance or null
+     */
+    protected Resolution resolveResolution(String name) {
+        for (Resolution resolution : pi.getResolutions()) {
+            if (name.equals(resolution.getName())) {
+                return resolution;
+            }
+        }
+        return null;
+    }
 }

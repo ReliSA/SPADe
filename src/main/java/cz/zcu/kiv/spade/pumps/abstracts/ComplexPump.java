@@ -33,4 +33,10 @@ public abstract class ComplexPump<RootObject> extends DataPump<RootObject> imple
 
     @Override
     public abstract void mineEnums();
+
+    @Override
+    public abstract void mineAllRelations();
+
+    @Override
+    public abstract void mineCategories();
 }

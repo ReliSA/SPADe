@@ -92,7 +92,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         return pi;
     }
 
-    private void mineAllRelations() {
+    @Override
+    public void mineAllRelations() {
         for (WorkUnit unit : pi.getProject().getUnits()) {
             Issue issue = null;
             try {
@@ -107,7 +108,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }
     }
 
-    private void mineCategories() {
+    @Override
+    public void mineCategories() {
         Iterable<BasicComponent> components = jiraProject.getComponents();
         for (BasicComponent component : components) {
             Category category = new Category();
@@ -172,7 +174,7 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         unit.setAssignee(addPerson(generateIdentity(issue.getAssignee())));
         unit.setStatus(resolveStatus(issue.getStatus()));
         unit.setType(resolveType(issue.getIssueType().getName()));
-        if (issue.getPriority() != null) unit.setPriority(resolvePriorty(issue.getPriority().getName()));
+        if (issue.getPriority() != null) unit.setPriority(resolvePriority(issue.getPriority().getName()));
         if (issue.getResolution() != null) unit.setResolution(resolveResolution(issue.getResolution().getName()));
         unit.getCategories().addAll(resolveCategories(issue));
         unit.setSeverity(resolveSeverity(issue));
@@ -232,20 +234,6 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         configuration.getChanges().add(change);
 
         pi.getProject().getConfigurations().add(configuration);
-    }
-
-    private void generateCreationConfig(WorkUnit unit) {
-        WorkItemChange change = new WorkItemChange();
-        change.setName("ADD");
-        change.setDescription("issue added");
-        change.setChangedItem(unit);
-
-        Configuration creation = new Configuration();
-        creation.setCreated(unit.getCreated());
-        creation.setAuthor(unit.getAuthor());
-        creation.getChanges().add(change);
-
-        pi.getProject().getConfigurations().add(creation);
     }
 
     private void mineRelations(WorkUnit unit, Issue issue) {
@@ -457,33 +445,6 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         return minutes / 60.0;
     }
 
-    private Resolution resolveResolution(String name) {
-        for (Resolution resolution : pi.getResolutions()) {
-            if (name.equals(resolution.getName())) {
-                return resolution;
-            }
-        }
-        return null;
-    }
-
-    private Priority resolvePriorty(String name) {
-        for (Priority priority : pi.getPriorities()) {
-            if (name.equals(priority.getName())) {
-                return priority;
-            }
-        }
-        return null;
-    }
-
-    private WorkUnitType resolveType(String name) {
-        for (WorkUnitType type : pi.getWuTypes()) {
-            if (name.equals(type.getName())) {
-                return type;
-            }
-        }
-        return null;
-    }
-
     @Override
     public Collection<ProjectSegment> mineIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
@@ -518,11 +479,9 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
 
     @Override
     public void mineEnums() {
-        mineWUTypes();
-        minePriorities();
+        super.mineEnums();
         mineResolutions();
         mineWURelationTypes();
-        mineRoles();
     }
 
     private Status resolveStatus(BasicStatus basicStatus) {
@@ -607,7 +566,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }
     }
 
-    private void mineRoles() {
+    @Override
+    public void mineRoles() {
         /*Iterable<BasicProjectRole> roles = jiraProject.getProjectRoles();
 
         for (BasicProjectRole projectRole : roles) {
@@ -630,7 +590,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }*/
     }
 
-    private void minePriorities() {
+    @Override
+    public void minePriorities() {
         Iterable<com.atlassian.jira.rest.client.domain.Priority> priorities = new ArrayList<>();
         try {
             priorities = rootObject.getMetadataClient().getPriorities().get();
@@ -657,7 +618,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }
     }
 
-    private void mineWUTypes() {
+    @Override
+    public void mineWUTypes() {
         for (IssueType issueType : jiraProject.getIssueTypes()) {
             boolean found = false;
             for (WorkUnitType type : pi.getWuTypes()) {
@@ -740,7 +702,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         return identity;
     }
 
-    private void minePeople() {
+    @Override
+    public void minePeople() {
         Person person = addPerson(generateIdentity(jiraProject.getLead()));
         try {
             User user = rootObject.getUserClient().getUser(jiraProject.getLead().getName()).get();
@@ -758,20 +721,11 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
     }
 
     private Role getProjectLeadRole() {
-        Role projectLeadRole = resolveRole();
+        Role projectLeadRole = resolveRole("project lead");
         if (projectLeadRole == null) {
             projectLeadRole = new Role("project lead", roleDao.findByClass(RoleClass.PROJECTMANAGER));
             pi.getRoles().add(projectLeadRole);
         }
         return projectLeadRole;
-    }
-
-    private Role resolveRole() {
-        for (Role role : pi.getRoles()) {
-            if (role.getName().equals("project lead")) {
-                return role;
-            }
-        }
-        return null;
     }
 }

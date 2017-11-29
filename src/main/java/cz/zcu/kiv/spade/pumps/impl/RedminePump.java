@@ -97,7 +97,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return pi;
     }
 
-    private void mineAllRelations() {
+    @Override
+    public void mineAllRelations() {
         for (WorkUnit unit : pi.getProject().getUnits()) {
             Issue issue = null;
             try {
@@ -134,10 +135,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines custom issue categories in Redmine project
-     */
-    private void mineCategories() {
+    @Override
+    public void mineCategories() {
         Collection<IssueCategory> issueCategories = new LinkedHashSet<>();
 
         try {
@@ -245,10 +244,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         return artifact;
     }
 
-    /**
-     * mines data of users with access to the project
-     */
-    private void minePeople() {
+    public void minePeople() {
         Map<String, Group> groupMap = new HashMap<>();
         List<Membership> memberships = new ArrayList<>();
         try {
@@ -287,20 +283,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
     }
 
-    /**
-     * gets a Role instance with a given name
-     * @param name role name
-     * @return Role instance or null
-     */
-    private Role resolveRole(String name) {
-        for (Role role : pi.getRoles()) {
-            if (name.equals(role.getName())) {
-                return role;
-            }
-        }
-        return null;
-    }
-
     @Override
     public void mineTickets() {
 
@@ -337,12 +319,12 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             unit.setAssignee(addPerson(generateIdentity(issue.getAssigneeId(), issue.getAssigneeName())));
             unit.setStatus(resolveStatus(issue.getStatusName()));
             unit.setType(resolveType(issue.getTracker().getName()));
-            unit.setPriority(resolvePriorty(issue.getPriorityText()));
+            unit.setPriority(resolvePriority(issue.getPriorityText()));
             unit.setEstimatedTime((issue.getEstimatedHours() == null) ? 0 : issue.getEstimatedHours());
             unit.setSpentTime(getSpentTimeFromEntries(unit, issue.getId()));
             unit.setProgress(issue.getDoneRatio());
             unit.getCategories().addAll(resolveCategories(issue));
-            unit.setSeverity(resolveSeverity(issue));
+            unit.setSeverity(assignSeverity(issue));
 
             pi.getProject().addUnit(unit);
 
@@ -379,25 +361,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         closure.getChanges().add(change);
 
         pi.getProject().getConfigurations().add(closure);
-    }
-
-    /**
-     * mines a configuration/action of creating an issue
-     * @param unit WorkUnit (issue)
-     */
-    private void generateCreationConfig(WorkUnit unit) {
-
-        WorkItemChange change = new WorkItemChange();
-        change.setName("ADD");
-        change.setDescription("issue added");
-        change.setChangedItem(unit);
-
-        Configuration creation = new Configuration();
-        creation.setCreated(unit.getCreated());
-        creation.setAuthor(unit.getAuthor());
-        creation.getChanges().add(change);
-
-        pi.getProject().getConfigurations().add(creation);
     }
 
     /**
@@ -552,15 +515,11 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
      * @param issue issue
      * @return corresponding Severity instance or null
      */
-    private Severity resolveSeverity(Issue issue) {
+    private Severity assignSeverity(Issue issue) {
         for (CustomField field : issue.getCustomFields()) {
             if (field.getName().toLowerCase().equals("severity")) {
                 if (field.getValue() == null || field.getValue().isEmpty()) continue;
-                for (Severity severity : pi.getSeverities()) {
-                    if (field.getValue().equals(severity.getName())) {
-                        return severity;
-                    }
-                }
+                return resolveSeverity(field.getValue());
             }
         }
         return null;
@@ -615,48 +574,6 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         configuration.getChanges().add(change);
 
         pi.getProject().getConfigurations().add(configuration);
-    }
-
-    /**
-     * matches the issue priority to one of the values used in the project
-     * @param name priority value
-     * @return corresponding Priority instance or null
-     */
-    private Priority resolvePriorty(String name) {
-        for (Priority priority : pi.getPriorities()) {
-            if (name.equals(priority.getName())) {
-                return priority;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * matches the issue type to one of the values used in the project
-     * @param name type value
-     * @return corresponding WorkUnitType instance or null
-     */
-    private WorkUnitType resolveType(String name) {
-        for (WorkUnitType type : pi.getWuTypes()) {
-            if (name.equals(type.getName())) {
-                return type;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * matches the issue status to one of the values used in the project
-     * @param name status value
-     * @return corresponding Status instance or null
-     */
-    private Status resolveStatus(String name) {
-        for (Status status : pi.getStatuses()) {
-            if (name.equals(status.getName())) {
-                return status;
-            }
-        }
-        return null;
     }
 
     /**
@@ -727,10 +644,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
 
     @Override
     public void mineEnums() {
-        mineWUTypes();
-        minePriorities();
+        super.mineEnums();
         mineStatuses();
-        mineRoles();
         mineSeverities();
     }
 
@@ -767,10 +682,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines all the roles used in the project
-     */
-    private void mineRoles() {
+    @Override
+    public void mineRoles() {
 
         List<com.taskadapter.redmineapi.bean.Role> roles = new ArrayList<>();
         try {
@@ -825,10 +738,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines all the priority values used in the project
-     */
-    private void minePriorities() {
+    @Override
+    public void minePriorities() {
 
         List<IssuePriority> priorities = new ArrayList<>();
         try {
@@ -854,10 +765,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines all the issue type values used in the project
-     */
-    private void mineWUTypes() {
+    @Override
+    public void mineWUTypes() {
 
         for (Tracker tracker : redmineProject.getTrackers()) {
             boolean found = false;
