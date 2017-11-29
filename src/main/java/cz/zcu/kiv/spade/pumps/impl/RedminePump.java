@@ -265,17 +265,21 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
             } catch (RedmineException e) {
                 System.out.println("\tInsufficient permissions for user: " + member.getUserId());
             }
+            Person person = addPerson(generateIdentity(member.getUserId(), member.getUserName()));
+
             Collection<com.taskadapter.redmineapi.bean.Group> redmineGroups = new ArrayList<>();
             if (user != null) redmineGroups = user.getGroups();
+
             for (com.taskadapter.redmineapi.bean.Group redmineGroup : redmineGroups) {
-                if (!groupMap.containsKey(redmineGroup.getId().toString())) {
-                    Group group = new Group();
+                Group group = groupMap.get(redmineGroup.getId().toString());
+                if (group == null) {
+                    group = new Group();
                     group.setExternalId(redmineGroup.getId().toString());
                     group.setName(redmineGroup.getName());
                     groupMap.put(group.getExternalId(), group);
                 }
+                group.getMembers().add(person);
             }
-            Person person = addPerson(generateIdentity(member.getUserId(), member.getUserName()));
             for (com.taskadapter.redmineapi.bean.Role redmineRole : member.getRoles()) {
                 person.getRoles().add(resolveRole(redmineRole.getName()));
             }
