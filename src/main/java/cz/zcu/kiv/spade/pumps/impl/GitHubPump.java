@@ -724,7 +724,20 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     public void minePeople() {
-        //TODO + resolveRole
+        Role collaboratorRole = resolveRole("collaborator");
+        Role contributorRole = resolveRole("contributor");
+        try {
+            for (GHUser collaborator : rootObject.listCollaborators()) {
+                Person person = addPerson(generateIdentity(collaborator));
+                person.getRoles().add(collaboratorRole);
+            }
+            for (GHUser contributor : rootObject.listContributors()) {
+                Person person = addPerson(generateIdentity(contributor));
+                person.getRoles().add(contributorRole);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
