@@ -5,7 +5,6 @@ import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.Category;
 import cz.zcu.kiv.spade.domain.enums.*;
-import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.abstracts.ComplexPump;
 import org.kohsuke.github.*;
@@ -115,43 +114,15 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
 
         setDefaultBranch();
-
         enhanceCommits();
         mineCommitComments();
-
-        new DBInitializer(em).setDefaultEnums(pi);
-
-        mineEnums();
-        Collection<ProjectSegment> iterations = mineIterations();
-
-        mineTickets();
-
-        for (WorkUnit unit : pi.getProject().getUnits()) {
-            for (ProjectSegment iteration : iterations) {
-                if (unit.getIteration() != null &&
-                        unit.getIteration().getExternalId().equals(iteration.getExternalId())) {
-                    if (iteration instanceof Iteration) {
-                        Iteration i = (Iteration) iteration;
-                        unit.setIteration(i);
-                        if (unit.getDueDate() == null) unit.setDueDate(iteration.getEndDate());
-                    }
-                    if (iteration instanceof Phase) {
-                        Phase phase = (Phase) iteration;
-                        unit.setPhase(phase);
-                    }
-                    if (iteration instanceof  Activity) {
-                        Activity activity = (Activity) iteration;
-                        unit.setActivity(activity);
-                    }
-                }
-            }
-        }
-
         getTagDescriptions();
 
         /*DataPump wikiPump = new GitPump(App.GITHUB_WIKI_REPO_PREFIX + getProjectFullName() + App.GIT_SUFFIX, null, null, null);
         pi = wikiPump.mineData(em, pi);
         wikiPump.close();*/
+
+        mineContent();
 
         finalTouches();
         return pi;
@@ -685,8 +656,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     public void mineEnums() {
+        mineRoles();
         mineStatuses();
-        mineCategories();
     }
 
     @Override
@@ -742,7 +713,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     public void mineRoles() {
-
+        pi.getRoles().add(new Role("collaborator", roleDao.findByClass(RoleClass.TEAMMEMBER)));
+        pi.getRoles().add(new Role("contributor", roleDao.findByClass(RoleClass.TEAMMEMBER)));
     }
 
     @Override

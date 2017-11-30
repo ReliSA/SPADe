@@ -1,6 +1,5 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
-import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.pumps.DataPump;
 
@@ -21,44 +20,33 @@ public abstract class IssueTrackingPump<RootObjectType> extends DataPump<RootObj
     }
 
     @Override
-    public abstract void mineTickets();
-
-    @Override
-    public abstract Collection<ProjectSegment> mineIterations();
-
-    @Override
     public void mineEnums() {
+        super.mineEnums();
         mineWUTypes();
         minePriorities();
-        mineRoles();
     }
 
     @Override
     public abstract void mineAllRelations();
 
     @Override
-    public abstract void mineCategories();
+    protected abstract void mineCategories();
 
     @Override
-    public abstract void minePeople();
-
-    /**
-     * gets a Role instance with a given name
-     * @param name role name
-     * @return Role instance or null
-     */
-    protected Role resolveRole(String name) {
-        for (Role role : pi.getRoles()) {
-            if (name.equals(role.getName())) {
-                return role;
-            }
-        }
-        return null;
-    }
+    protected abstract void minePeople();
 
     @Override
-    public abstract void mineRoles();
+    protected abstract void mineRoles();
 
     @Override
     public abstract void minePriorities();
+
+    @Override
+    public abstract void mineWUTypes();
+
+    @Override
+    protected abstract void mineTickets();
+
+    @Override
+    protected abstract Collection<ProjectSegment> mineIterations();
 }

@@ -8,7 +8,6 @@ import cz.zcu.kiv.spade.domain.Project;
 import cz.zcu.kiv.spade.domain.Role;
 import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.*;
-import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
 
 import javax.persistence.EntityManager;
@@ -62,38 +61,13 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.setExternalId(redmineProject.getId().toString());
         pi.setProject(project);
 
-        new DBInitializer(em).setDefaultEnums(pi);
-        mineEnums();
-        mineCategories();
-        minePeople();
-        Collection<ProjectSegment> iterations = mineIterations();
-
-        mineTickets();
-
-        for (WorkUnit unit : pi.getProject().getUnits()) {
-            for (ProjectSegment iteration : iterations) {
-                if (unit.getIteration() != null &&
-                        unit.getIteration().getExternalId().equals(iteration.getExternalId())) {
-                    if (iteration instanceof Iteration) {
-                        Iteration i = (Iteration) iteration;
-                        unit.setIteration(i);
-                        if (unit.getDueDate() == null) unit.setDueDate(iteration.getEndDate());
-                    }
-                    if (iteration instanceof Phase) {
-                        Phase phase = (Phase) iteration;
-                        unit.setPhase(phase);
-                    }
-                    if (iteration instanceof  Activity) {
-                        Activity activity = (Activity) iteration;
-                        unit.setActivity(activity);
-                    }
-                }
-            }
-        }
-
         mineWiki();
+
+        mineContent();
+
         mineAllRelations();
         finalTouches();
+
         return pi;
     }
 

@@ -4,7 +4,9 @@ import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.dao.*;
 import cz.zcu.kiv.spade.dao.jpa.*;
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.*;
+import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
 
 import javax.persistence.EntityManager;
@@ -50,6 +52,7 @@ public abstract class DataPump<RootObjectType> {
     protected SeverityClassificationDAO severityDao;
     /** DAO object for handling Role Classification instances */
     protected RoleClassificationDAO roleDao;
+    protected EntityManager entityManager;
 
     /**
      * @param projectHandle URL of the project instance
@@ -112,6 +115,11 @@ public abstract class DataPump<RootObjectType> {
         pi.setUrl(projectHandle);
         pi.setName(getProjectName());
         pi.getProject().setName(getProjectName());
+
+        this.entityManager = em;
+
+        return pi;
+    }
 
         return pi;
     }
@@ -818,4 +826,82 @@ public abstract class DataPump<RootObjectType> {
         }
         return null;
     }
+
+    /**
+     * gets a Role instance with a given name
+     * @param name role name
+     * @return Role instance or null
+     */
+    protected Role resolveRole(String name) {
+        for (Role role : pi.getRoles()) {
+            if (name.equals(role.getName())) {
+                return role;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * mines all the enumeration values used in the project
+     */
+    public void mineEnums() {
+        new DBInitializer(entityManager).setDefaultEnums(pi);
+        mineRoles();
+        mineCategories();
+        minePeople();
+    }
+
+    /**
+     * mines custom issue categories (components, tags, labels) in project instance
+     */
+    protected abstract void mineCategories();
+
+    /**
+     * mines data of users with access to the project
+     */
+    protected abstract void minePeople();
+
+    /**
+     * mines all the roles used in the project
+     */
+    protected abstract void mineRoles();
+
+    protected void mineContent() {
+        mineEnums();
+        mineTickets();
+
+        Collection<ProjectSegment> iterations = mineIterations();
+        for (WorkUnit unit : pi.getProject().getUnits()) {
+            for (ProjectSegment iteration : iterations) {
+                if (unit.getIteration() != null &&
+                        unit.getIteration().getExternalId().equals(iteration.getExternalId())) {
+                    if (iteration instanceof Iteration) {
+                        Iteration i = (Iteration) iteration;
+                        unit.setIteration(i);
+                        if (unit.getDueDate() == null) unit.setDueDate(iteration.getEndDate());
+                    }
+                    if (iteration instanceof Phase) {
+                        Phase phase = (Phase) iteration;
+                        unit.setPhase(phase);
+                    }
+                    if (iteration instanceof Activity) {
+                        Activity activity = (Activity) iteration;
+                        unit.setActivity(activity);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * mines all the tickets/issues in the project
+     */
+    protected abstract void mineTickets();
+
+    /**
+     * mines all iterations (milestones, phases, etc.) in the project and saves each one as Iteration, Phase and Activity
+     * for future analysis
+     * @return all project segments in all 3 forms
+     */
+    protected abstract Collection<ProjectSegment> mineIterations();
 }

@@ -5,6 +5,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.abstracts.VCSPump;
@@ -100,6 +101,31 @@ public class GitPump extends VCSPump<Repository> {
         for (Commit commit : pi.getProject().getCommits()) {
             mineMentionedGitCommits(commit, commit.getDescription());
         }
+    }
+
+    @Override
+    protected void mineCategories() {
+
+    }
+
+    @Override
+    protected void minePeople() {
+
+    }
+
+    @Override
+    protected void mineRoles() {
+
+    }
+
+    @Override
+    protected void mineTickets() {
+
+    }
+
+    @Override
+    protected Collection<ProjectSegment> mineIterations() {
+        return null;
     }
 
     @Override
