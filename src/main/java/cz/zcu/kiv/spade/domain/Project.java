@@ -81,7 +81,7 @@ public class Project extends ProjectSegment {
 
     @Transient
     public WorkUnit getUnit(int number) {
-        return units.get(number + "");
+        return units.get(number);
     }
 
     @Transient
@@ -91,7 +91,7 @@ public class Project extends ProjectSegment {
 
     @Transient
     public boolean containsUnit(String number) {
-        return units.containsKey(number);
+        return units.containsKey(Integer.parseInt(number));
     }
 
     @Transient
