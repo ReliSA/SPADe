@@ -5,7 +5,6 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.*;
-import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.ArtifactClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.pumps.abstracts.VCSPump;
@@ -78,7 +77,7 @@ public class GitPump extends VCSPump<Repository> {
         setToolInstance();
 
         mineBranches();
-        addTags();
+        mineTags();
         
         pi.getStats().setCommits(pi.getProject().getCommits().size());
 
@@ -104,28 +103,21 @@ public class GitPump extends VCSPump<Repository> {
     }
 
     @Override
-    protected void mineCategories() {
 
-    }
+        mineBranches();
+        mineTags();
 
-    @Override
-    protected void minePeople() {
+        List<Configuration> list = sortConfigsByDate();
+        list = cleanUpCommitList(list);
+        this.pi.getProject().getConfigurations().addAll(list);
 
-    }
+        this.pi.getProject().setStartDate(list.get(0).getCreated());
 
-    @Override
-    protected void mineRoles() {
+        addWorkItemAuthors();
 
-    }
+        mineMentions();
 
-    @Override
-    protected void mineTickets() {
-
-    }
-
-    @Override
-    protected Collection<ProjectSegment> mineIterations() {
-        return null;
+        return this.pi;
     }
 
     @Override
@@ -148,7 +140,7 @@ public class GitPump extends VCSPump<Repository> {
     }
 
     @Override
-    public void addTags() {
+    public void mineTags() {
         RevWalk walk = new RevWalk(rootObject);
 
         Set<Map.Entry<String, Ref>> refs = rootObject.getTags().entrySet();

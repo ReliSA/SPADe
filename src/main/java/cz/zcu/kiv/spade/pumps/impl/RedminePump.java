@@ -61,12 +61,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         pi.setExternalId(redmineProject.getId().toString());
         pi.setProject(project);
 
-        mineWiki();
-
         mineContent();
-
-        mineAllRelations();
-        finalTouches();
 
         return pi;
     }
@@ -110,6 +105,42 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     }
 
     @Override
+    protected void mineResolutions() {
+        List<CustomFieldDefinition> defs = new ArrayList<>();
+        try {
+            defs = rootObject.getCustomFieldManager().getCustomFieldDefinitions();
+        } catch (RedmineException e) {
+            System.out.println("\tInsufficient permissions for custom fields");
+        }
+        for (CustomFieldDefinition def : defs) {
+            if (def.getName().toLowerCase().equals("resolution")) {
+
+                for (String issueResolution : def.getPossibleValues()) {
+                    boolean found = false;
+                    for (Resolution resolution : pi.getResolutions()) {
+                        if (toLetterOnlyLowerCase(resolution.getName()).equals(toLetterOnlyLowerCase(issueResolution))) {
+                            resolution.setName(issueResolution);
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        Resolution newResolution = new Resolution(issueResolution, resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+                        pi.getResolutions().add(newResolution);
+                    }
+                }
+                break;
+            }
+        }
+    }
+
+    @Override
+    protected void mineWURelationTypes() {
+        resolveRelation("parent of");
+        resolveRelation("child of");
+    }
+
+    @Override
     public void mineCategories() {
         Collection<IssueCategory> issueCategories = new LinkedHashSet<>();
 
@@ -127,10 +158,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines projects wiki
-     */
-    private void mineWiki() {
+    @Override
+    protected void mineWiki() {
         Map<String, Artifact> wikies = new HashMap<>();
 
         WikiManager wikiMgr = rootObject.getWikiManager();
@@ -279,42 +308,45 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
 
         for (Issue issue : issues) {
-
-            WorkUnit unit = new WorkUnit();
-            unit.setNumber(issue.getId());
-            unit.setExternalId(issue.getId().toString());
-            unit.setUrl("https://" + getServer() + "/issues/" + issue.getId());
-            unit.setName(issue.getSubject());
-            unit.setDescription(issue.getDescription());
-            unit.setAuthor(addPerson(generateIdentity(issue.getAuthorId(), issue.getAuthorName())));
-            unit.setCreated(issue.getCreatedOn());
-            unit.setStartDate((issue.getStartDate() == null) ? issue.getCreatedOn() : issue.getStartDate());
-            unit.setDueDate(issue.getDueDate());
-            unit.setAssignee(addPerson(generateIdentity(issue.getAssigneeId(), issue.getAssigneeName())));
-            unit.setStatus(resolveStatus(issue.getStatusName()));
-            unit.setType(resolveType(issue.getTracker().getName()));
-            unit.setPriority(resolvePriority(issue.getPriorityText()));
-            unit.setEstimatedTime((issue.getEstimatedHours() == null) ? 0 : issue.getEstimatedHours());
-            unit.setSpentTime(getSpentTimeFromEntries(unit, issue.getId()));
-            unit.setProgress(issue.getDoneRatio());
-            unit.getCategories().addAll(resolveCategories(issue));
-            unit.setSeverity(assignSeverity(issue));
-
-            pi.getProject().addUnit(unit);
-
-            mineAttachments(unit, issue.getAttachments());
-            mineHistory(unit, issue.getJournals());
-            mineRevisions(unit, issue.getChangesets());
-
-            if (issue.getTargetVersion() != null) {
-                Iteration iteration = new Iteration();
-                iteration.setExternalId(issue.getTargetVersion().getId() + "");
-                unit.setIteration(iteration);
-            }
-
-            generateCreationConfig(unit);
-            if (issue.getClosedOn() != null) generateClosureConfig(unit, issue.getClosedOn());
+            mineTicket(issue);
         }
+    }
+
+    private void mineTicket(Issue issue) {
+        WorkUnit unit = new WorkUnit();
+        unit.setNumber(issue.getId());
+        unit.setExternalId(issue.getId().toString());
+        unit.setUrl("https://" + getServer() + "/issues/" + issue.getId());
+        unit.setName(issue.getSubject());
+        unit.setDescription(issue.getDescription());
+        unit.setAuthor(addPerson(generateIdentity(issue.getAuthorId(), issue.getAuthorName())));
+        unit.setCreated(issue.getCreatedOn());
+        unit.setStartDate((issue.getStartDate() == null) ? issue.getCreatedOn() : issue.getStartDate());
+        unit.setDueDate(issue.getDueDate());
+        unit.setAssignee(addPerson(generateIdentity(issue.getAssigneeId(), issue.getAssigneeName())));
+        unit.setStatus(resolveStatus(issue.getStatusName()));
+        unit.setType(resolveType(issue.getTracker().getName()));
+        unit.setPriority(resolvePriority(issue.getPriorityText()));
+        unit.setEstimatedTime((issue.getEstimatedHours() == null) ? 0 : issue.getEstimatedHours());
+        unit.setSpentTime(getSpentTimeFromEntries(unit, issue.getId()));
+        unit.setProgress(issue.getDoneRatio());
+        unit.getCategories().addAll(resolveCategories(issue));
+        unit.setSeverity(assignSeverity(issue));
+
+        pi.getProject().addUnit(unit);
+
+        mineAttachments(unit, issue.getAttachments());
+        mineHistory(unit, issue.getJournals());
+        mineRevisions(unit, issue.getChangesets());
+
+        if (issue.getTargetVersion() != null) {
+            Iteration iteration = new Iteration();
+            iteration.setExternalId(issue.getTargetVersion().getId() + "");
+            unit.setIteration(iteration);
+        }
+
+        generateCreationConfig(unit);
+        if (issue.getClosedOn() != null) generateClosureConfig(unit, issue.getClosedOn());
     }
 
     /**
@@ -370,7 +402,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     }
 
     /**
-     * mines issue historz
+     * mines issue history
      * @param unit issue
      * @param journals journals (history entries)
      */
@@ -576,7 +608,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     }
 
     @Override
-    public Collection<ProjectSegment> mineIterations() {
+    public Collection<ProjectSegment> collectIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
         try {
             for (Version version : rootObject.getProjectManager().getVersions(redmineProject.getId())) {
@@ -617,16 +649,7 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
     }
 
     @Override
-    public void mineEnums() {
-        super.mineEnums();
-        mineStatuses();
-        mineSeverities();
-    }
-
-    /**
-     * mines all the severity values used in the project (if there are any)
-     */
-    private void mineSeverities() {
+    protected void mineSeverities() {
 
         List<CustomFieldDefinition> defs = new ArrayList<>();
         try {
@@ -683,10 +706,8 @@ public class RedminePump extends IssueTrackingPump<RedmineManager> {
         }
     }
 
-    /**
-     * mines all the status values used in the project
-     */
-    private void mineStatuses() {
+    @Override
+    protected void mineStatuses() {
 
         List<IssueStatus> statuses = new ArrayList<>();
         try {

@@ -20,6 +20,8 @@ import java.util.concurrent.ExecutionException;
 
 public class JiraPump extends IssueTrackingPump<JiraRestClient> {
 
+    public static final String JIRA_ISSUE_MENTION_REGEX = "(-\\d{1,4})(?=[^0-9])";
+
     /**  a representation of a Jira project from jira-api */
     private com.atlassian.jira.rest.client.domain.Project jiraProject;
 
@@ -57,9 +59,6 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         pi.setProject(project);
 
         mineContent();
-
-        mineAllRelations();
-        finalTouches();
 
         return pi;
     }
@@ -110,10 +109,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
             if (index > 0) break;
         }
 
-        index += 1;
-        while (true) {
+        for (int i = index; i > 0; i--) {
             Issue issue = null;
-            index--;
             try {
                 issue = rootObject.getIssueClient().getIssue(pi.getName() + "-" + index).get();
                 if (index <= 0) break;
@@ -127,7 +124,7 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }
     }
 
-    private int getNumberFromKey(String key) {
+    public static int getNumberFromKey(String key) {
         return Integer.parseInt(key.substring(key.lastIndexOf("-") + 1));
     }
 
@@ -175,8 +172,6 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
 
         generateCreationConfig(unit);
         mineTransitions(unit, issue);
-
-        issue.getExpandos();
     }
 
     private void mineTransitions(WorkUnit unit, Issue issue) {
@@ -418,7 +413,7 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
     }
 
     @Override
-    public Collection<ProjectSegment> mineIterations() {
+    public Collection<ProjectSegment> collectIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
             for (Version version : jiraProject.getVersions()) {
                 Iteration iteration = new Iteration();
@@ -449,13 +444,6 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         return iterations;
     }
 
-    @Override
-    public void mineEnums() {
-        super.mineEnums();
-        mineResolutions();
-        mineWURelationTypes();
-    }
-
     private Status resolveStatus(BasicStatus basicStatus) {
         com.atlassian.jira.rest.client.domain.Status jiraStatus = null;
         try {
@@ -483,7 +471,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         return newStatus;
     }
 
-    private void mineWURelationTypes() {
+    @Override
+    protected void mineWURelationTypes() {
         Iterable<IssuelinksType> types = new ArrayList<>();
         try {
             types = rootObject.getMetadataClient().getIssueLinkTypes().get();
@@ -510,7 +499,8 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
         }
     }
 
-    private void mineResolutions() {
+    @Override
+    protected void mineResolutions() {
         Iterable<com.atlassian.jira.rest.client.domain.Resolution> resolutions = new ArrayList<>();
         try {
             resolutions = rootObject.getMetadataClient().getResolutions().get();
@@ -699,5 +689,20 @@ public class JiraPump extends IssueTrackingPump<JiraRestClient> {
             pi.getRoles().add(projectLeadRole);
         }
         return projectLeadRole;
+    }
+
+    @Override
+    protected void mineWiki() {
+        // Jira has no wiki
+    }
+
+    @Override
+    protected void mineStatuses() {
+        // API doesn't list statuses in project, therefore handled while mining issues (mineTickets)
+    }
+
+    @Override
+    protected void mineSeverities() {
+        // API doesn't list custom fields in project, therefore handled while mining issues (mineTickets)
     }
 }

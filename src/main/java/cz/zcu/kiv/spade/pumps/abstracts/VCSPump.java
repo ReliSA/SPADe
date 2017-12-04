@@ -1,6 +1,10 @@
 package cz.zcu.kiv.spade.pumps.abstracts;
 
+import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.pumps.DataPump;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * a generic VCS tool pump
@@ -8,7 +12,7 @@ import cz.zcu.kiv.spade.pumps.DataPump;
  *
  * @author Petr Pícha
  */
-public abstract class VCSPump<RootObjectType> extends DataPump<RootObjectType> implements IVCSPump {
+public abstract class VCSPump<RootObjectType> extends DataPump<RootObjectType> {
 
     /**
      * constructor, sets projects URI and login credentials
@@ -23,8 +27,44 @@ public abstract class VCSPump<RootObjectType> extends DataPump<RootObjectType> i
     }
 
     @Override
-    public abstract void addTags();
+    protected void mineCategories() {}
 
     @Override
-    public abstract void mineBranches();
+    protected void minePeople() {}
+
+    @Override
+    protected void mineRoles() {}
+
+    @Override
+    public void mineAllRelations() {}
+
+    @Override
+    protected void mineTickets() {}
+
+    @Override
+    protected Collection<ProjectSegment> collectIterations() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    protected void mineWiki() {}
+
+    @Override
+    protected void minePriorities() {}
+
+    @Override
+    protected void mineWUTypes() {}
+
+    @Override
+    protected void mineResolutions() {}
+
+    @Override
+    protected void mineStatuses() {}
+
+    @Override
+    protected void mineSeverities() {}
+
+
+    @Override
+    protected void mineWURelationTypes() {}
 }

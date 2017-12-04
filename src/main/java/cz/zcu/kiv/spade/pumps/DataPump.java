@@ -8,6 +8,7 @@ import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.abstracts.IssueTrackingPump;
+import cz.zcu.kiv.spade.pumps.impl.JiraPump;
 
 import javax.persistence.EntityManager;
 import java.io.File;
@@ -319,7 +320,17 @@ public abstract class DataPump<RootObjectType> {
      * @param text text to search mentions in
      */
     protected void mineMentionedUnits(WorkItem item, String text) {
-        for (String mention : mineMentions(text, IssueTrackingPump.WU_MENTION_REGEX)) {
+        String regex;
+        switch (tool) {
+            case JIRA: regex = pi.getName() + JiraPump.JIRA_ISSUE_MENTION_REGEX ;
+                        break;
+            default: regex = IssueTrackingPump.DEFAULT_ISSUE_MENTION_REGEX;
+                        break;
+        }
+        for (String mention : mineMentions(text, regex)) {
+            if (tool == Tool.JIRA) {
+                mention = JiraPump.getNumberFromKey(mention) + "";
+            }
             if (pi.getProject().containsUnit(mention)) {
                 WorkUnit mentioned = pi.getProject().getUnit(mention);
                 generateMentionRelation(item, mentioned);
@@ -727,18 +738,6 @@ public abstract class DataPump<RootObjectType> {
     protected abstract void mineMentions();
 
     /**
-     * performs a few tasks at the end of mining`
-     * add the "deleted" status to possibly deleted WorkUnits found,
-     * assigns default enumeration values to WorkUnits with none set yet,
-     * mines mentions among the WorkItems
-     */
-    protected void finalTouches() {
-        addDeletedStatus();
-        assignDefaultEnums();
-        mineMentions();
-    }
-
-    /**
      * mines a configuration/action of creating an issue
      * @param unit WorkUnit (issue)
      */
@@ -844,12 +843,32 @@ public abstract class DataPump<RootObjectType> {
     /**
      * mines all the enumeration values used in the project
      */
-    public void mineEnums() {
+    private void mineEnums() {
         new DBInitializer(entityManager).setDefaultEnums(pi);
         mineRoles();
         mineCategories();
         minePeople();
+        mineWUTypes();
+        minePriorities();
+        mineResolutions();
+        mineWURelationTypes();
+        mineStatuses();
+        mineSeverities();
     }
+
+    protected abstract void mineResolutions();
+
+    protected abstract void mineWURelationTypes();
+
+    /**
+     * mines all the status values used in the project
+     */
+    protected abstract void mineStatuses();
+
+    /**
+     * mines all the severity values used in the project (if there are any)
+     */
+    protected abstract void mineSeverities();
 
     /**
      * mines custom issue categories (components, tags, labels) in project instance
@@ -869,8 +888,22 @@ public abstract class DataPump<RootObjectType> {
     protected void mineContent() {
         mineEnums();
         mineTickets();
+        mineIterations();
+        mineAllRelations();
+        mineWiki();
+        addDeletedStatus();
+        assignDefaultEnums();
+        mineMentions();
+    }
 
-        Collection<ProjectSegment> iterations = mineIterations();
+    protected abstract void mineAllRelations();
+
+    /**
+     * collects all iterations in the project
+     * and assigns the proper ones to the Work Units
+     */
+    private void mineIterations() {
+        Collection<ProjectSegment> iterations = collectIterations();
         for (WorkUnit unit : pi.getProject().getUnits()) {
             for (ProjectSegment iteration : iterations) {
                 if (unit.getIteration() != null &&
@@ -899,9 +932,35 @@ public abstract class DataPump<RootObjectType> {
     protected abstract void mineTickets();
 
     /**
-     * mines all iterations (milestones, phases, etc.) in the project and saves each one as Iteration, Phase and Activity
+     * collects all iterations (milestones, phases, etc.) in the project and saves each one as Iteration, Phase and Activity
      * for future analysis
      * @return all project segments in all 3 forms
      */
-    protected abstract Collection<ProjectSegment> mineIterations();
+    protected abstract Collection<ProjectSegment> collectIterations();
+
+    /**
+     * mines projects wiki
+     */
+    protected abstract void mineWiki();
+
+    /**
+     * mines all the priority values used in the project
+     */
+    protected abstract void minePriorities();
+
+    /**
+     * mines all the issue type values used in the project
+     */
+    protected abstract void mineWUTypes();
+
+
+    /**
+     * loads a map using commit's external ID as a key and a set of associated tags as a value
+     */
+    protected abstract void mineTags();
+
+    /**
+     * mines data one branch after another while storing date in private fields
+     */
+    protected abstract void mineBranches();
 }

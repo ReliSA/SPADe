@@ -6,7 +6,6 @@ import cz.zcu.kiv.spade.domain.abstracts.ProjectSegment;
 import cz.zcu.kiv.spade.domain.Category;
 import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.pumps.DataPump;
-import cz.zcu.kiv.spade.pumps.abstracts.ComplexPump;
 import org.kohsuke.github.*;
 
 import javax.persistence.EntityManager;
@@ -19,7 +18,7 @@ import java.util.*;
  *
  * @author Petr Pícha
  */
-public class GitHubPump extends ComplexPump<GHRepository> {
+public class GitHubPump extends DataPump<GHRepository> {
 
     /** GitHub instance for getting items. */
     private GitHub gitHub;
@@ -27,6 +26,11 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     private List<String> usernames = new ArrayList<>();
     /** list of passwords necessary for continuous mining (rate limit workaround) */
     private List<String> passwords = new ArrayList<>();
+
+    private final List<String> GITHUB_ROLES = new ArrayList<String>() {{
+        add("collaborator");
+        add("contributor");
+    }};
 
     /**
      * a constructor, sets project's URL and login credentials
@@ -51,7 +55,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
 
     @Override
     protected GHRepository init() {
-        return null;
+        return init(false);
     }
 
     /**
@@ -89,17 +93,29 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     public ProjectInstance mineData(EntityManager em) {
         super.mineData(em);
 
-        DataPump gitPump = new GitPump(projectHandle, null, null, null);
-        pi = gitPump.mineData(em);
-        gitPump.close();
-        pi.getStats().setRepo(System.currentTimeMillis());
+        mineGit(em);
 
         this.tool = Tool.GITHUB;
         pi.getToolInstance().setTool(tool);
         setToolInstance();
 
-        rootObject = init(false);
+        rootObject = init();
 
+        enhanceGitData();
+
+        mineContent();
+
+        return pi;
+    }
+
+    private void mineGit(EntityManager em) {
+        DataPump gitPump = new GitPump(projectHandle, null, null, null);
+        pi = gitPump.mineData(em);
+        gitPump.close();
+        pi.getStats().setRepo(System.currentTimeMillis());
+    }
+
+    private void enhanceGitData() {
         pi.getStats().setName(getProjectFullName());
 
         if (rootObject.getDescription() != null) pi.getProject().setDescription(rootObject.getDescription().trim());
@@ -116,16 +132,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         setDefaultBranch();
         enhanceCommits();
         mineCommitComments();
-        getTagDescriptions();
-
-        /*DataPump wikiPump = new GitPump(App.GITHUB_WIKI_REPO_PREFIX + getProjectFullName() + App.GIT_SUFFIX, null, null, null);
-        pi = wikiPump.mineData(em, pi);
-        wikiPump.close();*/
-
-        mineContent();
-
-        finalTouches();
-        return pi;
+        mineTags();
     }
 
     @Override
@@ -283,14 +290,12 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
         if (limit != null && limit.remaining < 500) {
             System.out.println("username: " + username + ", remaining rate limit: " + limit.remaining + ", reset at: " + limit.getResetDate().toString());
-            rootObject = init(false);
+            rootObject = init();
         }
     }
 
-    /**
-     * adds release names and description to SPADe tag descriptions mined from Git
-     */
-    private void getTagDescriptions() {
+    @Override
+    protected void mineTags() {
 
         List<GHRelease> releases;
         List<GHTag> tags;
@@ -332,12 +337,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         pi.getStats().setReleases(releases.size());
     }
 
-    /**
-     * mines milestones and saves each one as Iteration, Phase and Activity
-     * for further analysis
-     * @return collection of Iterations, Phases and Activities
-     */
-    public Collection<ProjectSegment> mineIterations() {
+    @Override
+    protected Collection<ProjectSegment> collectIterations() {
         Collection<ProjectSegment> iterations = new LinkedHashSet<>();
         int i = 1;
         List<GHMilestone> milestones = rootObject.listMilestones(GHIssueState.ALL).asList();
@@ -393,15 +394,13 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     }
 
     @Override
-    public void mineBranches() {}
-
-    @Override
-    public void addTags() {}
+    protected void mineWiki() {
+    }
 
     /**
      * mines issues (not pull requests)
      */
-    public void mineTickets() {
+    protected void mineTickets() {
         Set<GHIssue> issues = rootObject.listIssues(GHIssueState.ALL).asSet();
         App.printLogMsg("issues listed");
         pi.getStats().setIssues(issues.size());
@@ -427,46 +426,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
             }
 
             if (!issue.isPullRequest()) {
-                WorkUnit unit = new WorkUnit();
-                unit.setNumber(issue.getNumber());
-                unit.setExternalId(issue.getId() + "");
-                unit.setUrl(issue.getHtmlUrl().toString());
-                unit.setName(issue.getTitle());
-                if (issue.getBody() != null) unit.setDescription(issue.getBody().trim());
-
-                unit.setStatus(resolveStatus(issue.getState().name()));
-
-                if (issue.getMilestone() != null) {
-                    Iteration iteration = new Iteration();
-                    iteration.setExternalId(issue.getMilestone().getId() + "");
-                    unit.setIteration(iteration);
-                }
-
-                Date creation;
-                Collection<GHLabel> labels;
-                GHUser author, assignee;
-                while (true) {
-                    try {
-                        author = issue.getUser();
-                        assignee = issue.getAssignee();
-                        creation = issue.getCreatedAt();
-                        labels = issue.getLabels();
-                        break;
-                    } catch (IOException e) {
-                        rootObject = init(true);
-                    }
-                }
-
-                unit.setAuthor(addPerson(generateIdentity(author)));
-                if (assignee != null) unit.setAssignee(addPerson(generateIdentity(assignee)));
-                unit.setCreated(creation);
-                unit.setStartDate(creation);
-                if (labels != null && !labels.isEmpty()) mineLabels(labels, unit);
-
-                pi.getProject().addUnit(unit);
-
-                mineChanges(issue, unit);
-
+                mineTicket(issue);
                 if ((count % 100) == 0) {
                     App.printLogMsg("mined " + count + " tickets");
                 }
@@ -476,6 +436,48 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         }
         App.printLogMsg("mined " + (count - 1) + " tickets");
         pi.getStats().setRealIssues(count - 1);
+    }
+
+    private void mineTicket(GHIssue issue) {
+        WorkUnit unit = new WorkUnit();
+        unit.setNumber(issue.getNumber());
+        unit.setExternalId(issue.getId() + "");
+        unit.setUrl(issue.getHtmlUrl().toString());
+        unit.setName(issue.getTitle());
+        if (issue.getBody() != null) unit.setDescription(issue.getBody().trim());
+
+        unit.setStatus(resolveStatus(issue.getState().name()));
+
+        if (issue.getMilestone() != null) {
+            Iteration iteration = new Iteration();
+            iteration.setExternalId(issue.getMilestone().getId() + "");
+            unit.setIteration(iteration);
+        }
+
+        Date creation;
+        Collection<GHLabel> labels;
+        GHUser author, assignee;
+        while (true) {
+            try {
+                author = issue.getUser();
+                assignee = issue.getAssignee();
+                creation = issue.getCreatedAt();
+                labels = issue.getLabels();
+                break;
+            } catch (IOException e) {
+                rootObject = init(true);
+            }
+        }
+
+        unit.setAuthor(addPerson(generateIdentity(author)));
+        if (assignee != null) unit.setAssignee(addPerson(generateIdentity(assignee)));
+        unit.setCreated(creation);
+        unit.setStartDate(creation);
+        if (labels != null && !labels.isEmpty()) mineLabels(labels, unit);
+
+        pi.getProject().addUnit(unit);
+
+        mineChanges(issue, unit);
     }
 
     /**
@@ -655,18 +657,7 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     }
 
     @Override
-    public void mineEnums() {
-        mineRoles();
-        mineStatuses();
-    }
-
-    @Override
-    public void mineAllRelations() {
-
-    }
-
-    @Override
-    public void mineCategories() {
+    protected void mineCategories() {
         List<GHLabel> labels;
         while (true) {
             try {
@@ -694,17 +685,15 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     }
 
     @Override
-    public void minePeople() {
-        Role collaboratorRole = resolveRole("collaborator");
-        Role contributorRole = resolveRole("contributor");
+    protected void minePeople() {
         try {
             for (GHUser collaborator : rootObject.listCollaborators()) {
                 Person person = addPerson(generateIdentity(collaborator));
-                person.getRoles().add(collaboratorRole);
+                person.getRoles().add(resolveRole("collaborator"));
             }
             for (GHUser contributor : rootObject.listContributors()) {
                 Person person = addPerson(generateIdentity(contributor));
-                person.getRoles().add(contributorRole);
+                person.getRoles().add(resolveRole("contributor"));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -712,19 +701,12 @@ public class GitHubPump extends ComplexPump<GHRepository> {
     }
 
     @Override
-    public void mineRoles() {
-        pi.getRoles().add(new Role("collaborator", roleDao.findByClass(RoleClass.TEAMMEMBER)));
-        pi.getRoles().add(new Role("contributor", roleDao.findByClass(RoleClass.TEAMMEMBER)));
-    }
-
-    @Override
-    public void minePriorities() {
-
-    }
-
-    @Override
-    public void mineWUTypes() {
-
+    protected void mineRoles() {
+        for (String name : GITHUB_ROLES) {
+            if (resolveRole(name) == null) {
+                pi.getRoles().add(new Role(name, roleDao.findByClass(RoleClass.TEAMMEMBER)));
+            }
+        }
     }
 
     /**
@@ -835,10 +817,8 @@ public class GitHubPump extends ComplexPump<GHRepository> {
         return false;
     }
 
-    /**
-     * mines statuses from GitHub and adds corresponding Statuses to the Project Instance
-     */
-    private void mineStatuses() {
+    @Override
+    protected void mineStatuses() {
         for (GHIssueState state : GHIssueState.values()) {
             if (state == GHIssueState.ALL) continue;
 
@@ -866,5 +846,40 @@ public class GitHubPump extends ComplexPump<GHRepository> {
      */
     private String getProjectFullName() {
         return getProjectDir().substring(getProjectDir().indexOf("/") + 1);
+    }
+
+    @Override
+    protected void mineSeverities() {
+        //handled in mineCategories
+    }
+
+    @Override
+    protected void mineResolutions() {
+        //handled in mineCategories
+    }
+
+    @Override
+    protected void minePriorities() {
+        //handled in mineCategories
+    }
+
+    @Override
+    protected void mineWUTypes() {
+        //handled in mineCategories
+    }
+
+    @Override
+    protected void mineWURelationTypes() {
+        //GitHub does not have ane issue relations
+    }
+
+    @Override
+    protected void mineAllRelations() {
+        //GitHub does not have ane issue relations
+    }
+
+    @Override
+    protected void mineBranches() {
+        //handles through GitPump in minGit
     }
 }
