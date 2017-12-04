@@ -395,6 +395,9 @@ public class GitHubPump extends DataPump<GHRepository> {
 
     @Override
     protected void mineWiki() {
+        /*DataPump wikiPump = new GitPump(App.GITHUB_WIKI_REPO_PREFIX + getProjectFullName() + App.GIT_SUFFIX, null, null, null);
+        pi = wikiPump.mineData(em, pi);
+        wikiPump.close();*/
     }
 
     /**

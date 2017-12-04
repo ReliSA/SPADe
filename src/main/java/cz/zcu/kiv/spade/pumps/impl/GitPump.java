@@ -103,6 +103,8 @@ public class GitPump extends VCSPump<Repository> {
     }
 
     @Override
+    public ProjectInstance mineData(EntityManager em, ProjectInstance pi) {
+        this.pi = super.mineData(em, pi);
 
         mineBranches();
         mineTags();

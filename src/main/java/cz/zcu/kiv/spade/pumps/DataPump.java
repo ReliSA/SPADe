@@ -122,6 +122,25 @@ public abstract class DataPump<RootObjectType> {
         return pi;
     }
 
+    /**
+     * gathers aditional data needed from project instance
+     * @param em JPA entitny manager for accessing the database
+     * @param pi project instance (the result of previous mining)
+     * @return ProjectInstrance with all data
+     */
+    public ProjectInstance mineData(EntityManager em, ProjectInstance pi) {
+        this.pi = pi;
+
+        toolDao = new ToolInstanceDAO_JPA(em);
+        relationDao = new RelationClassificationDAO_JPA(em);
+        statusDao = new StatusClassificationDAO_JPA(em);
+        priorityDao = new PriorityClassificationDAO_JPA(em);
+        severityDao = new SeverityClassificationDAO_JPA(em);
+        resolutionDao = new ResolutionClassificationDAO_JPA(em);
+        typeDao = new WorkUnitTypeClassificationDAO_JPA(em);
+
+        this.entityManager = em;
+
         return pi;
     }
 
