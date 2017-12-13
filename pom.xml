@@ -139,7 +139,12 @@
         <dependency>
         </dependency>
 
+        <!-- SVN API -->
+        <!-- https://mvnrepository.com/artifact/org.tmatesoft.svnkit/svnkit -->
         <dependency>
+            <groupId>org.tmatesoft.svnkit</groupId>
+            <artifactId>svnkit</artifactId>
+            <version>1.9.0</version>
         </dependency>
 
     </dependencies>
