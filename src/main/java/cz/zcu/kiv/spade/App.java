@@ -140,25 +140,26 @@ public class App {
 
         Tool tool = Tool.valueOf(toolName);
 
-        DataPump pump = null;
-        if (tool.equals(Tool.GIT)) {
-            pump = new GitPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
-        } else if (tool.equals(Tool.GITHUB)) {
-            pump = new GitHubPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
-        } else if (tool.equals(Tool.REDMINE)) {
-            pump = new RedminePump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
-        } else if (tool.equals(Tool.JIRA)) {
-            pump = new JiraPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
-        } /*else if (tool.equals(Tool.SVN)) {
-
-        } else if (tool.equals(Tool.BUGZILLA)) {
-
-        } else if (tool.equals(Tool.ASSEMBLA)) {
-
-        } else if (tool.equals(Tool.RTC)) {
-
-        }*/
-
+        DataPump pump;
+        switch (tool) {
+            case GIT:
+                pump = new GitPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                break;
+            case GITHUB:
+                pump = new GitHubPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                break;
+            case REDMINE:
+                pump = new RedminePump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                break;
+            case JIRA:
+                pump = new JiraPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                break;
+            case BUGZILLA:
+            case ASSEMBLA:
+            case SVN:
+            case RTC:
+            default:
+                return null;
         }
 
         ProjectInstance pi = pump.mineData(updateManager);
