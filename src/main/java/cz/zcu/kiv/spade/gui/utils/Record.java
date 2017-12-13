@@ -4,13 +4,10 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-
 public class Record {
-    private SimpleStringProperty name;
-    private SimpleIntegerProperty count;
-    private SimpleDoubleProperty percentage;
+    private final SimpleStringProperty name;
+    private final SimpleIntegerProperty count;
+    private final SimpleDoubleProperty percentage;
 
     public Record(String name, int count, double percentage){
         this.name = new SimpleStringProperty(name);

@@ -8,7 +8,7 @@ import javax.persistence.EntityManager;
 
 public class Loader {
 
-    private EntityManager em;
+    private final EntityManager em;
 
     public Loader(EntityManager em) {
         this.em = em;

@@ -47,16 +47,16 @@ public class CodefacePrinter {
             if (wu.getStartDate() != null) bean.setStartDate(format.format(wu.getStartDate()));
             if (wu.getDueDate() != null) bean.setDueDate(format.format(wu.getDueDate()));
 
-            StringBuilder asignee = new StringBuilder();
+            StringBuilder assignee = new StringBuilder();
             if (wu.getAssignee() != null) {
                 for (String email : wu.getAssignee().getEmails()) {
                     if (email.equals("unknown")) continue;
-                    if (!asignee.toString().isEmpty()) asignee.append("@@");
-                    asignee.append(email);
+                    if (!assignee.toString().isEmpty()) assignee.append("@@");
+                    assignee.append(email);
                 }
             }
 
-            bean.setAssignedTo(asignee.toString());
+            bean.setAssignedTo(assignee.toString());
             bean.setEstimateTime(wu.getEstimatedTime() + "");
             bean.setSpentTime(wu.getSpentTime() + "");
             bean.setProgress(wu.getProgress() + "");

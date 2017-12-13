@@ -40,7 +40,7 @@ public class Main extends Application {
 
         if (args.length > 0) {
             switch (args[0]) {
-                case "giu":
+                case "gui":
                     launch(args);
                     break;
                 case "clean":

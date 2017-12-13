@@ -1,8 +1,5 @@
 package cz.zcu.kiv.spade.output;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 public class CodefaceBean {
 
     private String externalId;

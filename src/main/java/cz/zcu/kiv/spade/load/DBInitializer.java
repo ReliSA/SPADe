@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DBInitializer {
 
-    private EntityManager em;
+    private final EntityManager em;
 
     public DBInitializer(EntityManager em) {
         this.em = em;
@@ -89,7 +89,7 @@ public class DBInitializer {
         pi.setResolutions(getDefaultResolutions());
         pi.setRoles(getDefaultRoles());
         pi.setSeverities(getDefaultSeverities());
-        pi.setStatuses(getDeafultStatuses());
+        pi.setStatuses(getDefaultStatuses());
         pi.setWuTypes(getDefaultWUTypes());
     }
 
@@ -127,7 +127,7 @@ public class DBInitializer {
         roles.add(new Role("project admin", stakeholderClass));
         roles.add(new Role("stakeholder", stakeholderClass));
         roles.add(new Role("product owner", stakeholderClass));
-        roles.add(new Role("bussiness owner", stakeholderClass));
+        roles.add(new Role("business owner", stakeholderClass));
         roles.add(new Role("release train manager", stakeholderClass));
         roles.add(new Role("watcher", stakeholderClass));
         roles.add(new Role("reporter", stakeholderClass));
@@ -138,7 +138,7 @@ public class DBInitializer {
         roles.add(new Role("member", teamMemberClass));
 
         roles.add(new Role("analyst", analystClass));
-        roles.add(new Role("bussiness analyst", analystClass));
+        roles.add(new Role("business analyst", analystClass));
 
         roles.add(new Role("designer", designerClass));
         roles.add(new Role("architect", designerClass));
@@ -154,7 +154,7 @@ public class DBInitializer {
         return roles;
     }
 
-    private List<Status> getDeafultStatuses() {
+    private List<Status> getDefaultStatuses() {
         List<Status> statuses = new ArrayList<>();
         StatusClassificationDAO dao = new StatusClassificationDAO_JPA(em);
 
@@ -327,7 +327,7 @@ public class DBInitializer {
         RelationClassification blocksClass = dao.findByClass(RelationClass.BLOCKS);
         RelationClassification blockedByClass = dao.findByClass(RelationClass.BLOCKEDBY);
         RelationClassification relatesToClass = dao.findByClass(RelationClass.RELATESTO);
-        RelationClassification precedesClas = dao.findByClass(RelationClass.PRECEDES);
+        RelationClassification precedesClass = dao.findByClass(RelationClass.PRECEDES);
         RelationClassification followsClass = dao.findByClass(RelationClass.FOLLOWS);
         RelationClassification copiedFromClass = dao.findByClass(RelationClass.COPIEDFROM);
         RelationClassification copiedByClass = dao.findByClass(RelationClass.COPIEDBY);
@@ -357,9 +357,9 @@ public class DBInitializer {
         relations.add(new Relation("has attached", relatesToClass));
         relations.add(new Relation("attached to", relatesToClass));
 
-        relations.add(new Relation("precedes", precedesClas));
-        relations.add(new Relation("precedessor", precedesClas));
-        relations.add(new Relation("before", precedesClas));
+        relations.add(new Relation("precedes", precedesClass));
+        relations.add(new Relation("predecessor", precedesClass));
+        relations.add(new Relation("before", precedesClass));
 
         relations.add(new Relation("follows", followsClass));
         relations.add(new Relation("successor", followsClass));
@@ -373,7 +373,7 @@ public class DBInitializer {
         relations.add(new Relation("cloned by", copiedByClass));
 
         relations.add(new Relation("child of", childOfClass));
-        relations.add(new Relation("subtask of", childOfClass));
+        relations.add(new Relation("sub-task of", childOfClass));
 
         relations.add(new Relation("parent of", parentOfClass));
 

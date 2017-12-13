@@ -19,12 +19,15 @@ public class ChartTab extends SPADeTab {
 
     private final PieChart pieChart = new PieChart();
     private final Map<String, EnumStrings> enums = new LinkedHashMap<>();
-    private CategoryAxis xAxis = new CategoryAxis();
-    private NumberAxis yAxis = new NumberAxis();
+    private final CategoryAxis xAxis = new CategoryAxis();
+    private final NumberAxis yAxis = new NumberAxis();
     private final BarChart<String, Number> barChart = new BarChart<>(xAxis, yAxis);
-    private ComboBox<String> prjSelect, enumSelect, fldSelect;
-    private CheckBox zeroBox, nullBox;
-    private TableView<Record> statTbl;
+    private final ComboBox<String> prjSelect;
+    private final ComboBox<String> enumSelect;
+    private final ComboBox<String> fldSelect;
+    private final CheckBox zeroBox;
+    private final CheckBox nullBox;
+    private final TableView<Record> statTbl;
 
     public ChartTab(SPADeGUI gui) {
         super("Charts", gui);
@@ -54,8 +57,8 @@ public class ChartTab extends SPADeTab {
         grid.add(statTbl, 0, 5, 2, 1);
         grid.add(pieChart, 2, 2, 3, 4);
 
-        setRowHeightPercetages(5, 5, 5, 5, 5, 75);
-        setRowValignment(VPos.TOP, 3, 4, 5);
+        setRowHeightPercentages(5, 5, 5, 5, 5, 75);
+        setRowVAlignment(VPos.TOP, 3, 4, 5);
 
         setColumnWidths(45, 120, 100, 100, 500);
 
@@ -78,9 +81,9 @@ public class ChartTab extends SPADeTab {
         nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         TableColumn <Record, Integer> countCol = new TableColumn<>("#");
         countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
-        TableColumn <Record, Double> percetCol = new TableColumn<>("%");
-        percetCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
-        statTbl.getColumns().addAll(nameCol, countCol, percetCol);
+        TableColumn <Record, Double> percentCol = new TableColumn<>("%");
+        percentCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
+        statTbl.getColumns().addAll(nameCol, countCol, percentCol);
 
         prjSelect.setOnAction(event -> fillChart());
         enumSelect.setOnAction(event -> {

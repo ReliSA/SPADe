@@ -2,9 +2,9 @@ package cz.zcu.kiv.spade.gui.utils;
 
 public class EnumStrings {
 
-    private String className;
-    private String attributeName;
-    private String collectionName;
+    private final String className;
+    private final String attributeName;
+    private final String collectionName;
 
     public EnumStrings(String className, String attributeName, String collectionName) {
         this.className = className;

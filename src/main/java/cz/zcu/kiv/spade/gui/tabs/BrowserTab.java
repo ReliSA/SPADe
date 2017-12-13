@@ -16,12 +16,12 @@ import java.util.List;
 
 public abstract class BrowserTab extends SPADeTab {
 
-    protected String url;
+    String url;
     String folder;
-    protected String file;
+    String file;
 
-    ComboBox<String> prjSelect;
-    WebEngine webEngine;
+    final ComboBox<String> prjSelect;
+    final WebEngine webEngine;
 
     BrowserTab(String name, SPADeGUI gui) {
         super(name, gui);

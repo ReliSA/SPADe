@@ -14,8 +14,8 @@ import java.util.List;
 
 public abstract class SPADeTab extends Tab {
 
-    protected SPADeGUI gui;
-    GridPane grid;
+    final SPADeGUI gui;
+    final GridPane grid;
 
     SPADeTab(String text, SPADeGUI gui) {
         super(text);
@@ -33,7 +33,7 @@ public abstract class SPADeTab extends Tab {
 
     public abstract void refreshProjects(List<String> projects);
 
-    void setRowHeightPercetages(double... heights) {
+    void setRowHeightPercentages(double... heights) {
         for (double height : heights) {
             RowConstraints rc = new RowConstraints();
             rc.setPercentHeight(height);
@@ -41,9 +41,9 @@ public abstract class SPADeTab extends Tab {
         }
     }
 
-    void setRowValignment(VPos valignment, int... rowIndexes) {
+    void setRowVAlignment(VPos vAlignment, int... rowIndexes) {
         for (int rowIndex : rowIndexes) {
-            grid.getRowConstraints().get(rowIndex).setValignment(valignment);
+            grid.getRowConstraints().get(rowIndex).setValignment(vAlignment);
         }
     }
 
@@ -53,9 +53,9 @@ public abstract class SPADeTab extends Tab {
         }
     }
 
-    void setColumnHalignment (HPos halignment, int... columnIndexes) {
+    void setColumnHAlignment (HPos hAlignment, int... columnIndexes) {
         for (int columnIndex : columnIndexes) {
-            grid.getColumnConstraints().get(columnIndex).setHalignment(halignment);
+            grid.getColumnConstraints().get(columnIndex).setHalignment(hAlignment);
         }
     }
 }

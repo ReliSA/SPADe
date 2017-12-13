@@ -48,7 +48,7 @@ public class CocaexFilePrinter {
             } else if (item instanceof Commit) {
                 itemNode = generateCommitNode((Commit) item);
             } else if (item instanceof CommittedConfiguration) {
-                itemNode = generateCommitedConfigurationNode((CommittedConfiguration) item);
+                itemNode = generateCommittedConfigurationNode((CommittedConfiguration) item);
             } else if (item instanceof Configuration) {
                 itemNode = generateConfigurationNode((Configuration) item);
             }
@@ -184,7 +184,7 @@ public class CocaexFilePrinter {
         return configurationNode;
     }
 
-    private JSONObject generateCommitedConfigurationNode(CommittedConfiguration committed) throws JSONException {
+    private JSONObject generateCommittedConfigurationNode(CommittedConfiguration committed) throws JSONException {
         JSONObject committedNode = new JSONObject();
         committedNode.put("symbolicName", committed.getChanges().get(0).getName());
 

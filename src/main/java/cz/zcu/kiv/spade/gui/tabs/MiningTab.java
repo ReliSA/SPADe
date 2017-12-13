@@ -18,16 +18,16 @@ import java.util.*;
 
 public class MiningTab extends SPADeTab {
 
-    private TextField newBox;
-    private ChoiceBox<String> toolBox;
-    private TextArea logArea;
-    private RadioButton reloadBtn;
-    private ListView<String> reloadBox;
+    private final TextField newBox;
+    private final ChoiceBox<String> toolBox;
+    private final TextArea logArea;
+    private final RadioButton reloadBtn;
+    private final ListView<String> reloadBox;
 
     public MiningTab(SPADeGUI gui) {
         super("Mining", gui);
 
-        // conponents
+        // components
         RadioButton newBtn = new RadioButton("Load new project:");
         newBox = new TextField();
         toolBox = new ChoiceBox<>();
@@ -51,7 +51,7 @@ public class MiningTab extends SPADeTab {
         grid.add(btnHBox, 0, 2, 5, 1);
 
         setColumnWidths(120, 200, 30, 100, 450);
-        setColumnHalignment(HPos.RIGHT, 3);
+        setColumnHAlignment(HPos.RIGHT, 3);
 
         // default settings
         ToggleGroup urlGroup = new ToggleGroup();
