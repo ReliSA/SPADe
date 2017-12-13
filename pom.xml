@@ -40,47 +40,6 @@
         </dependency>
 
 
-        <!-- JPA - Hibernate stuff -->
-
-        <dependency>
-            <groupId>org.hibernate.javax.persistence</groupId>
-            <artifactId>hibernate-jpa-2.1-api</artifactId>
-            <version>1.0.0.Final</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-entitymanager</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-c3p0</artifactId>
-            <version>${hibernate.version}</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
-        <dependency>
-            <groupId>org.eclipse.jgit</groupId>
-            <artifactId>org.eclipse.jgit</artifactId>
-            <version>4.8.0.201706111038-r</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
-        <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
-            <version>1.89</version>
-        </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.taskadapter/redmine-java-api -->
-        <dependency>
-            <groupId>com.taskadapter</groupId>
-            <artifactId>redmine-java-api</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
         <dependency>
             <groupId>com.opencsv</groupId>
@@ -95,13 +54,15 @@
             <version>1.7.25</version>
         </dependency>
 
+
+
+        <!-- codepoint handling -->
         <!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
         <dependency>
             <groupId>com.googlecode.juniversalchardet</groupId>
             <artifactId>juniversalchardet</artifactId>
             <version>1.0.3</version>
         </dependency>
-
         <!-- https://mvnrepository.com/artifact/com.vdurmont/emoji-java -->
         <dependency>
             <groupId>com.vdurmont</groupId>
@@ -109,11 +70,69 @@
             <version>3.3.0</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.atlassian.jira/jira-rest-java-client -->
+
+        <!-- JPA - Hibernate stuff -->
+
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+            <version>1.0.0.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+
+        <!-- Git API -->
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit -->
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>4.9.1.201712030800-r</version>
+        </dependency>
+
+
+        <!-- GitHub API -->
+        <!-- https://mvnrepository.com/artifact/org.kohsuke/github-api -->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.90</version>
+        </dependency>
+
+
+        <!-- Redmine API -->
+        <!-- https://mvnrepository.com/artifact/com.taskadapter/redmine-java-api -->
+        <dependency>
+            <groupId>com.taskadapter</groupId>
+            <artifactId>redmine-java-api</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+
+        <!-- Jira API -->
+        <!-- https://mvnrepository.com/artifact/com.atlassian.jira/jira-rest-java-client-api -->
         <dependency>
             <groupId>com.atlassian.jira</groupId>
-            <artifactId>jira-rest-java-client</artifactId>
-            <version>2.0.0-m2</version>
+            <artifactId>jira-rest-java-client-api</artifactId>
+            <version>2.0.0-m31</version>
+        </dependency>
+
+        <dependency>
+        </dependency>
+        <dependency>
+        </dependency>
+        <dependency>
+        </dependency>
+
+        <dependency>
         </dependency>
 
     </dependencies>
