@@ -11,15 +11,15 @@ public class DevelopmentProgramDAO_JPA extends GenericDAO_JPA<DevelopmentProgram
         super(em, DevelopmentProgram.class);
     }
 
-    public DevelopmentProgram save(DevelopmentProgram devProg) {
+    public DevelopmentProgram save(DevelopmentProgram developmentProgram) {
         entityManager.getTransaction().begin();
 
         DevelopmentProgram ret;
-        if (devProg.getId() == 0) {
-            entityManager.persist(devProg);
-            ret = devProg;
+        if (developmentProgram.getId() == 0) {
+            entityManager.persist(developmentProgram);
+            ret = developmentProgram;
         } else {
-            ret = entityManager.merge(devProg);
+            ret = entityManager.merge(developmentProgram);
         }
 
         entityManager.getTransaction().commit();
