@@ -20,7 +20,7 @@ import java.util.*;
  */
 public class TimelineFilePrinter {
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     public void print(ProjectInstance pi) throws JSONException {
 
@@ -106,7 +106,7 @@ public class TimelineFilePrinter {
             } else if (item instanceof Commit) {
                 itemNode = generateCommitNode((Commit) item);
             } else if (item instanceof CommittedConfiguration) {
-                itemNode = generateCommitedConfigurationNode((CommittedConfiguration) item);
+                itemNode = generateCommittedConfigurationNode((CommittedConfiguration) item);
             } else if (item instanceof Configuration) {
                 itemNode = generateConfigurationNode((Configuration) item);
             }
@@ -137,7 +137,7 @@ public class TimelineFilePrinter {
                 if (unit.getAssignee() != null) {
                     JSONObject assigneeNode = new JSONObject();
                     assigneeNode.put("id", edgesId++);
-                    assigneeNode.put("stereotyp", "ASSIGNEE");
+                    assigneeNode.put("stereotype", "ASSIGNEE");
                     assigneeNode.put("name", "responsible for");
                     assigneeNode.put("from", nodeMap.get(unit.getAssignee()));
                     assigneeNode.put("to", nodeMap.get(unit));
@@ -297,7 +297,7 @@ public class TimelineFilePrinter {
         return configurationNode;
     }
 
-    private JSONObject generateCommitedConfigurationNode(CommittedConfiguration committed) throws JSONException {
+    private JSONObject generateCommittedConfigurationNode(CommittedConfiguration committed) throws JSONException {
         JSONObject committedNode = new JSONObject();
 
         StringBuilder descriptionBuilder = new StringBuilder("\nURL: " + committed.getUrl());
