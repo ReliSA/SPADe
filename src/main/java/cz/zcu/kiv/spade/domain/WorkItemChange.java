@@ -10,12 +10,47 @@ import java.util.LinkedHashSet;
 @Table(name = "work_item_change")
 public class WorkItemChange extends DescribedEntity {
 
+    public enum Type {
+        COMMENT,
+        MODIFY,
+        LOGTIME,
+        ADD,
+        RENAME,
+        COPY,
+        MOVE,
+        DELETE
+    }
+
     private WorkItem changedItem;
     private Collection<FieldChange> fieldChanges;
+    private Type type;
 
     public WorkItemChange() {
         super();
         fieldChanges = new LinkedHashSet<>();
+        type = Type.MODIFY;
+    }
+
+    @Transient
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.name = type.name();
+        this.type = type;
+    }
+
+    @Transient
+    @Override
+    public String getName() {
+        return this.type.name();
+    }
+
+    @Override
+    public void setName(String name) {
+        this.type = Type.valueOf(name);
+        this.name = name;
     }
 
     @JoinColumn(name = "workItemId")
