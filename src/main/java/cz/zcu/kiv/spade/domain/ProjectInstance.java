@@ -22,6 +22,7 @@ public class ProjectInstance extends DescribedEntity {
     private Collection<Role> roles;
     private Collection<Relation> relations;
     private Collection<Category> categories;
+    private Collection<Group> groups;
     private StatsBean stats;
 
     public ProjectInstance() {
@@ -35,6 +36,7 @@ public class ProjectInstance extends DescribedEntity {
         this.roles = new LinkedHashSet<>();
         this.relations = new LinkedHashSet<>();
         this.categories = new LinkedHashSet<>();
+        this.groups = new LinkedHashSet<>();
         this.stats = new StatsBean();
     }
 
@@ -145,6 +147,16 @@ public class ProjectInstance extends DescribedEntity {
 
     public void setCategories(Collection<Category> categories) {
         this.categories = categories;
+    }
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "projectInstanceId")
+    public Collection<Group> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Collection<Group> groups) {
+        this.groups = groups;
     }
 
     @Transient
