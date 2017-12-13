@@ -58,9 +58,15 @@ public class App {
      * default constructor, sets default update entity manager and log print stream
      */
     public App() {
+        log = System.out;
+        try {
+            System.setOut(new PrintStream(new FileOutputStream(new File("out.txt"))));
+            System.setErr(new PrintStream(new FileOutputStream(new File("err.txt"))));
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found!");
+        }
         EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
         this.updateManager = factory.createEntityManager();
-        log = System.out;
     }
 
     /**
