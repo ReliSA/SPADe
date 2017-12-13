@@ -11,22 +11,18 @@ import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
-import cz.zcu.kiv.spade.output.CocaexFilePrinter;
 import cz.zcu.kiv.spade.output.CodefacePrinter;
 import cz.zcu.kiv.spade.output.StatsPrinter;
-import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
-import cz.zcu.kiv.spade.pumps.impl.GitHubPump;
-import cz.zcu.kiv.spade.pumps.impl.GitPump;
-import cz.zcu.kiv.spade.pumps.impl.JiraPump;
-import cz.zcu.kiv.spade.pumps.impl.RedminePump;
-import org.json.JSONException;
+import cz.zcu.kiv.spade.pumps.issuetracking.github.GitHubPump;
+import cz.zcu.kiv.spade.pumps.vcs.git.GitPump;
+import cz.zcu.kiv.spade.pumps.issuetracking.jira.JiraPump;
+import cz.zcu.kiv.spade.pumps.issuetracking.redmine.RedminePump;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -39,26 +35,22 @@ public class App {
 
     /** a format for timestamps */
     public static final SimpleDateFormat TIMESTAMP = new SimpleDateFormat("HH:mm:ss.SSS");
-    /** the extension of Git repository URLs */
+    /** the extension of git repository URLs */
     public static final String GIT_SUFFIX = ".git";
-    /** regular expression for Git commit hash */
-    public static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
     /** temporary directory to transfer necessary data into */
     public static final String ROOT_TEMP_DIR = "repos\\";
-    /** regular expression for SVN revision marker */
-    public static final String SVN_REVISION_REGEX = "(?<=^r|\\Wr|_r|$r)\\d{1,4}(?=\\W|_|^|$)";
     /** a prefix of a GitHub repository URL */
     private static final String GITHUB_PREFIX = "https://github.com/";
 
-    /** a JPA persistance unit for updating the SPADe database */
+    /** a JPA persistence unit for updating the SPADe database */
     private static final String PERSISTENCE_UNIT_UPDATE = "update";
-    /** a JPA persistance unit for creating a blank SPADe database */
+    /** a JPA persistence unit for creating a blank SPADe database */
     private static final String PERSISTENCE_UNIT_CREATE = "create";
 
     /** a stream to print log messages into */
     public static PrintStream log;
     /** JPA entity manager for updating the SPADe database */
-    private EntityManager updateManager;
+    private final EntityManager updateManager;
     /** JPA entity manager for creating a blank SPADe database */
     private EntityManager createManager;
 
@@ -98,7 +90,7 @@ public class App {
     }
 
     /**
-     * handles a lifeczcle of mining a project instance (mining, printing output files, uploading to database)
+     * handles a lifecycle of mining a project instance (mining, printing output files, uploading to database)
      * @param url project's URL to mine
      * @param loginResults a map containing username, password and private kez for accessing the project
      * @param toolName name of the tool storing the project data (all caps, e.g. GITHUB)
@@ -110,6 +102,8 @@ public class App {
         ProjectInstance pi;
         if (toolName == null) pi = this.remineProjectInstance(url, loginResults);
         else pi = this.mineProjectInstance(url, loginResults, toolName);
+        if (pi == null) return;
+
         pi.getStats().setStart(startTime);
         printLogMsg("project instance " + pi.getUrl() + " mined");
         long miningTime = System.currentTimeMillis();
@@ -159,11 +153,10 @@ public class App {
 
         }*/
 
-        ProjectInstance pi = null;
-        if (pump != null) {
-            pi = pump.mineData(updateManager);
-            pump.close();
         }
+
+        ProjectInstance pi = pump.mineData(updateManager);
+        pump.close();
 
         return pi;
     }
@@ -240,15 +233,15 @@ public class App {
             toolName = Tool.GIT.name();
         } else if (toolString.contains(Tool.JIRA.name().toLowerCase())) {
             toolName = Tool.JIRA.name();
-        } else if (toolString.toUpperCase().contains("REDMINE")) {
+        } else if (toolString.contains(Tool.BUGZILLA.name().toLowerCase())) {
+            toolName = Tool.BUGZILLA.name();
+        } else if (toolString.contains(Tool.ASSEMBLA.name().toLowerCase())) {
+            toolName = Tool.ASSEMBLA.name();
+        } else if (toolString.startsWith(Tool.SVN.name().toLowerCase())) {
             toolName = Tool.REDMINE.name();
-        } else if (toolString.toUpperCase().contains("BUGZILLA")) {
+        } else if (toolString.contains(Tool.REDMINE.name().toLowerCase())) {
             toolName = Tool.REDMINE.name();
-        } else if (toolString.toUpperCase().contains("SVN")) {
-            toolName = Tool.REDMINE.name();
-        } else if (toolString.toUpperCase().contains("RTC")) {
-            toolName = Tool.REDMINE.name();
-        } else if (toolString.toUpperCase().contains("ASSEMBLA")) {
+        } else if (toolString.contains(Tool.RTC.name().toLowerCase())) {
             toolName = Tool.REDMINE.name();
         }
         return toolName;
@@ -268,7 +261,7 @@ public class App {
     }
 
     /**
-     * gets a cout of WorkUnits in a project with null value of a given enumeration (e.g. priority) from database
+     * gets a count of WorkUnits in a project with null value of a given enumeration (e.g. priority) from database
      * @param entity an EntityStrings instance for the particular enumeration (e.g. priority)
      * @param url project's URL (if null gets for all the projects)
      * @return number of WorkUnits with enumeration value null
@@ -434,7 +427,11 @@ public class App {
      * @param message a message
      */
     public static void printLogMsg(String message) {
-        log.println(getTimeStamp() + ": " + message);
+        printLogMsg(message, true);
+    }
+
+    public static void printLogMsg(String message, boolean timeStamp) {
+       log.println(timeStamp ? (getTimeStamp() + ": " + message) : "\t" + message);
     }
 
     /**
@@ -512,7 +509,7 @@ public class App {
     }
 
     /**
-     * reads an input file untill the line starting with "\\"
+     * reads an input file until the line starting with "\\"
      * @param file input file name
      * @return list of lines read
      */
