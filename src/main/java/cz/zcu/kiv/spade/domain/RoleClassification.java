@@ -19,16 +19,16 @@ public class RoleClassification extends BaseEntity {
 
     public RoleClassification(RoleClass aClass) {
         super();
-        this.setaClass(aClass);
+        this.setAClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public RoleClass getaClass() {
+    public RoleClass getAClass() {
         return aClass;
     }
 
-    public void setaClass(RoleClass aClass) {
+    public void setAClass(RoleClass aClass) {
         this.aClass = aClass;
         if (aClass == RoleClass.UNASSIGNED)
             this.superClass = RoleSuperclass.UNASSIGNED;

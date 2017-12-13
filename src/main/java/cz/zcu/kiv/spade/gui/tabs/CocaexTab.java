@@ -8,10 +8,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,23 +31,19 @@ public class CocaexTab extends BrowserTab {
 
     @Override
     protected void selectProject() {
-        try {
-            sendPost();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        sendPost();
     }
 
 
 
-    private void sendPost() throws IOException {
+    private void sendPost() {
 
-        /*HttpClient client = HttpClientBuilder.create().build();
+        //HttpClient client = HttpClientBuilder.create().build();
         HttpPost post = new HttpPost(url);
 
         List<NameValuePair> urlParameters = new ArrayList<>();
 
-        String content = "";
+        StringBuilder content = new StringBuilder();
         BufferedReader reader;
 
         try {
@@ -60,16 +53,20 @@ public class CocaexTab extends BrowserTab {
                             , StandardCharsets.UTF_8));
             String line;
             while ((line = reader.readLine()) != null) {
-                content += line.trim();
+                content.append(line.trim());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        urlParameters.add(new BasicNameValuePair("graph", content));
+        urlParameters.add(new BasicNameValuePair("graph", content.toString()));
 
-        post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        try {
+            post.setEntity(new UrlEncodedFormEntity(urlParameters));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
-        webEngine.load(client.execute(post).getEntity());*/
+        //webEngine.load(client.execute(post).getEntity());
     }
 }

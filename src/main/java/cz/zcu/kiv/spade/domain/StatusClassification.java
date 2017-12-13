@@ -21,16 +21,16 @@ public class StatusClassification extends BaseEntity {
 
     public StatusClassification(StatusClass aClass) {
         super();
-        this.setaClass(aClass);
+        this.setAClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public StatusClass getaClass() {
+    public StatusClass getAClass() {
         return aClass;
     }
 
-    public void setaClass(StatusClass aClass) {
+    public void setAClass(StatusClass aClass) {
         this.aClass = aClass;
         if (aClass == StatusClass.UNASSIGNED)
             this.superClass = StatusSuperClass.UNASSIGNED;

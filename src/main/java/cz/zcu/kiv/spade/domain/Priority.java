@@ -39,7 +39,7 @@ public class Priority extends DescribedEntity {
     }
 
     public void setAClass(PriorityClass newClass) {
-        this.classification.setaClass(newClass);
+        this.classification.setAClass(newClass);
     }
 
     @Transient

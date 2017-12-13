@@ -35,11 +35,11 @@ public class Severity extends DescribedEntity {
 
     @Transient
     public SeverityClass getAClass() {
-        return classification.getaClass();
+        return classification.getAClass();
     }
 
     public void setAClass(SeverityClass newClass) {
-        this.classification.setaClass(newClass);
+        this.classification.setAClass(newClass);
     }
 
     @Transient

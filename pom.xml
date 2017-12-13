@@ -62,7 +62,6 @@
 
 
         <!-- JPA - Hibernate stuff -->
-
         <dependency>
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.1-api</artifactId>
@@ -80,7 +79,7 @@
         </dependency>
 
 
-        <!-- codepoint handling -->
+        <!-- code point handling -->
         <!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
         <dependency>
         <groupId>com.googlecode.juniversalchardet</groupId>

@@ -112,7 +112,7 @@ public class CodefacePrinter {
         this.print(beans, pi.getName());
     }
 
-    public void print(List<CodefaceBean> beans, String name) {
+    private void print(List<CodefaceBean> beans, String name) {
         ColumnPositionMappingStrategy<CodefaceBean> strategy = new ColumnPositionMappingStrategy<>();
         strategy.setType(CodefaceBean.class);
         String[] columns = new String[]{"externalId", "url", "issueType", "title", "creationDate", "createdBy",

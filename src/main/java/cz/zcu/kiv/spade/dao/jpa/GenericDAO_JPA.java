@@ -7,8 +7,8 @@ import javax.persistence.EntityManager;
 
 public class GenericDAO_JPA<E extends BaseEntity> implements GenericDAO<E> {
 
-    protected EntityManager entityManager;
-    protected Class<E> persistedClass;
+    protected final EntityManager entityManager;
+    protected final Class<E> persistedClass;
 
     public GenericDAO_JPA(EntityManager em, Class<E> persistedClass) {
         this.entityManager = em;

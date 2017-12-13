@@ -35,11 +35,11 @@ public class Status extends DescribedEntity {
 
     @Transient
     public StatusClass getAClass() {
-        return classification.getaClass();
+        return classification.getAClass();
     }
 
     public void setAClass(StatusClass newClass) {
-        this.classification.setaClass(newClass);
+        this.classification.setAClass(newClass);
     }
 
     @Transient

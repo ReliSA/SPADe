@@ -163,7 +163,7 @@ public class TimelineFilePrinter {
                 if (!nodeMap.containsKey(item) || !nodeMap.containsKey(relation.getRelatedItem())) continue;
                 JSONObject relNode = new JSONObject();
                 relNode.put("id", edgesId++);
-                relNode.put("stereotype", relation.getRelation().getClassification().getaClass().name());
+                relNode.put("stereotype", relation.getRelation().getClassification().getAClass().name());
                 if (relation.getRelation() != null) relNode.put("name", relation.getRelation().getName());
                 else relNode.put("name", relation.getRelation().getName());
                 relNode.put("from", nodeMap.get(item));

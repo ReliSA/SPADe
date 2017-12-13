@@ -163,9 +163,9 @@ public abstract class EnumsMiner extends DataMiner {
      * @param unit given Work Unit instance
      */
     private void assignDefaultResolution(WorkUnit unit) {
-        if (unit.getStatus().getClassification().getaClass().equals(StatusClass.INVALID)) {
+        if (unit.getStatus().getClassification().getAClass().equals(StatusClass.INVALID)) {
             for (Resolution resolution : pump.getPi().getResolutions()) {
-                if (resolution.getClassification().getaClass().equals(ResolutionClass.INVALID)) {
+                if (resolution.getClassification().getAClass().equals(ResolutionClass.INVALID)) {
                     unit.setResolution(resolution);
                     return;
                 }

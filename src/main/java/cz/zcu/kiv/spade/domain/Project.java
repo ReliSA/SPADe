@@ -14,7 +14,7 @@ public class Project extends ProjectSegment {
     private Collection<Person> people;
     private Collection<Configuration> configurations;
     private Map<Integer, WorkUnit> units;
-    public Map<String, Commit> commits;
+    private Map<String, Commit> commits;
 
     public Project() {
         super();

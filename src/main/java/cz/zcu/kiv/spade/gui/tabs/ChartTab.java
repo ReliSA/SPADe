@@ -83,7 +83,9 @@ public class ChartTab extends SPADeTab {
         countCol.setCellValueFactory(new PropertyValueFactory<>("count"));
         TableColumn <Record, Double> percentCol = new TableColumn<>("%");
         percentCol.setCellValueFactory(new PropertyValueFactory<>("percentage"));
-        statTbl.getColumns().addAll(nameCol, countCol, percentCol);
+        statTbl.getColumns().add(nameCol);
+        statTbl.getColumns().add(countCol);
+        statTbl.getColumns().add(percentCol);
 
         prjSelect.setOnAction(event -> fillChart());
         enumSelect.setOnAction(event -> {
@@ -172,7 +174,7 @@ public class ChartTab extends SPADeTab {
 
     private Map<String, Integer> collectData() {
         String url = getSelected(prjSelect);
-        String enumer = getSelected(enumSelect);
+        String enumeration = getSelected(enumSelect);
         String column = getSelected(fldSelect);
         boolean includeNull = nullBox.isSelected();
         boolean excludeZeros = zeroBox.isSelected();
@@ -183,16 +185,16 @@ public class ChartTab extends SPADeTab {
 
         int count;
         if (includeNull) {
-            count = gui.getApp().getUnitCountWithNullEnum(enums.get(enumer), url);
+            count = gui.getApp().getUnitCountWithNullEnum(enums.get(enumeration), url);
             data.put("null", count);
         }
         if (column.equals("name")) {
-            for (String name : gui.getApp().getEnumsByPrjUrl(enums.get(enumer), url)) {
-                count = gui.getApp().getUnitCountByEnumName(enums.get(enumer), url, name);
+            for (String name : gui.getApp().getEnumsByPrjUrl(enums.get(enumeration), url)) {
+                count = gui.getApp().getUnitCountByEnumName(enums.get(enumeration), url, name);
                 data.put(name, count);
             }
         } else {
-            switch (enumer) {
+            switch (enumeration) {
                 case "priority":
                     data.putAll(withPriorities(url, column));
                     break;

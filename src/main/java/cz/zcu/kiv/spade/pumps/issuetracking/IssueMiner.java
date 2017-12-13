@@ -124,7 +124,7 @@ public abstract class IssueMiner<IssueObject> extends ItemMiner<IssueObject> {
 
         String openStatus = "";
         for (Status status : pump.getPi().getStatuses()) {
-            if (status.getClassification().getaClass().equals(StatusClass.OPEN)) {
+            if (status.getClassification().getAClass().equals(StatusClass.OPEN)) {
                 openStatus = status.getName();
                 break;
             }

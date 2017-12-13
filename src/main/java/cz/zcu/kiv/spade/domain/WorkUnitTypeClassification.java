@@ -17,16 +17,16 @@ public class WorkUnitTypeClassification extends BaseEntity {
 
     public WorkUnitTypeClassification(WorkUnitTypeClass aClass) {
         super();
-        this.setaClass(aClass);
+        this.setAClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public WorkUnitTypeClass getaClass() {
+    public WorkUnitTypeClass getAClass() {
         return aClass;
     }
 
-    public void setaClass(WorkUnitTypeClass aClass) {
+    public void setAClass(WorkUnitTypeClass aClass) {
         this.aClass = aClass;
     }
 }

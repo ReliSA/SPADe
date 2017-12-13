@@ -34,10 +34,10 @@ public class WorkUnitType extends DescribedEntity {
 
     @Transient
     public WorkUnitTypeClass getAClass() {
-        return classification.getaClass();
+        return classification.getAClass();
     }
 
     public void setAClass(WorkUnitTypeClass newClass) {
-        this.classification.setaClass(newClass);
+        this.classification.setAClass(newClass);
     }
 }
