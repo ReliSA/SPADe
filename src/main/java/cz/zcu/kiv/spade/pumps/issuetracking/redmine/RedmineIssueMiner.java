@@ -1,12 +1,12 @@
 package cz.zcu.kiv.spade.pumps.issuetracking.redmine;
 
-import com.taskadapter.redmineapi.Include;
 import com.taskadapter.redmineapi.RedmineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.*;
 import com.taskadapter.redmineapi.bean.Project;
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.*;
+import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.IssueMiner;
 
 import java.util.ArrayList;
@@ -22,16 +22,17 @@ class RedmineIssueMiner extends IssueMiner<Issue> {
     private static final String ISSUE_URL_FORMAT = "https://%s/issues/%d";
     private static final String QUERY_NAME = "allissues";
     private static final int QUERY_ID = 73;
+    static final String ISSUES_COUNT_FORMAT = "%s issues to mine";
 
     private final RedmineChangelogMiner changelogMiner;
     private final RedmineWorklogMiner worklogMiner;
-    private final RedmineAttachmentMiner attachmentMiner;
+    //private final RedmineAttachmentMiner attachmentMiner;
 
     RedmineIssueMiner(RedminePump pump) {
         super(pump);
         changelogMiner = new RedmineChangelogMiner(pump);
         worklogMiner = new RedmineWorklogMiner(pump);
-        attachmentMiner = new RedmineAttachmentMiner(pump);
+        //attachmentMiner = new RedmineAttachmentMiner(pump);
     }
 
     @Override
@@ -46,17 +47,23 @@ class RedmineIssueMiner extends IssueMiner<Issue> {
                 }
             }
         } catch (RedmineException e) {
-            App.printLogMsg(QUERIES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, QUERIES_PERMISSION_ERR_MSG);
         }
 
         try {
-            issues = ((RedmineManager) pump.getRootObject()).getIssueManager().getIssues(redmineProject.getIdentifier(), queryId, Include.values());
+            issues = ((RedmineManager) pump.getRootObject()).getIssueManager().getIssues(redmineProject.getIdentifier(), queryId);
         } catch (RedmineException e) {
-            App.printLogMsg(ISSUES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, ISSUES_PERMISSION_ERR_MSG);
         }
 
+        int i = 0;
+        App.printLogMsg(this, String.format(ISSUES_COUNT_FORMAT, issues.size()));
         for (Issue issue : issues) {
             mineItem(issue);
+            i++;
+            if (i % ISSUES_BATCH_SIZE == 0 || i == issues.size()) {
+                App.printLogMsg(this, String.format(ISSUES_MINED_FORMAT, (i + DataPump.SLASH + issues.size())));
+            }
         }
     }
 
@@ -83,7 +90,7 @@ class RedmineIssueMiner extends IssueMiner<Issue> {
 
         pump.getPi().getProject().addUnit(unit);
 
-        attachmentMiner.mineAttachments(unit, issue.getAttachments());
+        //attachmentMiner.mineAttachments(unit, issue.getAttachments());
         mineHistory(unit, issue);
 
         if (issue.getTargetVersion() != null) {
@@ -142,13 +149,15 @@ class RedmineIssueMiner extends IssueMiner<Issue> {
     protected void mineHistory(WorkUnit unit, Issue issue) {
         super.mineHistory(unit, issue);
 
-        for (Journal journal : issue.getJournals()) {
+        changelogMiner.parseHistory(unit);
+
+        /*for (Journal journal : issue.getJournals()) {
             changelogMiner.generateModification(unit, journal);
         }
 
         if (issue.getClosedOn() != null) {
             generateClosureConfig(unit, issue.getClosedOn());
-        }
+        }*/
     }
 
     @Override
@@ -158,7 +167,7 @@ class RedmineIssueMiner extends IssueMiner<Issue> {
         try {
             entries = ((RedmineManager) pump.getRootObject()).getTimeEntryManager().getTimeEntriesForIssue(issue.getId());
         } catch (RedmineException e) {
-            App.printLogMsg(String.format(LOGTIME_PERMISSION_ERR_FORMAT, issue.getId()), false);
+            App.printLogMsg(this, String.format(LOGTIME_PERMISSION_ERR_FORMAT, issue.getId()));
         }
         for (TimeEntry entry : entries) {
             worklogMiner.generateLogTimeConfiguration(unit, spentTime, entry);

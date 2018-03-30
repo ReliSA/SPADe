@@ -8,7 +8,6 @@ import cz.zcu.kiv.spade.pumps.issuetracking.IssueTrackingPump;
 import cz.zcu.kiv.spade.pumps.vcs.git.GitPump;
 import org.kohsuke.github.*;
 
-import javax.persistence.EntityManager;
 import java.io.IOException;
 import java.util.*;
 
@@ -24,14 +23,16 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
     static final String COMMIT_URL_SUFFIX = "/commit/";
     private static final int WAIT_MILLSECS = 5000;
     private static final int LIMIT_THRESHOLD = 500;
+
+    private String repo;
     /**
      * list of usernames necessary for continuous mining (rate limit workaround)
      */
-    private final List<String> usernames = new ArrayList<>();
+    private List<String> usernames = new ArrayList<>();
     /**
      * list of passwords necessary for continuous mining (rate limit workaround)
      */
-    private final List<String> passwords = new ArrayList<>();
+    private List<String> passwords = new ArrayList<>();
     private final GitHubReleaseMiner releaseMiner;
 
     /**
@@ -65,7 +66,7 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
 
     @Override
     protected GHRepository init() {
-        return init(false);
+        return null;
     }
 
     /**
@@ -74,7 +75,7 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
      * @param wait true if there should be a 5s waiting period before reconnecting, false if users should be switched
      * @return an instance for mining GitHub data
      */
-    GHRepository init(boolean wait) {
+    private GHRepository init(boolean wait) {
         GHRepository repo;
         while (true) {
             try {
@@ -87,8 +88,8 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
                 }
                 secondaryObject = GitHub.connectUsingPassword(username, password);
                 GHRateLimit limit = secondaryObject.getRateLimit();
-                App.printLogMsg(CONNECTED_LOG_MSG);
-                App.printLogMsg(String.format(CONNECTION_LOG_FORMAT, username, limit.remaining, limit.reset.toString()));
+                App.printLogMsg(this, CONNECTED_LOG_MSG);
+                App.printLogMsg(this, String.format(CONNECTION_LOG_FORMAT, username, limit.remaining, limit.reset.toString()));
                 repo = secondaryObject.getRepository(getProjectFullName());
                 if (limit.remaining < LIMIT_THRESHOLD) continue;
                 break;
@@ -100,29 +101,35 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
     }
 
     @Override
-    public ProjectInstance mineData(EntityManager em) {
-        pi = super.mineData(em);
+    public void setRepo(String repo) {
+        this.repo = repo;
+    }
 
-        mineGit(em);
+    private void mineRepository() {
+        if (repo == null) repo = projectHandle;
+        DataPump gitPump = new GitPump(repo, null, null, null);
+        pi = gitPump.mineData();
+        gitPump.close();
+        pi.getStats().setRepo(System.currentTimeMillis());
+    }
+
+    @Override
+    public ProjectInstance mineData() {
+        pi = super.mineData();
+
+        mineRepository();
 
         this.tool = Tool.GITHUB;
         pi.getToolInstance().setTool(tool);
         setToolInstance();
 
-        rootObject = init();
+        rootObject = init(false);
 
         enhanceGitData();
 
         mineContent();
 
         return pi;
-    }
-
-    private void mineGit(EntityManager em) {
-        DataPump gitPump = new GitPump(projectHandle, null, null, null);
-        pi = gitPump.mineData(em);
-        gitPump.close();
-        pi.getStats().setRepo(System.currentTimeMillis());
     }
 
     private void enhanceGitData() {
@@ -169,7 +176,7 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
      */
     private void enhanceCommits() {
         for (Commit commit : pi.getProject().getCommits()) {
-            String commitUrlPrefix = projectHandle.substring(0, projectHandle.lastIndexOf(App.GIT_SUFFIX)) + COMMIT_URL_SUFFIX;
+            String commitUrlPrefix = projectHandle.replace(App.GIT_SUFFIX, "") + COMMIT_URL_SUFFIX;
             commit.setUrl(commitUrlPrefix + commit.getName());
         }
     }
@@ -188,8 +195,8 @@ public class GitHubPump extends IssueTrackingPump<GHRepository, GitHub> {
             }
         }
         if (limit != null && limit.remaining < LIMIT_THRESHOLD) {
-            App.printLogMsg(String.format(CONNECTION_LOG_FORMAT, username, limit.remaining, limit.getResetDate().toString()));
-            rootObject = init();
+            App.printLogMsg(this, String.format(CONNECTION_LOG_FORMAT, username, limit.remaining, limit.getResetDate().toString()));
+            rootObject = init(false);
         }
     }
 

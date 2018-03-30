@@ -7,9 +7,9 @@ import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.Project;
 import cz.zcu.kiv.spade.domain.ProjectInstance;
 import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.IssueTrackingPump;
-
-import javax.persistence.EntityManager;
+import cz.zcu.kiv.spade.pumps.vcs.git.GitPump;
 
 /**
  * a pump for mining Redmine data
@@ -19,6 +19,13 @@ import javax.persistence.EntityManager;
 public class RedminePump extends IssueTrackingPump<RedmineManager, com.taskadapter.redmineapi.bean.Project> {
 
     private static final String PROJECTS_PERMISSION_ERR_MSG = "Insufficient permissions for projects";
+    private static final String MB = "MB";
+    private static final String KB = "KB";
+    private static final String RIGHT_PARENTHESIS = ")";
+    private static final String LEFT_PARENTHESIS = "(";
+    private static final int KILO = 1024;
+
+    private String repo;
 
     /**
      * constructor, sets projects URL and login credentials
@@ -40,8 +47,14 @@ public class RedminePump extends IssueTrackingPump<RedmineManager, com.taskadapt
     }
 
     @Override
-    public ProjectInstance mineData(EntityManager em) {
-        pi = super.mineData(em);
+    public ProjectInstance mineData() {
+        pi = super.mineData();
+
+        if (repo != null && !repo.isEmpty()) {
+            mineRepository();
+            pi.setUrl(projectHandle);
+            pi.setName(getProjectName());
+        }
 
         setToolInstance();
 
@@ -52,15 +65,18 @@ public class RedminePump extends IssueTrackingPump<RedmineManager, com.taskadapt
                 }
             }
         } catch (RedmineException e) {
-            App.printLogMsg(PROJECTS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, PROJECTS_PERMISSION_ERR_MSG);
         }
 
-        Project project = new Project();
+        Project project;
+        if ((project = pi.getProject()) == null) project = new Project();
         project.setName(secondaryObject.getName());
         project.setDescription(secondaryObject.getDescription());
         project.setStartDate(secondaryObject.getCreatedOn());
 
         pi.setExternalId(secondaryObject.getId().toString());
+        pi.setName(secondaryObject.getIdentifier());
+        pi.setDescription(secondaryObject.getName() + LINE_BREAK + secondaryObject.getDescription());
         pi.setProject(project);
 
         mineContent();
@@ -76,5 +92,32 @@ public class RedminePump extends IssueTrackingPump<RedmineManager, com.taskadapt
         if (username != null && password != null)
             return RedmineManagerFactory.createWithUserAuth(serverWithProtocol, username, password);
         return RedmineManagerFactory.createUnauthenticated(serverWithProtocol);
+    }
+
+    @Override
+    public void setRepo(String repo) {
+        this.repo = repo;
+    }
+
+    private void mineRepository() {
+        if (repo == null) return;
+        DataPump gitPump = new GitPump(repo, null, username, password);
+        pi = gitPump.mineData();
+        gitPump.close();
+        pi.getStats().setRepo(System.currentTimeMillis());
+        App.printLogMsg(this, "repo mined");
+    }
+
+    long parseSize(String sizeString) {
+        sizeString = sizeString.replace(LEFT_PARENTHESIS, "").replace(RIGHT_PARENTHESIS, "").trim();
+        String sizeUnit = sizeString.split(SPACE)[1];
+        sizeString = sizeString.split(SPACE)[0];
+        long size = (long) Double.parseDouble(sizeString);
+        if (sizeUnit.equals(KB)) {
+            size = KILO * size;
+        } else if (sizeUnit.equals(MB)) {
+            size = KILO * KILO * size;
+        }
+        return size;
     }
 }

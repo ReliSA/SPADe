@@ -1,65 +1,29 @@
 package cz.zcu.kiv.spade.pumps;
 
-import cz.zcu.kiv.spade.dao.*;
-import cz.zcu.kiv.spade.dao.jpa.*;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.RelationClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 
 public abstract class DataMiner {
 
+    protected static final String LINK_FORMAT = "%d %s %d";
     protected static final String SEVERITY_FIELD_NAME = "severity";
     protected static final String PARENT_OF = "parent of";
     protected static final String CHILD_OF = "child of";
-    protected static final String DOT = ".";
+    protected static final int PERCENTAGE_MAX = 100;
+    protected static final String ATTACHED_TO = "attached to";
+    protected static final String HAS_ATTACHED = "has attached";
+
     private static final String MENTIONS = "mentions";
     private static final String MENTIONED_BY = "mentioned by";
-    private static final String DASH = "-";
-    private static final double MINUTES_IN_HOUR = 60.0;
+    protected static final String DASH = "-";
+    protected static final double MINUTES_IN_HOUR = 60.0;
+    protected static final String COMMA = ",";
 
     protected final DataPump pump;
 
-    /**
-     * DAO object for handling Relation Classification instances
-     */
-    protected RelationClassificationDAO relationDao;
-    /**
-     * DAO object for handling Severity Classification instances
-     */
-    protected SeverityClassificationDAO severityDao;
-    /**
-     * DAO object for handling Status Classification instances
-     */
-    protected StatusClassificationDAO statusDao;
-    /**
-     * DAO object for handling Role Classification instances
-     */
-    protected RoleClassificationDAO roleDao;
-    /**
-     * DAO object for handling Work Unit Type Classification instances
-     */
-    protected WorkUnitTypeClassificationDAO typeDao;
-    /**
-     * DAO object for handling Priority Classification instances
-     */
-    protected PriorityClassificationDAO priorityDao;
-    /**
-     * DAO object for handling Resolution Classification instances
-     */
-    protected ResolutionClassificationDAO resolutionDao;
-
     protected DataMiner(DataPump pump) {
         this.pump = pump;
-    }
-
-    public void setEntityManager() {
-        relationDao = new RelationClassificationDAO_JPA(pump.getEntityManager());
-        severityDao = new SeverityClassificationDAO_JPA(pump.getEntityManager());
-        statusDao = new StatusClassificationDAO_JPA(pump.getEntityManager());
-        roleDao = new RoleClassificationDAO_JPA(pump.getEntityManager());
-        typeDao = new WorkUnitTypeClassificationDAO_JPA(pump.getEntityManager());
-        priorityDao = new PriorityClassificationDAO_JPA(pump.getEntityManager());
-        resolutionDao = new ResolutionClassificationDAO_JPA(pump.getEntityManager());
     }
 
     /**
@@ -94,7 +58,7 @@ public abstract class DataMiner {
                 return relation;
             }
         }
-        Relation newRelation = new Relation(name, relationDao.findByClass(RelationClass.UNASSIGNED));
+        Relation newRelation = new Relation(name, new RelationClassification(RelationClass.UNASSIGNED));
         pump.pi.getRelations().add(newRelation);
         return newRelation;
     }
@@ -106,6 +70,7 @@ public abstract class DataMiner {
      * @return added person or identified or enhanced (added identity) previously existing one
      */
     public Person addPerson(Identity identity) {
+        if (identity == null) return null;
         for (Person person : pump.pi.getProject().getPeople()) {
 
             boolean foundSimilar = false;
@@ -121,7 +86,7 @@ public abstract class DataMiner {
                 boolean sameEmail = false;
                 boolean sameName = false;
 
-                if (!identity.getEmail().isEmpty()) {
+                if (identity.getEmail() != null && !identity.getEmail().isEmpty()) {
                     sameEmail = identity.getEmail().equals(member.getEmail());
                 }
                 if (!identity.getName().isEmpty()) {
@@ -209,7 +174,7 @@ public abstract class DataMiner {
 
     protected void generateDeletedIssue(int number) {
         WorkUnit deleted = new WorkUnit();
-        deleted.setExternalId(pump.getPi().getName() + "-" + number);
+        deleted.setExternalId(pump.getPi().getName() + DASH + number);
         deleted.setNumber(number);
         pump.getPi().getProject().addUnit(deleted);
     }

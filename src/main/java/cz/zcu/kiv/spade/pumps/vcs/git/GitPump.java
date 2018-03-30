@@ -14,7 +14,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.*;
 import org.eclipse.jgit.util.FS;
 
-import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.IOException;
 
@@ -68,13 +67,13 @@ public class GitPump extends VcsPump<Repository, Git> {
         } catch (GitAPIException e) {
             e.printStackTrace();
         }
-        App.printLogMsg(REPO_CLONED_LOG_MSG);
+        App.printLogMsg(this, REPO_CLONED_LOG_MSG);
         return repo;
     }
 
     @Override
-    public ProjectInstance mineData(EntityManager em) {
-        pi = super.mineData(em);
+    public ProjectInstance mineData() {
+        pi = super.mineData();
 
         try {
             pi.setDescription(rootObject.getGitwebDescription());

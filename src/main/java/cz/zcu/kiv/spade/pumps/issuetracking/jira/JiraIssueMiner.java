@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.pumps.issuetracking.jira;
 
+import com.atlassian.jira.rest.client.IssueRestClient;
 import com.atlassian.jira.rest.client.JiraRestClient;
 import com.atlassian.jira.rest.client.domain.*;
 import cz.zcu.kiv.spade.App;
@@ -9,9 +10,11 @@ import cz.zcu.kiv.spade.domain.enums.SeverityClass;
 import cz.zcu.kiv.spade.domain.enums.StatusClass;
 import cz.zcu.kiv.spade.domain.enums.StatusSuperClass;
 import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.IssueMiner;
+import javafx.util.Pair;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 class JiraIssueMiner extends IssueMiner<Issue> {
@@ -21,21 +24,21 @@ class JiraIssueMiner extends IssueMiner<Issue> {
     private static final String ISSUE_URL_FORMAT = "https://%s/" + Tool.JIRA.name().toLowerCase() + "/browse/%s";
     private static final String TAGS_FIELD_NAME = "Tags";
     private static final String SEVERITY_FIELD_NAME = "Severity";
-    private static final String TRANSITION_CHANGE_DESC = "transition";
-    private static final String TRANSITION_FORMAT = TRANSITION_CHANGE_DESC + ": %s";
-    private static final String SPACE = " ";
 
     private final JiraChangelogMiner changelogMiner;
     private final JiraCommentMiner commentMiner;
     private final JiraWorklogMiner worklogMiner;
-    private final JiraAttachmentMiner attachmentMiner;
+
+    private Map<String, WorkUnit> parents;
+    private Map<String, Set<Pair<IssueLink, WorkUnit>>> links;
 
     JiraIssueMiner(JiraPump pump) {
         super(pump);
         changelogMiner = new JiraChangelogMiner(pump);
         commentMiner = new JiraCommentMiner(pump);
         worklogMiner = new JiraWorklogMiner(pump);
-        attachmentMiner = new JiraAttachmentMiner(pump);
+        parents = new HashMap<>();
+        links = new HashMap<>();
     }
 
     @Override
@@ -56,18 +59,22 @@ class JiraIssueMiner extends IssueMiner<Issue> {
             if (index > 0) break;
         }
 
+        List<IssueRestClient.Expandos> expandos = new ArrayList<>();
+        expandos.add(IssueRestClient.Expandos.CHANGELOG);
         for (; index > 0; index--) {
-            Issue issue = null;
+            if (index % 100 == 0) {
+                App.printLogMsg(this, Integer.toString(index));
+            }
+            String issueKey = String.format(ISSUE_KEY_FORMAT, pump.getPi().getName(), index);
             try {
-                issue = ((JiraRestClient) pump.getRootObject()).getIssueClient().getIssue(String.format(ISSUE_KEY_FORMAT, pump.getPi().getName(), index)).get();
+                Issue issue = ((JiraRestClient) pump.getRootObject()).getIssueClient().getIssue(issueKey, expandos).get();
+                mineItem(issue);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } catch (ExecutionException e) {
                 // deleted issue
                 generateDeletedIssue(index);
-                continue;
             }
-            mineItem(issue);
         }
     }
 
@@ -75,7 +82,6 @@ class JiraIssueMiner extends IssueMiner<Issue> {
     protected void mineItem(Issue issue) {
         WorkUnit unit = new WorkUnit();
         unit.setNumber(getNumberAfterLastDash(issue.getKey()));
-        App.printLogMsg(Integer.toString(unit.getNumber()), false);
         unit.setExternalId(issue.getKey());
         unit.setUrl(String.format(ISSUE_URL_FORMAT, pump.getServer(), issue.getKey()));
         unit.setName(issue.getSummary());
@@ -100,17 +106,13 @@ class JiraIssueMiner extends IssueMiner<Issue> {
 
         pump.getPi().getProject().addUnit(unit);
 
-        mineTimeTracking(unit, issue);
-        if (issue.getAttachments() != null) {
-            attachmentMiner.mineAttachments(unit, issue.getAttachments());
-        }
         mineHistory(unit, issue);
 
         if (issue.getFixVersions() != null) {
             for (Version version : issue.getFixVersions()) {
                 Iteration iteration = new Iteration();
-                if (version.getId() != null) {
-                    iteration.setExternalId(version.getId().toString());
+                if (version.getName() != null) {
+                    iteration.setExternalId(version.getName());
                 }
                 if (version.getReleaseDate() != null) {
                     iteration.setEndDate(version.getReleaseDate().toDate());
@@ -120,6 +122,62 @@ class JiraIssueMiner extends IssueMiner<Issue> {
                     unit.setIteration(iteration);
                 }
             }
+
+        }
+        mineRelations(unit, issue);
+    }
+
+    private void mineRelations(WorkUnit unit, Issue issue) {
+        if (issue.getIssueLinks() != null) {
+            for (IssueLink link : issue.getIssueLinks()) {
+                WorkUnit related;
+                if ((related = pump.getPi().getProject().getUnit(getNumberAfterLastDash(link.getTargetIssueKey()))) != null) {
+                    unit.getRelatedItems().add(new WorkItemRelation(related, resolveRelation(link.getIssueLinkType().getName())));
+                } else {
+                    saveLink(unit, link);
+                }
+            }
+        }
+        if (issue.getSubtasks() != null) {
+            for (Subtask subtask : issue.getSubtasks()) {
+                WorkUnit child ;
+                if ((child = pump.getPi().getProject().getUnit(getNumberAfterLastDash(subtask.getIssueKey()))) != null) {
+                    unit.getRelatedItems().add(new WorkItemRelation(child, resolveRelation(PARENT_OF)));
+                    child.getRelatedItems().add(new WorkItemRelation(unit, resolveRelation(CHILD_OF)));
+                } else {
+                    parents.put(subtask.getIssueKey(), unit);
+                }
+            }
+        }
+        completePastRelations(unit);
+    }
+
+    private void saveLink(WorkUnit unit, IssueLink link) {
+        if (links.containsKey(link.getTargetIssueKey())) {
+            Pair<IssueLink, WorkUnit> relation = new Pair<>(link, unit);
+            links.get(link.getTargetIssueKey()).add(relation);
+        } else {
+            Set<Pair<IssueLink, WorkUnit>> set = new LinkedHashSet<>();
+            set.add(new Pair<>(link, unit));
+            links.put(link.getTargetIssueKey(), set);
+        }
+    }
+
+    private void completePastRelations(WorkUnit unit) {
+        String key = unit.getExternalId();
+        if (links.containsKey(key)) {
+            for (Pair<IssueLink, WorkUnit> relation : links.get(key)) {
+                IssueLink link = relation.getKey();
+                WorkUnit related = relation.getValue();
+                related.getRelatedItems().add(new WorkItemRelation(unit, resolveRelation(link.getIssueLinkType().getName())));
+            }
+            links.remove(key);
+        }
+        if (parents.containsKey(key)) {
+            WorkUnit parent = parents.get(key);
+            parent.getRelatedItems().add(new WorkItemRelation(unit, resolveRelation(PARENT_OF)));
+            unit.getRelatedItems().add(new WorkItemRelation(parent, resolveRelation(CHILD_OF)));
+            parents.remove(key);
         }
     }
 
@@ -158,9 +216,9 @@ class JiraIssueMiner extends IssueMiner<Issue> {
             tags = issue.getFieldByName(TAGS_FIELD_NAME.toLowerCase());
         }
         if (tags != null) {
-            for (String tag : tags.getValue().toString().split(SPACE)) {
+            for (String tag : tags.getValue().toString().split(DataPump.SPACE)) {
                 Category fromTag = resolveCategory(tag);
-                App.printLogMsg(tag, false);
+                App.printLogMsg(this, tag);
                 if (fromTag != null) {
                     unit.getCategories().add(fromTag);
                 }
@@ -182,7 +240,7 @@ class JiraIssueMiner extends IssueMiner<Issue> {
                         return severity;
                     }
                 }
-                Severity newSeverity = new Severity(value, severityDao.findByClass(SeverityClass.UNASSIGNED));
+                Severity newSeverity = new Severity(value, new SeverityClassification(SeverityClass.UNASSIGNED));
                 pump.getPi().getSeverities().add(newSeverity);
                 return newSeverity;
             }
@@ -192,6 +250,8 @@ class JiraIssueMiner extends IssueMiner<Issue> {
 
     @Override
     protected void mineWorklogs(WorkUnit unit, Issue issue) {
+        worklogMiner.mineTimeTracking(unit, issue);
+
         double spentTime = 0;
         for (Worklog worklog : issue.getWorklogs()) {
             worklogMiner.generateLogTimeConfiguration(unit, spentTime, worklog);
@@ -226,26 +286,11 @@ class JiraIssueMiner extends IssueMiner<Issue> {
             }
         }
 
-        Status newStatus = new Status(basicStatus.getName(), statusDao.findByClass(StatusClass.UNASSIGNED));
+        Status newStatus = new Status(basicStatus.getName(), new StatusClassification(StatusClass.UNASSIGNED));
         newStatus.setExternalId(basicStatus.getSelf().toString());
         newStatus.setDescription(description);
         pump.getPi().getStatuses().add(newStatus);
         return newStatus;
-    }
-
-    private void mineTimeTracking(WorkUnit unit, Issue issue) {
-        if (issue.getTimeTracking() != null) {
-            if (issue.getTimeTracking().getOriginalEstimateMinutes() != null) {
-                unit.setEstimatedTime(minutesToHours(issue.getTimeTracking().getOriginalEstimateMinutes()));
-            }
-            if (issue.getTimeTracking().getTimeSpentMinutes() != null) {
-                unit.setSpentTime(minutesToHours(issue.getTimeTracking().getTimeSpentMinutes()));
-            }
-            if (unit.getEstimatedTime() > 0) {
-                int percentage = (int) (unit.getEstimatedTime() / unit.getSpentTime()) * PERCENTAGE_MAX;
-                unit.setProgress(Math.min(percentage, PERCENTAGE_MAX));
-            }
-        }
     }
 
     private Category resolveCategory(String label) {
@@ -273,39 +318,9 @@ class JiraIssueMiner extends IssueMiner<Issue> {
             }
         }
 
-        mineTransitions(unit, issue);
-
         if (unit.getStatus().getClassification().getSuperClass() == StatusSuperClass.CLOSED
                 && issue.getUpdateDate() != null) {
             generateClosureConfig(unit, issue.getUpdateDate().toDate());
         }
-    }
-
-    private void mineTransitions(WorkUnit unit, Issue issue) {
-        Iterable<Transition> transitions = new ArrayList<>();
-        try {
-            transitions = ((JiraRestClient) pump.getRootObject()).getIssueClient().getTransitions(issue).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
-
-        for (Transition transition : transitions) {
-            generateTransitionConfig(unit, transition);
-        }
-    }
-
-    private void generateTransitionConfig(WorkUnit unit, Transition transition) {
-        WorkItemChange change = new WorkItemChange();
-        change.setType(WorkItemChange.Type.MODIFY);
-        change.setChangedItem(unit);
-
-        App.printLogMsg(String.format(TRANSITION_FORMAT, transition.toString()), false);
-        //change.getFieldChanges().add(new FieldChange("status", , ));
-
-        Configuration configuration = new Configuration();
-        //configuration.setCreated();
-        configuration.getChanges().add(change);
-
-        pump.getPi().getProject().getConfigurations().add(configuration);
     }
 }

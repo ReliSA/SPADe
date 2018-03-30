@@ -8,6 +8,7 @@ import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.Identity;
 import cz.zcu.kiv.spade.domain.Person;
 import cz.zcu.kiv.spade.domain.Role;
+import cz.zcu.kiv.spade.domain.RoleClassification;
 import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.PeopleMiner;
@@ -18,8 +19,8 @@ import java.util.concurrent.ExecutionException;
 class JiraPeopleMiner extends PeopleMiner<BasicUser> {
 
     private static final String PROJECT_LEAD_ROLE_NAME = "project lead";
-    private static final String AT_STRING = " at ";
-    private static final String DOT_STRING = " dot ";
+    static final String AT_STRING = " at ";
+    static final String DOT_STRING = " dot ";
 
     JiraPeopleMiner(JiraPump pump) {
         super(pump);
@@ -34,7 +35,7 @@ class JiraPeopleMiner extends PeopleMiner<BasicUser> {
     private Role getProjectLeadRole() {
         Role projectLeadRole = resolveRole(PROJECT_LEAD_ROLE_NAME);
         if (projectLeadRole == null) {
-            projectLeadRole = new Role(PROJECT_LEAD_ROLE_NAME, roleDao.findByClass(RoleClass.PROJECTMANAGER));
+            projectLeadRole = new Role(PROJECT_LEAD_ROLE_NAME, new RoleClassification(RoleClass.PROJECTMANAGER));
             pump.getPi().getRoles().add(projectLeadRole);
         }
         return projectLeadRole;
@@ -54,7 +55,7 @@ class JiraPeopleMiner extends PeopleMiner<BasicUser> {
             identity.setDescription(user.getDisplayName());
 
             String email = user.getEmailAddress().replace(AT_STRING, DataPump.AT);
-            email = email.replace(DOT_STRING, DOT);
+            email = email.replace(DOT_STRING, DataPump.DOT);
             identity.setEmail(email);
 
         } catch (InterruptedException | ExecutionException e) {
@@ -73,7 +74,7 @@ class JiraPeopleMiner extends PeopleMiner<BasicUser> {
         try {
             user = ((JiraRestClient) pump.getRootObject()).getUserClient().getUser(URI.create(userId)).get();
         } catch (InterruptedException | ExecutionException e) {
-            App.printLogMsg(String.format(USER_PERMISSION_ERR_FORMAT, person.getName()), false);
+            App.printLogMsg(this, String.format(USER_PERMISSION_ERR_FORMAT, person.getName()));
         }
         if (user == null) return;
         if (user.getGroups().getItems() != null) {

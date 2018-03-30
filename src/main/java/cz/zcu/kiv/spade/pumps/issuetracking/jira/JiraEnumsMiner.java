@@ -15,8 +15,13 @@ import java.util.concurrent.ExecutionException;
 
 class JiraEnumsMiner extends EnumsMiner {
 
-    private static final String RELATION_DESCRIPTION_FORMAT = "%s / %s";
     private static final String PRIORITY_DESCRIPTION_FORMAT = "%s\nStatus color: %s";
+
+    public enum Status {
+        NEW,
+        DONE,
+        INDETERMINATE,
+    }
 
     JiraEnumsMiner(JiraPump pump) {
         super(pump);
@@ -43,22 +48,32 @@ class JiraEnumsMiner extends EnumsMiner {
             e.printStackTrace();
         }
         for (IssuelinksType linksType : types) {
-            boolean found = false;
+            mineWURelationType(linksType.getInward(), linksType.getName(), linksType.getId());
+            mineWURelationType(linksType.getOutward(), linksType.getName(), linksType.getId());
+        }
+    }
+
+    private void mineWURelationType(String name, String sClass, String id){
+        boolean found = false;
+        for (Relation relation : pump.getPi().getRelations()) {
+            if (toLetterOnlyLowerCase(relation.getName()).equals(toLetterOnlyLowerCase(name))) {
+                relation.setName(name);
+                relation.setExternalId(name);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            RelationClass aClass = RelationClass.UNASSIGNED;
             for (Relation relation : pump.getPi().getRelations()) {
-                if (toLetterOnlyLowerCase(relation.getName()).equals(toLetterOnlyLowerCase(linksType.getName()))) {
-                    relation.setName(linksType.getName());
-                    relation.setExternalId(linksType.getId());
-                    relation.setDescription(String.format(RELATION_DESCRIPTION_FORMAT, linksType.getInward(), linksType.getOutward()));
-                    found = true;
+                if (relation.getSuperClass().name().toLowerCase().equals(toLetterOnlyLowerCase(sClass))) {
+                    aClass = relation.getaClass();
                     break;
                 }
             }
-            if (!found) {
-                Relation newRelation = new Relation(linksType.getName(), relationDao.findByClass(RelationClass.UNASSIGNED));
-                newRelation.setExternalId(linksType.getId());
-                newRelation.setDescription(String.format(RELATION_DESCRIPTION_FORMAT, linksType.getInward(), linksType.getOutward()));
-                pump.getPi().getRelations().add(newRelation);
-            }
+            Relation newRelation = new Relation(name, new RelationClassification(aClass));
+            newRelation.setExternalId(id);
+            pump.getPi().getRelations().add(newRelation);
         }
     }
 
@@ -82,7 +97,7 @@ class JiraEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Resolution newResolution = new Resolution(jiraResolution.getName(), resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+                Resolution newResolution = new Resolution(jiraResolution.getName(), new ResolutionClassification(ResolutionClass.UNASSIGNED));
                 newResolution.setExternalId(jiraResolution.getSelf().toString());
                 newResolution.setDescription(jiraResolution.getDescription());
                 pump.getPi().getResolutions().add(newResolution);
@@ -103,11 +118,11 @@ class JiraEnumsMiner extends EnumsMiner {
                     try {
                         projectRoles = ((JiraPump) pump).getRootObject().getProjectRolesRestClient().getRoles(basicRole.getSelf()).claim();
                     } catch (Exception e) {
-                        App.printLogMsg(ROLES_PERMISSION_ERR_MSG, false);
+                        App.printLogMsg(this, ROLES_PERMISSION_ERR_MSG);
                     }
                     if (projectRoles != null) {
                         for (ProjectRole projectRole : projectRoles) {
-                            App.printLogMsg(projectRole.getName(), false);
+                            App.printLogMsg(this, projectRole.getName());
                             //role.setExternalId(projectRole.getId().toString());
                             //role.setDescription(projectRole.getDescription());
                         }
@@ -117,7 +132,7 @@ class JiraEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Role newRole = new Role(basicRole.getName(), roleDao.findByClass(RoleClass.UNASSIGNED));
+                Role newRole = new Role(basicRole.getName(), new RoleClassification(RoleClass.UNASSIGNED));
                 //newRole.setExternalId(projectRole.getId().toString());
                 //newRole.setDescription(projectRole.getDescription());
                 pump.getPi().getRoles().add(newRole);
@@ -147,7 +162,7 @@ class JiraEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Priority newPriority = new Priority(issuePriority.getName(), priorityDao.findByClass(PriorityClass.UNASSIGNED));
+                Priority newPriority = new Priority(issuePriority.getName(), new PriorityClassification(PriorityClass.UNASSIGNED));
                 if (issuePriority.getId() != null) {
                     newPriority.setExternalId(issuePriority.getId().toString());
                 }
@@ -173,7 +188,7 @@ class JiraEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                WorkUnitType newType = new WorkUnitType(issueType.getName(), typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
+                WorkUnitType newType = new WorkUnitType(issueType.getName(), new WorkUnitTypeClassification(WorkUnitTypeClass.UNASSIGNED));
                 if (issueType.getId() != null) {
                     newType.setExternalId(issueType.getId().toString());
                 }

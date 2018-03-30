@@ -49,9 +49,9 @@ class GitHubEnumsMiner extends EnumsMiner {
         for (GitHubPump.GitHubRole role : GitHubPump.GitHubRole.values()) {
             if (resolveRole(role.name()) == null) {
                 if (role == GitHubPump.GitHubRole.owner) {
-                    pump.getPi().getRoles().add(new Role(role.name(), roleDao.findByClass(RoleClass.PROJECTMANAGER)));
+                    pump.getPi().getRoles().add(new Role(role.name(), new RoleClassification(RoleClass.PROJECTMANAGER)));
                 } else {
-                    pump.getPi().getRoles().add(new Role(role.name(), roleDao.findByClass(RoleClass.TEAMMEMBER)));
+                    pump.getPi().getRoles().add(new Role(role.name(), new RoleClassification(RoleClass.TEAMMEMBER)));
                 }
             }
         }
@@ -73,7 +73,7 @@ class GitHubEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Status newStatus = new Status(state.name(), statusDao.findByClass(StatusClass.UNASSIGNED));
+                Status newStatus = new Status(state.name(), new StatusClassification(StatusClass.UNASSIGNED));
                 pump.getPi().getStatuses().add(newStatus);
             }
         }
@@ -127,7 +127,7 @@ class GitHubEnumsMiner extends EnumsMiner {
             }
         }
         if (createIfNotFound) {
-            Severity newSeverity = new Severity(label.getName(), severityDao.findByClass(SeverityClass.UNASSIGNED));
+            Severity newSeverity = new Severity(label.getName(), new SeverityClassification(SeverityClass.UNASSIGNED));
             newSeverity.setExternalId(label.getUrl());
             newSeverity.setDescription(label.getColor());
             pump.getPi().getSeverities().add(newSeverity);
@@ -158,7 +158,7 @@ class GitHubEnumsMiner extends EnumsMiner {
             }
         }
         if (createIfNotFound) {
-            Priority newPriority = new Priority(label.getName(), priorityDao.findByClass(PriorityClass.UNASSIGNED));
+            Priority newPriority = new Priority(label.getName(), new PriorityClassification(PriorityClass.UNASSIGNED));
             newPriority.setExternalId(label.getUrl());
             newPriority.setDescription(label.getColor());
             pump.getPi().getPriorities().add(newPriority);
@@ -189,7 +189,7 @@ class GitHubEnumsMiner extends EnumsMiner {
             }
         }
         if (createIfNotFound) {
-            Resolution newResolution = new Resolution(label.getName(), resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+            Resolution newResolution = new Resolution(label.getName(), new ResolutionClassification(ResolutionClass.UNASSIGNED));
             newResolution.setExternalId(label.getUrl());
             newResolution.setDescription(label.getColor());
             pump.getPi().getResolutions().add(newResolution);

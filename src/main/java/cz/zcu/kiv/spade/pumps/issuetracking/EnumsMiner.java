@@ -89,7 +89,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            Role defaultRole = new Role(DEFAULT_ROLE_NAME, roleDao.findByClass(RoleClass.TEAMMEMBER));
+            Role defaultRole = new Role(DEFAULT_ROLE_NAME, new RoleClassification(RoleClass.TEAMMEMBER));
             pump.getPi().getRoles().add(defaultRole);
             person.getRoles().add(defaultRole);
         }
@@ -109,7 +109,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            Priority defaultPriority = new Priority(DEFAULT_ENUM_NAME, priorityDao.findByClass(PriorityClass.UNASSIGNED));
+            Priority defaultPriority = new Priority(DEFAULT_ENUM_NAME, new PriorityClassification(PriorityClass.UNASSIGNED));
             pump.getPi().getPriorities().add(defaultPriority);
             unit.setPriority(defaultPriority);
         }
@@ -129,7 +129,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            Severity defaultSeverity = new Severity(DEFAULT_ENUM_NAME, severityDao.findByClass(SeverityClass.UNASSIGNED));
+            Severity defaultSeverity = new Severity(DEFAULT_ENUM_NAME, new SeverityClassification(SeverityClass.UNASSIGNED));
             pump.getPi().getSeverities().add(defaultSeverity);
             unit.setSeverity(defaultSeverity);
         }
@@ -149,7 +149,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            Status defaultStatus = new Status(DEFAULT_ENUM_NAME, statusDao.findByClass(StatusClass.UNASSIGNED));
+            Status defaultStatus = new Status(DEFAULT_ENUM_NAME, new StatusClassification(StatusClass.UNASSIGNED));
             pump.getPi().getStatuses().add(defaultStatus);
             unit.setStatus(defaultStatus);
         }
@@ -163,9 +163,9 @@ public abstract class EnumsMiner extends DataMiner {
      * @param unit given Work Unit instance
      */
     private void assignDefaultResolution(WorkUnit unit) {
-        if (unit.getStatus().getClassification().getAClass().equals(StatusClass.INVALID)) {
+        if (unit.getStatus().getClassification().getaClass().equals(StatusClass.INVALID)) {
             for (Resolution resolution : pump.getPi().getResolutions()) {
-                if (resolution.getClassification().getAClass().equals(ResolutionClass.INVALID)) {
+                if (resolution.getClassification().getaClass().equals(ResolutionClass.INVALID)) {
                     unit.setResolution(resolution);
                     return;
                 }
@@ -181,7 +181,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            Resolution defaultResolution = new Resolution(DEFAULT_ENUM_NAME, resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+            Resolution defaultResolution = new Resolution(DEFAULT_ENUM_NAME, new ResolutionClassification(ResolutionClass.UNASSIGNED));
             pump.getPi().getResolutions().add(defaultResolution);
             unit.setResolution(defaultResolution);
         }
@@ -201,7 +201,7 @@ public abstract class EnumsMiner extends DataMiner {
                     return;
                 }
             }
-            WorkUnitType defaultType = new WorkUnitType(DEFAULT_ENUM_NAME, typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
+            WorkUnitType defaultType = new WorkUnitType(DEFAULT_ENUM_NAME, new WorkUnitTypeClassification(WorkUnitTypeClass.UNASSIGNED));
             pump.getPi().getWuTypes().add(defaultType);
             unit.setType(defaultType);
         }
@@ -213,7 +213,7 @@ public abstract class EnumsMiner extends DataMiner {
      * it adds the new status to the Project instance as well
      */
     void addDeletedStatus() {
-        Status delStatus = new Status(DELETED_STATUS_NAME, statusDao.findByClass(StatusClass.DELETED));
+        Status delStatus = new Status(DELETED_STATUS_NAME, new StatusClassification(StatusClass.DELETED));
         boolean add = true;
         for (WorkUnit unit : pump.getPi().getProject().getUnits()) {
             if (unit.getUrl().isEmpty()) {

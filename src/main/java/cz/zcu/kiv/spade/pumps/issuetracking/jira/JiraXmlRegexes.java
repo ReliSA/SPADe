@@ -1,0 +1,88 @@
+package cz.zcu.kiv.spade.pumps.issuetracking.jira;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
+class JiraXmlRegexes {
+    static final String FOLDER_NAME_FORMAT = "input/xml/%s";
+    static final String CHANGELOG_URL_FORMAT = "https://%s/jira/rest/api/latest/issue/%s?expand=changelog";
+    static final SimpleDateFormat JSON_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    static final int SECONDS_IN_HOUR = 3600;
+
+    static final String SUMMARY = "summary";
+    static final String LINK = "link";
+    static final String DESCRIPTION = "description";
+    static final DateFormat DATE_FORMAT = new SimpleDateFormat("dd MMM yyyy kk:mm:ss", Locale.ENGLISH);
+    static final String REPORTER = "reporter";
+    static final String ASSIGNEE = "assignee";
+    static final String CREATED = "created";
+    static final String UPDATED = "updated";
+    static final String DUE = "due";
+    static final String STATUS = "status";
+    static final String TYPE = "type";
+    static final String PRIORITY = "priority";
+    static final String SEVERITY = "severity";
+    static final String RESOLUTION = "resolution";
+    static final String COMPONENT = "component";
+    static final String LABEL = "label";
+    static final String CUSTOM_FIELDS = "customfields";
+    static final String CUSTOM_FIELD_NAME = "customfieldname";
+    static final String CUSTOM_FIELD_VALUES = "customfieldvalues";
+    static final String CUSTOM_FIELD_VALUE = "customfieldvalue";
+    static final String TAG = "tag";
+    static final String COMMENTS = "comments";
+    static final String COMMENT = "comment";
+    static final String ISSUE_LINKS = "issuelinks";
+    static final String NAME = "name";
+    static final String OUTWARD_LINKS = "outwardlinks";
+    static final String INWARD_LINKS = "inwardlinks";
+    static final String SUBTASK = "subtask";
+    static final String ATTACHMENT = "attachment";
+    static final String CHANGELOG = "changelog";
+    static final String HISTORIES = "histories";
+    static final String ID = "id";
+    static final String AUTHOR = "author";
+    static final String DISPLAY_NAME = "displayName";
+    static final String EMAIL_ADDRESS = "emailAddress";
+    static final String ITEMS = "items";
+    static final String FIELD = "field";
+    static final String TIMESPENT = "timespent";
+    static final String FROM_STRING = "fromString";
+    static final String TO_STRING = "toString";
+    static final String NULL = "null";
+    static final String ZERO = "0";
+    static final String HOUR = "hour";
+    static final String MINUTE = "minute";
+    static final String DELIMITER = "\\Z";
+    static final String GT = ">";
+    static final String PLUS_REGEX = "\\\\+";
+
+    static final String ITEMS_SPLIT = "<item>";
+    static final String CUSTOM_FIELDS_SPLIT = "<customfield id=\"";
+    static final String COMMENTS_SPLIT = "<comment ";
+    static final String ISSUE_LINK_TYPE_SPLIT = "<issuelinktype id\"";
+
+    static final String ISSUE_KEY = "%s-\\d+";
+    static final String ELEMENT_VALUE = "(?<=<%s>).+(?=<\\/%s>)";
+    static final String ELEMENT_START = "<%s>";
+    static final String ELEMENT_END = "</%s>";
+    static final String EXTERNAL_ID = "(?<=<key id=\"\\d{8}\">).+(?=<\\/key>)";
+    static final String KEY_ID = "(?<=<key id=\")\\d{8}";
+    static final String INLINE_ELEMENT = "<%s.+<\\/%s>";
+    static final String LINES_ELEMENT = "<%s(.|\\n)+<\\/%s>";
+    static final String INLINE_ELEMENT_VALUE = "(?<=>).+(?=<)";
+    static final String INLINE_ID = "(?<=id=\")\\d+(?=\")";
+    static final String INLINE_DESCRIPTION = "(?<=description=\").+(?=\")";
+    static final String INLINE_AUTHOR = "(?<=author=\").+(?=\" created=)";
+    static final String INLINE_CREATED = "(?<=created=\"\\w{3}, ).+(?= (\\+|-)\\d{4}\")";
+    static final String STATUS_CLASS = "(?<=<statusCategory id=\"\\d\" key=\")[a-z]+(?=\")";
+    static final String PERSON_LOGIN = "(?<=<%s username=\").+(?=\")";
+    static final String PERSON_NAME = "(?<=<%s username=\"%s\">).+(?=<\\/%s>)";
+    static final String DATE = "(?<=<%s>\\w{3}, ).+(?= (\\+|-)\\d{4}<\\/%s>)";
+    static final String ATTACHMENT_NAME = "(?<=name=\").+(?=\" size)";
+    static final String ATTACHMENT_SIZE = "(?<=size=\")\\d+(?=\")";
+    static final String VERSIONS = "(?<=[vV]ersion>).+(?=<\\/)";
+    static final String TIME_ESTIMATE = "(?<=<timeestimate seconds=\")\\d+(?=\")";
+    static final String TIME_SPENT = "(?<=<timespent seconds=\")\\d+(?=\")";
+}

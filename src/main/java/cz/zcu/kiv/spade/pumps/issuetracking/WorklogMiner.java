@@ -8,7 +8,7 @@ import cz.zcu.kiv.spade.pumps.DataPump;
 
 public abstract class WorklogMiner<WorklogObject> extends DataMiner {
 
-    private static final String LOGTIME_FIELD_NAME = "spentTime";
+    public static final String LOGTIME_FIELD_NAME = "spentTime";
 
     protected WorklogMiner(DataPump pump) {
         super(pump);

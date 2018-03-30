@@ -26,7 +26,7 @@ import java.util.*;
 
 class GitCommitMiner extends CommitMiner<RevCommit> {
 
-    private static final String MINING_BRANCH_START_FORMAT = "started mining branch \"%s\" (%d/%d)";
+    private static final String MINING_BRANCH_START_FORMAT = "mining branch \"%s\" (%d/%d)";
     private static final String COMMITS_MINED_FORMAT = "%d commits mined";
     private static final String SCORE_FORMAT = "score: %d\n";
     private static final String LINES_CHANGED_FORMAT = "%d lines added, %d lines deleted";
@@ -60,7 +60,7 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
         int i = 1;
         for (Ref branchRef : branchRefs) {
             Branch branch = generateBranch(stripBranchName(branchRef.getName()), branchRef.getName());
-            App.printLogMsg(String.format(MINING_BRANCH_START_FORMAT, branch.getName(), i, branches.size()));
+            App.printLogMsg(this, String.format(MINING_BRANCH_START_FORMAT, branch.getName(), i, branchRefs.size()));
             mineCommits(branch);
             branches.add(branch);
             i++;
@@ -82,20 +82,25 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
             e.printStackTrace();
         }
 
-        int count = 0;
+        boolean newCommit;
+        int commitCount = pump.getPi().getProject().getCommits().size();
         for (RevCommit gitCommit : revWalk) {
-            String shortSHA = gitCommit.getId().getName().substring(0, 7);
+            newCommit = false;
+            String shortSHA = gitCommit.getId().getName().substring(0, GitPump.SHORT_COMMIT_HASH_LENGTH);
             if (!pump.getPi().getProject().containsCommit(shortSHA)) {
                 mineItem(gitCommit);
+                newCommit = true;
             }
             Commit commit = pump.getPi().getProject().getCommit(shortSHA);
             commit.getBranches().add(branch);
-            count++;
-            if ((count % COMMIT_BATCH_SIZE) == 0) {
-                App.printLogMsg(String.format(COMMITS_MINED_FORMAT, count));
+            if (newCommit) {
+                commitCount = pump.getPi().getProject().getCommits().size();
+                if ((commitCount % COMMIT_BATCH_SIZE) == 0) {
+                    App.printLogMsg(this, String.format(COMMITS_MINED_FORMAT, commitCount));
+                }
             }
         }
-        App.printLogMsg(String.format(COMMITS_MINED_FORMAT, count));
+        App.printLogMsg(this, String.format(COMMITS_MINED_FORMAT, commitCount));
         revWalk.dispose();
     }
 
@@ -148,7 +153,7 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
                 header = df.toFileHeader(diff);
             } catch (IOException e) {
                 if (e instanceof MissingObjectException) {
-                    App.printLogMsg(MISSING_OBJECT_ERR_MSG, false);
+                    App.printLogMsg(this, MISSING_OBJECT_ERR_MSG);
                     continue;
                 }
                 e.printStackTrace();
@@ -200,8 +205,8 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
                 desc += String.format(LINES_CHANGED_FORMAT, linesAdded, linesDeleted);
             }
 
-            if (!diff.getNewId().toString().equals(diff.getOldId().toString())) {
-                change.getFieldChanges().add(new FieldChange(ID_FIELD_NAME, diff.getOldId().toString(), diff.getNewId().toString()));
+            if (!type.equals(WorkItemChange.Type.ADD) && !type.equals(WorkItemChange.Type.DELETE) && !diff.getNewId().toString().equals(diff.getOldId().toString())) {
+                change.getFieldChanges().add(new FieldChange(ID_FIELD_NAME, diff.getOldId().name(), diff.getNewId().name()));
             }
             if (type.equals(WorkItemChange.Type.COPY) || type.equals(WorkItemChange.Type.MOVE)) {
                 if (diff.getScore() < PERCENTAGE_MAX) {
@@ -219,8 +224,8 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
     }
 
     private Artifact getArtifact(DiffEntry diff) {
-        String newId = diff.getNewId().toString();
-        String oldId = diff.getOldId().toString();
+        String newId = diff.getNewId().name();
+        String oldId = diff.getOldId().name();
 
         Artifact artifact;
         if (!artifactMap.containsKey(newId)) {
@@ -236,10 +241,10 @@ class GitCommitMiner extends CommitMiner<RevCommit> {
         artifact.setExternalId(newId);
         artifact.setUrl(diff.getNewPath());
         artifact.setArtifactClass(ArtifactClass.FILE);
-        if (artifact.getName().contains(DOT)) {
+        if (artifact.getName().contains(DataPump.DOT)) {
             artifact.setMimeType(URLConnection.guessContentTypeFromName(artifact.getName()));
             if (artifact.getMimeType() == null) {
-                artifact.setMimeType(artifact.getName().substring(artifact.getName().lastIndexOf(DOT) + 1));
+                artifact.setMimeType(artifact.getName().substring(artifact.getName().lastIndexOf(DataPump.DOT) + 1));
             }
         }
         artifactMap.put(oldId, artifact);

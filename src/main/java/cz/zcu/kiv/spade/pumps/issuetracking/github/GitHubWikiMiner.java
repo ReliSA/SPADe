@@ -25,7 +25,7 @@ class GitHubWikiMiner extends WikiMiner {
 
         String wikiUrl = pump.getPi().getUrl().substring(0, pump.getPi().getUrl().lastIndexOf(App.GIT_SUFFIX)) + GITHUB_WIKI_SUFFIX + App.GIT_SUFFIX;
         GitPump wikiPump = new GitPump(wikiUrl, null, null, null);
-        ProjectInstance wikiPi = wikiPump.mineData(pump.getEntityManager());
+        ProjectInstance wikiPi = wikiPump.mineData();
         wikiPump.close();
 
         for (Person person : wikiPi.getProject().getPeople()) {

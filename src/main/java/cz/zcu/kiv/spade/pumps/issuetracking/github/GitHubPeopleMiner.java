@@ -3,11 +3,10 @@ package cz.zcu.kiv.spade.pumps.issuetracking.github;
 import cz.zcu.kiv.spade.domain.Group;
 import cz.zcu.kiv.spade.domain.Identity;
 import cz.zcu.kiv.spade.domain.Person;
+import cz.zcu.kiv.spade.domain.enums.RoleClass;
 import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.PeopleMiner;
-import org.kohsuke.github.GHRepository;
-import org.kohsuke.github.GHTeam;
-import org.kohsuke.github.GHUser;
+import org.kohsuke.github.*;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -64,18 +63,29 @@ class GitHubPeopleMiner extends PeopleMiner<GHUser> {
         } catch (IOException e) {
             ((GitHubPump) pump).resetRootObject();
         }
-        try {
-            for (GHUser collaborator : ((GHRepository) pump.getRootObject()).listCollaborators()) {
-                Person person = addPerson(generateIdentity(collaborator));
-                person.getRoles().add(resolveRole(GitHubPump.GitHubRole.collaborator.name()));
+        if (((GHRepository) pump.getRootObject()).hasPushAccess()) {
+            try {
+                for (GHUser collaborator : ((GHRepository) pump.getRootObject()).listCollaborators()) {
+                    Person person = addPerson(generateIdentity(collaborator));
+                    person.getRoles().add(resolveRole(GitHubPump.GitHubRole.collaborator.name()));
+                }
+            } catch (IOException e) {
+                ((GitHubPump) pump).resetRootObject();
             }
-        } catch (IOException e) {
-            ((GitHubPump) pump).resetRootObject();
         }
         try {
             for (GHUser contributor : ((GHRepository) pump.getRootObject()).listContributors()) {
                 Person person = addPerson(generateIdentity(contributor));
                 person.getRoles().add(resolveRole(GitHubPump.GitHubRole.contributor.name()));
+            }
+        } catch (IOException e) {
+            ((GitHubPump) pump).resetRootObject();
+        }
+        // TODO watch out for resolveRole
+        try {
+            for (GHUser assignee : ((GHRepository) pump.getRootObject()).listAssignees()) {
+                Person person = addPerson(generateIdentity(assignee));
+                person.getRoles().add(resolveRole(RoleClass.TEAMMEMBER.name()));
             }
         } catch (IOException e) {
             ((GitHubPump) pump).resetRootObject();

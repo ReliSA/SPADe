@@ -9,9 +9,13 @@ import java.util.Date;
 
 public abstract class IssueMiner<IssueObject> extends ItemMiner<IssueObject> {
 
+    protected static final String PLUS = "\\+";
     private static final String CLOSURE_DESC = "issue closed";
     private static final String STATUS_FIELD_NAME = "status";
     private static final String OPEN_STATUS_NAME = "open";
+
+    protected static final String ISSUES_MINED_FORMAT = "%s tickets mined";
+    protected static final int ISSUES_BATCH_SIZE = 100;
 
     protected IssueMiner(IssueTrackingPump pump) {
         super(pump);
@@ -124,7 +128,7 @@ public abstract class IssueMiner<IssueObject> extends ItemMiner<IssueObject> {
 
         String openStatus = "";
         for (Status status : pump.getPi().getStatuses()) {
-            if (status.getClassification().getAClass().equals(StatusClass.OPEN)) {
+            if (status.getClassification().getaClass().equals(StatusClass.OPEN)) {
                 openStatus = status.getName();
                 break;
             }
@@ -138,7 +142,7 @@ public abstract class IssueMiner<IssueObject> extends ItemMiner<IssueObject> {
             }
         }
         if (openStatus.isEmpty()) {
-            Status newStatus = new Status(OPEN_STATUS_NAME, statusDao.findByClass(StatusClass.OPEN));
+            Status newStatus = new Status(OPEN_STATUS_NAME, new StatusClassification(StatusClass.OPEN));
             pump.getPi().getStatuses().add(newStatus);
             openStatus = newStatus.getName();
         }

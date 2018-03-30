@@ -33,7 +33,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             definitions = ((RedmineManager) pump.getRootObject()).getCustomFieldManager().getCustomFieldDefinitions();
         } catch (RedmineException e) {
-            App.printLogMsg(CUSTOM_FIELDS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, CUSTOM_FIELDS_PERMISSION_ERR_MSG);
         }
         for (CustomFieldDefinition def : definitions) {
             if (def.getName().toLowerCase().equals(SEVERITY_FIELD_NAME)) {
@@ -48,7 +48,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                         }
                     }
                     if (!found) {
-                        Severity newSeverity = new Severity(issueSeverity, severityDao.findByClass(SeverityClass.UNASSIGNED));
+                        Severity newSeverity = new Severity(issueSeverity, new SeverityClassification(SeverityClass.UNASSIGNED));
                         pump.getPi().getSeverities().add(newSeverity);
                     }
                 }
@@ -64,7 +64,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             roles = ((RedmineManager) pump.getRootObject()).getUserManager().getRoles();
         } catch (RedmineException e) {
-            App.printLogMsg(ROLES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, ROLES_PERMISSION_ERR_MSG);
         }
         for (com.taskadapter.redmineapi.bean.Role redmineRole : roles) {
             boolean found = false;
@@ -77,7 +77,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Role newRole = new Role(redmineRole.getName(), roleDao.findByClass(RoleClass.UNASSIGNED));
+                Role newRole = new Role(redmineRole.getName(), new RoleClassification(RoleClass.UNASSIGNED));
                 newRole.setExternalId(redmineRole.getId().toString());
                 pump.getPi().getRoles().add(newRole);
             }
@@ -91,7 +91,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             statuses = ((RedmineManager) pump.getRootObject()).getIssueManager().getStatuses();
         } catch (RedmineException e) {
-            App.printLogMsg(STATUSES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, STATUSES_PERMISSION_ERR_MSG);
         }
         for (IssueStatus issueStatus : statuses) {
             boolean found = false;
@@ -104,7 +104,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Status newStatus = new Status(issueStatus.getName(), statusDao.findByClass(StatusClass.UNASSIGNED));
+                Status newStatus = new Status(issueStatus.getName(), new StatusClassification(StatusClass.UNASSIGNED));
                 newStatus.setExternalId(issueStatus.getId().toString());
                 pump.getPi().getStatuses().add(newStatus);
             }
@@ -118,7 +118,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             priorities = ((RedmineManager) pump.getRootObject()).getIssueManager().getIssuePriorities();
         } catch (RedmineException e) {
-            App.printLogMsg(PRIORITIES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, PRIORITIES_PERMISSION_ERR_MSG);
         }
         for (IssuePriority issuePriority : priorities) {
             boolean found = false;
@@ -131,7 +131,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                Priority newPriority = new Priority(issuePriority.getName(), priorityDao.findByClass(PriorityClass.UNASSIGNED));
+                Priority newPriority = new Priority(issuePriority.getName(), new PriorityClassification(PriorityClass.UNASSIGNED));
                 newPriority.setExternalId(issuePriority.getId().toString());
                 pump.getPi().getPriorities().add(newPriority);
             }
@@ -152,7 +152,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                 }
             }
             if (!found) {
-                WorkUnitType newType = new WorkUnitType(tracker.getName(), typeDao.findByClass(WorkUnitTypeClass.UNASSIGNED));
+                WorkUnitType newType = new WorkUnitType(tracker.getName(), new WorkUnitTypeClassification(WorkUnitTypeClass.UNASSIGNED));
                 newType.setExternalId(tracker.getId().toString());
                 pump.getPi().getWuTypes().add(newType);
             }
@@ -172,7 +172,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             issueCategories = ((RedmineManager) pump.getRootObject()).getIssueManager().getCategories(((Project) pump.getSecondaryObject()).getId());
         } catch (RedmineException e) {
-            App.printLogMsg(CATEGORIES_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, CATEGORIES_PERMISSION_ERR_MSG);
         }
 
         for (IssueCategory issueCategory : issueCategories) {
@@ -189,7 +189,7 @@ class RedmineEnumsMiner extends EnumsMiner {
         try {
             definitions = ((RedmineManager) pump.getRootObject()).getCustomFieldManager().getCustomFieldDefinitions();
         } catch (RedmineException e) {
-            App.printLogMsg(CUSTOM_FIELDS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, CUSTOM_FIELDS_PERMISSION_ERR_MSG);
         }
         for (CustomFieldDefinition def : definitions) {
             if (def.getName().toLowerCase().equals(RESOLUTION_FIELD_NAME)) {
@@ -204,7 +204,7 @@ class RedmineEnumsMiner extends EnumsMiner {
                         }
                     }
                     if (!found) {
-                        Resolution newResolution = new Resolution(issueResolution, resolutionDao.findByClass(ResolutionClass.UNASSIGNED));
+                        Resolution newResolution = new Resolution(issueResolution, new ResolutionClassification(ResolutionClass.UNASSIGNED));
                         pump.getPi().getResolutions().add(newResolution);
                     }
                 }

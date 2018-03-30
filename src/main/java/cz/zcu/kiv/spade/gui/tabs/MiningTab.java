@@ -1,5 +1,6 @@
 package cz.zcu.kiv.spade.gui.tabs;
 
+import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 import cz.zcu.kiv.spade.gui.SPADeGUI;
 import javafx.application.Platform;
@@ -119,13 +120,14 @@ public class MiningTab extends SPADeTab {
 
     private void processForm(boolean reload, String newProject, String tool, List<String> selectedProjects) {
         Map<String, String> loginResults;
+        List<App.Flag> flags = new ArrayList<>();
 
         if (!reload) {
             // one new project
             if (!newProject.trim().isEmpty()) {
                 loginResults = showLoginDialog(tool);
                 if (loginResults != null) {
-                    gui.getApp().processProjectInstance(newProject, loginResults, tool);
+                    gui.getApp().processProjectInstance(newProject, loginResults, tool, flags);
                 }
             // project list from file
             } else {
@@ -135,7 +137,7 @@ public class MiningTab extends SPADeTab {
         } else {
             for (String url : selectedProjects) {
                 loginResults = showLoginDialog(url);
-                gui.getApp().processProjectInstance(url, loginResults, null);
+                gui.getApp().processProjectInstance(url, loginResults, null, flags);
             }
         }
     }

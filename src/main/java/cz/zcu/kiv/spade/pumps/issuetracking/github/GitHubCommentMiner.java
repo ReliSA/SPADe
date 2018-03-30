@@ -36,7 +36,7 @@ class GitHubCommentMiner extends CommentMiner<GHIssueComment> {
                 creation = comment.getCreatedAt();
                 break;
             } catch (IOException e) {
-                ((GitHubPump) pump).init(true);
+                ((GitHubPump) pump).resetRootObject();
             }
         }
         Person commenter = addPerson(((GitHubPeopleMiner) pump.getPeopleMiner()).generateIdentity(user));
@@ -114,7 +114,7 @@ class GitHubCommentMiner extends CommentMiner<GHIssueComment> {
             }
             if ((count % COMMIT_COMMENTS_BATCH_SIZE) == 0) {
                 if ((count % COMMIT_COMMENTS_MSG_BATCH_SIZE) == 0) {
-                    App.printLogMsg(String.format(COMMIT_COMMENTS_MINED_FORMAT, count, comments.size()));
+                    App.printLogMsg(this, String.format(COMMIT_COMMENTS_MINED_FORMAT, count, comments.size()));
                 }
                 ((GitHubPump) pump).checkRateLimit();
             }

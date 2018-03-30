@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.pumps.issuetracking;
 
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.pumps.*;
+import cz.zcu.kiv.spade.pumps.issuetracking.bugzilla.BugzillaXmlIssueMiner;
 
 public abstract class IssueTrackingPump<RootObject, SecondaryObject> extends DataPump<RootObject, SecondaryObject> {
 
@@ -22,30 +23,24 @@ public abstract class IssueTrackingPump<RootObject, SecondaryObject> extends Dat
     }
 
     protected void mineContent() {
-        new DBInitializer(getEntityManager()).setDefaultEnums(pi);
+        new DBInitializer().setDefaultEnums(pi);
         if (enumsMiner != null) {
-            enumsMiner.setEntityManager();
             enumsMiner.mineEnums();
         }
         if (peopleMiner != null) {
-            peopleMiner.setEntityManager();
             peopleMiner.mineGroups();
             peopleMiner.minePeople();
         }
         if (issueMiner != null) {
-            issueMiner.setEntityManager();
             issueMiner.mineItems();
         }
         if (segmentMiner != null) {
-            segmentMiner.setEntityManager();
             segmentMiner.mineIterations();
         }
         if (wikiMiner != null) {
-            wikiMiner.setEntityManager();
             wikiMiner.mineWiki();
         }
-        if (relationMiner != null) {
-            relationMiner.setEntityManager();
+        if (relationMiner != null && !(issueMiner instanceof BugzillaXmlIssueMiner)) {
             relationMiner.mineAllRelations();
         }
         if (enumsMiner != null) {

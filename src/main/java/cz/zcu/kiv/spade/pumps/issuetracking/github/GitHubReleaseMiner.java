@@ -3,6 +3,7 @@ package cz.zcu.kiv.spade.pumps.issuetracking.github;
 import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.Commit;
 import cz.zcu.kiv.spade.domain.VCSTag;
+import cz.zcu.kiv.spade.pumps.DataPump;
 import cz.zcu.kiv.spade.pumps.ReleaseMiner;
 import org.kohsuke.github.GHRelease;
 import org.kohsuke.github.GHRepository;
@@ -53,13 +54,13 @@ class GitHubReleaseMiner extends ReleaseMiner {
                 spadeTag.setDescription(release.getName());
             }
             if (release.getBody() != null) {
-                spadeTag.setDescription(spadeTag.getDescription() + "\n" + release.getBody().trim());
+                spadeTag.setDescription(spadeTag.getDescription() + DataPump.LINE_BREAK + release.getBody().trim());
             }
             i++;
             if ((i % RELEASES_BATCH_SIZE) == 0) {
                 ((GitHubPump) pump).checkRateLimit();
             }
         }
-        App.printLogMsg(String.format(RELEASES_MINED_FORMAT, i, releases.size(), tags.size()));
+        App.printLogMsg(this, String.format(RELEASES_MINED_FORMAT, i, releases.size(), tags.size()));
     }
 }

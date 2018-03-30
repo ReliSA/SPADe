@@ -11,17 +11,19 @@ import cz.zcu.kiv.spade.domain.enums.*;
 import cz.zcu.kiv.spade.gui.utils.EnumStrings;
 import cz.zcu.kiv.spade.load.DBInitializer;
 import cz.zcu.kiv.spade.load.Loader;
+import cz.zcu.kiv.spade.output.CocaexFilePrinter;
 import cz.zcu.kiv.spade.output.CodefacePrinter;
 import cz.zcu.kiv.spade.output.StatsPrinter;
+import cz.zcu.kiv.spade.output.TimelineFilePrinter;
 import cz.zcu.kiv.spade.pumps.DataPump;
+import cz.zcu.kiv.spade.pumps.issuetracking.bugzilla.BugzillaPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.github.GitHubPump;
 import cz.zcu.kiv.spade.pumps.vcs.git.GitPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.jira.JiraPump;
 import cz.zcu.kiv.spade.pumps.issuetracking.redmine.RedminePump;
+import org.json.JSONException;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,21 +40,34 @@ public class App {
     /** the extension of git repository URLs */
     public static final String GIT_SUFFIX = ".git";
     /** temporary directory to transfer necessary data into */
-    public static final String ROOT_TEMP_DIR = "repos\\";
+    public static final String ROOT_TEMP_DIR = "repos/";
     /** a prefix of a GitHub repository URL */
     private static final String GITHUB_PREFIX = "https://github.com/";
+    private static final String MESSAGE_FORMAT = "%s: %s: %s";
 
-    /** a JPA persistence unit for updating the SPADe database */
-    private static final String PERSISTENCE_UNIT_UPDATE = "update";
-    /** a JPA persistence unit for creating a blank SPADe database */
-    private static final String PERSISTENCE_UNIT_CREATE = "create";
+
+    private static final String UNKNOWN_ENTITY_PROMPT_FORMAT = "Unknown %s \"%s\", select category to map it onto:";
+    private static final String CHOOSE_ENTITY_PROMPT_FORMAT = "Choose %s:";
+    private static final String PROMPT_DEFAULT_OPT_FORMAT = "\t%s - %s (default)";
+    private static final String PROMPT_OPT_FORMAT = "\t%s - %s";
+    private static final String YOUR_CHOICE = "Your choice (leave empty for default): ";
+
+    static final String[] NO_YES = {"No", "Yes"};
+    private static final SimpleDateFormat UNIQUE_DATE_FORMAT = new SimpleDateFormat(" (yyyy-MM-dd kk-mm)");
+
+    public enum Flag {
+        PRINT_TIMELINE,
+        PRINT_COCAEX,
+        PRINT_CODEFACE,
+        LOAD,
+        PRINT_STATS
+    }
+
+    // TODO temporary fix
+    private EntityManager updateManager = null;
 
     /** a stream to print log messages into */
     public static PrintStream log;
-    /** JPA entity manager for updating the SPADe database */
-    private final EntityManager updateManager;
-    /** JPA entity manager for creating a blank SPADe database */
-    private EntityManager createManager;
 
     /**
      * default constructor, sets default update entity manager and log print stream
@@ -60,13 +75,12 @@ public class App {
     public App() {
         log = System.out;
         try {
+            //log = new PrintStream(new FileOutputStream(new File("out.txt")));
             System.setOut(new PrintStream(new FileOutputStream(new File("out.txt"))));
-            System.setErr(new PrintStream(new FileOutputStream(new File("err.txt"))));
+            //System.setErr(new PrintStream(new FileOutputStream(new File("err.txt"))));
         } catch (FileNotFoundException e) {
             System.out.println("File not found!");
         }
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
-        this.updateManager = factory.createEntityManager();
     }
 
     /**
@@ -74,8 +88,6 @@ public class App {
      * @param logOutput stream for printing log messages
      */
     public App(PrintStream logOutput) {
-        EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_UPDATE);
-        this.updateManager = factory.createEntityManager();
         log = logOutput;
     }
 
@@ -83,16 +95,11 @@ public class App {
      * creates a blank SPADe database
      */
     public void createBlankDB() {
-        printLogMsg("Initializing DB ...");
+        printLogMsg(this,"Initializing DB ...");
 
-        if (createManager == null || !createManager.isOpen()) {
-            EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_CREATE);
-            createManager = factory.createEntityManager();
-        }
+        new DBInitializer().initializeDatabase();
 
-        new DBInitializer(createManager).initializeDatabase();
-
-        printLogMsg("DB initialized");
+        printLogMsg(this, "DB initialized");
     }
 
     /**
@@ -101,32 +108,43 @@ public class App {
      * @param loginResults a map containing username, password and private kez for accessing the project
      * @param toolName name of the tool storing the project data (all caps, e.g. GITHUB)
      */
-    public void processProjectInstance(String url, Map<String, String> loginResults, String toolName) {
-        printLogMsg("mining of " + url + " started...");
+    public void processProjectInstance(String url, Map<String, String> loginResults, String toolName, List<Flag> flags) {
         long startTime = System.currentTimeMillis();
+        log.println("============================================================================");
+        App.printLogMsg(this, "mining of " + loginResults.get("url") + " started...");
 
         ProjectInstance pi;
-        if (toolName == null) pi = this.remineProjectInstance(url, loginResults);
+        if (toolName == null) pi = reMineProjectInstance(url, loginResults);
         else pi = this.mineProjectInstance(url, loginResults, toolName);
         if (pi == null) return;
-
         pi.getStats().setStart(startTime);
-        printLogMsg("project instance " + pi.getUrl() + " mined");
+
         long miningTime = System.currentTimeMillis();
+        printLogMsg(this, "project instance " + pi.getUrl() + " mined");
         pi.getStats().setMining(miningTime);
 
-        this.printProjectInstance(pi);
-        printLogMsg("project instance " + pi.getUrl() + " printed");
-        long printingTime = System.currentTimeMillis();
-        pi.getStats().setPrinting(printingTime);
+        if (flags.contains(Flag.PRINT_TIMELINE) || flags.contains(Flag.PRINT_COCAEX) || flags.contains(Flag.PRINT_CODEFACE)) {
+            this.printProjectInstance(pi, flags);
 
-        this.loadProjectInstance(pi);
-        printLogMsg("project instance " + pi.getUrl() + " loaded");
-        long loadingTime = System.currentTimeMillis();
-        pi.getStats().setLoading(loadingTime);
+            long printingTime = System.currentTimeMillis();
+            pi.getStats().setPrinting(printingTime);
+            printLogMsg(this,"project instance " + pi.getUrl() + " printed");
+        }
 
-        StatsPrinter statsPrinter = new StatsPrinter();
-        statsPrinter.print(pi);
+        if (flags.contains(Flag.LOAD)) {
+            pi.setName(pi.getName() + UNIQUE_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
+            this.loadProjectInstance(pi);
+
+            long loadingTime = System.currentTimeMillis();
+            printLogMsg(this, "project instance " + pi.getUrl() + " loaded");
+            pi.getStats().setLoading(loadingTime);
+        }
+
+        if (flags.contains(Flag.PRINT_STATS)) {
+            new StatsPrinter(pi).print();
+        }
+
+        log.println("============================================================================");
     }
 
     /**
@@ -138,10 +156,8 @@ public class App {
      */
     private ProjectInstance mineProjectInstance(String url, Map<String, String> loginResults, String toolName) {
 
-        Tool tool = Tool.valueOf(toolName);
-
         DataPump pump;
-        switch (tool) {
+        switch (Tool.valueOf(toolName)) {
             case GIT:
                 pump = new GitPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
                 break;
@@ -150,22 +166,35 @@ public class App {
                 break;
             case REDMINE:
                 pump = new RedminePump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                pump.setRepo(loginResults.get("repo"));
                 break;
             case JIRA:
                 pump = new JiraPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                pump.setRepo(loginResults.get("repo"));
                 break;
             case BUGZILLA:
+                pump = new BugzillaPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                pump.setRepo(loginResults.get("repo"));
+                break;
             case ASSEMBLA:
+                //pump = new AssemblaPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                //break;
             case SVN:
+                //pump = new SvnPump(url, loginResults.get("privateKey"), loginResults.get("username"), loginResults.get("password"));
+                //break;
             case RTC:
             default:
                 return null;
         }
 
-        ProjectInstance pi = pump.mineData(updateManager);
+        ProjectInstance pi = pump.mineData();
         pump.close();
 
         return pi;
+    }
+
+    public void close() {
+        if (updateManager != null) updateManager.close();
     }
 
     /**
@@ -173,7 +202,7 @@ public class App {
      * @param pi instance of the project containing all the data
      */
     private void loadProjectInstance(ProjectInstance pi) {
-        Loader loader = new Loader(updateManager);
+        Loader loader = new Loader();
         loader.loadProjectInstance(pi);
     }
 
@@ -181,17 +210,29 @@ public class App {
      * prints the output files from the data in ProjectInstance
      * @param pi mined data
      */
-    private void printProjectInstance(ProjectInstance pi) {
-        TimelineFilePrinter timelinePrinter = new TimelineFilePrinter();
-        CocaexFilePrinter cocaexPrinter = new CocaexFilePrinter();
-        try {
-            timelinePrinter.print(pi);
-            cocaexPrinter.print(pi);
-        } catch (JSONException e) {
-            e.printStackTrace();
+    private void printProjectInstance(ProjectInstance pi, List<Flag> flags) {
+        if (flags.contains(Flag.PRINT_TIMELINE)) {
+            TimelineFilePrinter timelinePrinter = new TimelineFilePrinter();
+            try {
+                timelinePrinter.print(pi);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
-        CodefacePrinter codefacePrinter = new CodefacePrinter();
-        codefacePrinter.print(pi);
+
+        if (flags.contains(Flag.PRINT_COCAEX)) {
+            CocaexFilePrinter cocaexPrinter = new CocaexFilePrinter();
+            try {
+                cocaexPrinter.print(pi);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (flags.contains(Flag.PRINT_CODEFACE)) {
+            CodefacePrinter codefacePrinter = new CodefacePrinter();
+            codefacePrinter.print(pi);
+        }
     }
 
     /**
@@ -200,7 +241,6 @@ public class App {
      */
     public List<String> getProjects() {
         ProjectInstanceDAO dao = new ProjectInstanceDAO_JPA(updateManager);
-
         return dao.selectAllUrls();
     }
 
@@ -210,20 +250,10 @@ public class App {
      * @param loginResults a map containing username, password and private kez for accessing the project
      * @return current ProjectInstance data
      */
-    private ProjectInstance remineProjectInstance(String url, Map<String, String> loginResults) {
+    private ProjectInstance reMineProjectInstance(String url, Map<String, String> loginResults) {
         ToolInstanceDAO dao = new ToolInstanceDAO_JPA(updateManager);
         Tool tool = dao.findToolByProjectInstanceUrl(url);
         return mineProjectInstance(url, loginResults, tool.name());
-    }
-
-    /**
-     * closes the application (the entity managers)
-     */
-    public void close() {
-        updateManager.close();
-        if (createManager != null && createManager.isOpen()) {
-            createManager.close();
-        }
     }
 
     /**
@@ -290,7 +320,6 @@ public class App {
      */
     public int getUnitCountByEnumName(EnumStrings entity, String url, String name) {
         WorkUnitDAO dao = new WorkUnitDAO_JPA(updateManager);
-
         if (url == null) return dao.getUnitCountByEnumName(entity, name);
         else return dao.getUnitCountByEnumName(entity, url, name);
     }
@@ -431,22 +460,11 @@ public class App {
 
     /**
      * prints a message with a timestamp to the log output
+     * @param source class that called to print the message
      * @param message a message
      */
-    public static void printLogMsg(String message) {
-        printLogMsg(message, true);
-    }
-
-    public static void printLogMsg(String message, boolean timeStamp) {
-       log.println(timeStamp ? (getTimeStamp() + ": " + message) : "\t" + message);
-    }
-
-    /**
-     * gets a timestamp for a log message
-     * @return timestamp
-     */
-    private static String getTimeStamp() {
-        return TIMESTAMP.format(System.currentTimeMillis());
+    public static void printLogMsg(Object source, String message) {
+        log.println(String.format(MESSAGE_FORMAT, TIMESTAMP.format(System.currentTimeMillis()), source.getClass().getSimpleName(), message));
     }
 
     /**
@@ -456,6 +474,7 @@ public class App {
      */
     public void mineFromFile(String tool) {
         List<String> lines = readFile("input\\" + tool + ".txt");
+        List<App.Flag> flags = new ArrayList<>();
 
         Map<String, String> loginResults = new HashMap<>();
         loginResults.put("username", lines.get(0));
@@ -464,55 +483,8 @@ public class App {
         else loginResults.put("privateKey", lines.get(2));
 
         for (int i = 3; i < lines.size(); i ++) {
-            this.processProjectInstance(lines.get(i), loginResults, tool);
+            this.processProjectInstance(lines.get(i), loginResults, tool, flags);
         }
-    }
-
-    /**
-     * mines multiple projects one by one from an input file named after a tool
-     * @param tool tool name (all caps, e.g. GITHUB)
-     * @param loginResults a map containing username, password and private key for accessing the projects
-     */
-    void mineFromFile(String tool, Map<String, String> loginResults) {
-        List<String> lines = readFile("input\\" + tool + ".txt");
-        boolean[] successes = new boolean[lines.size()];
-        for (int i = 0; i < successes.length; i++) {
-            successes[i] = false;
-        }
-
-        int i = 0;
-        Scanner s = new Scanner(System.in, "UTF-8");
-        while (true) {
-            boolean overallSuccess = true;
-
-            for (boolean success : successes) {
-                if (!success){
-                    overallSuccess = false;
-                    break;
-                }
-            }
-            if (overallSuccess) break;
-
-            if (successes[i]) continue;
-
-            log.println("======================================");
-            log.println("\t\tproject: " + (i+1) + "/" + lines.size());
-            log.println("======================================");
-            for (int attempt = 0; attempt < 3; attempt++) {
-                try {
-                    this.processProjectInstance(lines.get(i), loginResults, tool);
-                    successes[i] = true;
-                    printLogMsg(lines.get(i) + " - mining successful");
-                    break;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    successes[i] = false;
-                    s.nextLine();
-                }
-            }
-            i = (i + 1) % lines.size();
-        }
-        s.close();
     }
 
     /**
@@ -538,5 +510,45 @@ public class App {
             e.printStackTrace();
         }
         return lines;
+    }
+
+    static int promptUserSelection(String[] options, String entityType) {
+        return promptUserSelection(options, entityType, "");
+    }
+
+    public static int promptUserSelection(String[] options, String entityType, String entityName) {
+        while (true) {
+            log.println();
+            if (!entityName.isEmpty()) {
+                log.println(String.format(UNKNOWN_ENTITY_PROMPT_FORMAT, entityType, entityName));
+            } else {
+                log.println(String.format(CHOOSE_ENTITY_PROMPT_FORMAT, entityType));
+            }
+            for (int i = 0; i < options.length; i++) {
+                if (i == 0) {
+                    log.println(String.format(PROMPT_DEFAULT_OPT_FORMAT, i, options[i]));
+                } else {
+                    log.println(String.format(PROMPT_OPT_FORMAT, i, options[i]));
+                }
+            }
+            log.print(YOUR_CHOICE);
+
+            Scanner scanner = new Scanner(System.in);
+            try {
+                String response = scanner.nextLine();
+                if (response.isEmpty()) {
+                    response = 0 + "";
+                }
+                int choice = Integer.parseInt(response);
+                if (choice < 0 || choice > options.length - 1) {
+                    log.println("Illegal selection!\n");
+                    continue;
+                }
+                log.println();
+                return choice;
+            } catch (NumberFormatException e) {
+                log.println("Illegal selection!\n");
+            }
+        }
     }
 }

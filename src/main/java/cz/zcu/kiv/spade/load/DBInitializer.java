@@ -6,18 +6,24 @@ import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.*;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DBInitializer {
 
-    private final EntityManager em;
-
-    public DBInitializer(EntityManager em) {
-        this.em = em;
-    }
+    /** a JPA persistence unit for creating a blank SPADe database */
+    private static final String PERSISTENCE_UNIT_CREATE = "create";
+    /** JPA entity manager for creating a blank SPADe database */
+    private EntityManager createManager;
 
     public void initializeDatabase() {
+        if (createManager == null || !createManager.isOpen()) {
+            EntityManagerFactory factory = Persistence.createEntityManagerFactory(PERSISTENCE_UNIT_CREATE);
+            createManager = factory.createEntityManager();
+        }
+
         loadRoleClassifications();
         loadStatusClassifications();
         loadPriorityClassifications();
@@ -25,10 +31,14 @@ public class DBInitializer {
         loadResolutionClassifications();
         loadTypeClassifications();
         loadRelationClassifications();
+
+        if (createManager != null && createManager.isOpen()) {
+            createManager.close();
+        }
     }
 
     private void loadRoleClassifications() {
-        GenericDAO<RoleClassification> dao = new RoleClassificationDAO_JPA(em);
+        GenericDAO<RoleClassification> dao = new RoleClassificationDAO_JPA(createManager);
 
         for (RoleClass aClass : RoleClass.values()) {
             dao.save(new RoleClassification(aClass));
@@ -36,7 +46,7 @@ public class DBInitializer {
     }
 
     private void loadStatusClassifications() {
-        GenericDAO<StatusClassification> dao = new StatusClassificationDAO_JPA(em);
+        GenericDAO<StatusClassification> dao = new StatusClassificationDAO_JPA(createManager);
 
         for (StatusClass aClass : StatusClass.values()) {
             dao.save(new StatusClassification(aClass));
@@ -44,7 +54,7 @@ public class DBInitializer {
     }
 
     private void loadPriorityClassifications() {
-        GenericDAO<PriorityClassification> dao = new PriorityClassificationDAO_JPA(em);
+        GenericDAO<PriorityClassification> dao = new PriorityClassificationDAO_JPA(createManager);
 
         for (PriorityClass aClass : PriorityClass.values()) {
             dao.save(new PriorityClassification(aClass));
@@ -52,7 +62,7 @@ public class DBInitializer {
     }
 
     private void loadSeverityClassifications() {
-        GenericDAO<SeverityClassification> dao = new SeverityClassificationDAO_JPA(em);
+        GenericDAO<SeverityClassification> dao = new SeverityClassificationDAO_JPA(createManager);
 
         for (SeverityClass aClass : SeverityClass.values()) {
             dao.save(new SeverityClassification(aClass));
@@ -60,7 +70,7 @@ public class DBInitializer {
     }
 
     private void loadResolutionClassifications() {
-        GenericDAO<ResolutionClassification> dao = new ResolutionClassificationDAO_JPA(em);
+        GenericDAO<ResolutionClassification> dao = new ResolutionClassificationDAO_JPA(createManager);
 
         for (ResolutionClass aClass : ResolutionClass.values()) {
             dao.save(new ResolutionClassification(aClass));
@@ -68,7 +78,7 @@ public class DBInitializer {
     }
 
     private void loadTypeClassifications() {
-        GenericDAO<WorkUnitTypeClassification> dao = new WorkUnitTypeClassificationDAO_JPA(em);
+        GenericDAO<WorkUnitTypeClassification> dao = new WorkUnitTypeClassificationDAO_JPA(createManager);
 
         for (WorkUnitTypeClass aClass : WorkUnitTypeClass.values()) {
             dao.save(new WorkUnitTypeClassification(aClass));
@@ -76,7 +86,7 @@ public class DBInitializer {
     }
 
     private void loadRelationClassifications() {
-        GenericDAO<RelationClassification> dao = new RelationClassificationDAO_JPA(em);
+        GenericDAO<RelationClassification> dao = new RelationClassificationDAO_JPA(createManager);
 
         for (RelationClass aClass : RelationClass.values()) {
             dao.save(new RelationClassification(aClass));
@@ -95,18 +105,17 @@ public class DBInitializer {
 
     private List<Role> getDefaultRoles() {
         List<Role> roles = new ArrayList<>();
-        RoleClassificationDAO dao = new RoleClassificationDAO_JPA(em);
 
-        RoleClassification analystClass = dao.findByClass(RoleClass.ANALYST);
-        RoleClassification designerClass = dao.findByClass(RoleClass.DESIGNER);
-        RoleClassification developerClass = dao.findByClass(RoleClass.DEVELOPER);
-        RoleClassification documenterClass = dao.findByClass(RoleClass.DOCUMENTER);
-        RoleClassification mentorClass = dao.findByClass(RoleClass.MENTOR);
-        RoleClassification nonmemberClass = dao.findByClass(RoleClass.NONMEMBER);
-        RoleClassification projectManagerClass = dao.findByClass(RoleClass.PROJECTMANAGER);
-        RoleClassification testerClass = dao.findByClass(RoleClass.TESTER);
-        RoleClassification teamMemberClass = dao.findByClass(RoleClass.TEAMMEMBER);
-        RoleClassification stakeholderClass = dao.findByClass(RoleClass.STAKEHOLDER);
+        RoleClassification analystClass = new RoleClassification(RoleClass.ANALYST);
+        RoleClassification designerClass = new RoleClassification(RoleClass.DESIGNER);
+        RoleClassification developerClass = new RoleClassification(RoleClass.DEVELOPER);
+        RoleClassification documenterClass = new RoleClassification(RoleClass.DOCUMENTER);
+        RoleClassification mentorClass = new RoleClassification(RoleClass.MENTOR);
+        RoleClassification nonmemberClass = new RoleClassification(RoleClass.NONMEMBER);
+        RoleClassification projectManagerClass = new RoleClassification(RoleClass.PROJECTMANAGER);
+        RoleClassification testerClass = new RoleClassification(RoleClass.TESTER);
+        RoleClassification teamMemberClass = new RoleClassification(RoleClass.TEAMMEMBER);
+        RoleClassification stakeholderClass = new RoleClassification(RoleClass.STAKEHOLDER);
 
         roles.add(new Role("non-member", nonmemberClass));
         roles.add(new Role("anonymous", nonmemberClass));
@@ -156,15 +165,14 @@ public class DBInitializer {
 
     private List<Status> getDefaultStatuses() {
         List<Status> statuses = new ArrayList<>();
-        StatusClassificationDAO dao = new StatusClassificationDAO_JPA(em);
 
-        StatusClassification newClass = dao.findByClass(StatusClass.NEW);
-        StatusClassification acceptedClass = dao.findByClass(StatusClass.ACCEPTED);
-        StatusClassification inProgressClass = dao.findByClass(StatusClass.INPROGRESS);
-        StatusClassification resolvedClass = dao.findByClass(StatusClass.RESOLVED);
-        StatusClassification verifiedClass = dao.findByClass(StatusClass.VERIFIED);
-        StatusClassification doneClass = dao.findByClass(StatusClass.DONE);
-        StatusClassification invalidClass = dao.findByClass(StatusClass.INVALID);
+        StatusClassification newClass = new StatusClassification(StatusClass.NEW);
+        StatusClassification acceptedClass = new StatusClassification(StatusClass.ACCEPTED);
+        StatusClassification inProgressClass = new StatusClassification(StatusClass.INPROGRESS);
+        StatusClassification resolvedClass = new StatusClassification(StatusClass.RESOLVED);
+        StatusClassification verifiedClass = new StatusClassification(StatusClass.VERIFIED);
+        StatusClassification doneClass = new StatusClassification(StatusClass.DONE);
+        StatusClassification invalidClass = new StatusClassification(StatusClass.INVALID);
 
         statuses.add(new Status("new", newClass));
         statuses.add(new Status("todo", newClass));
@@ -199,13 +207,12 @@ public class DBInitializer {
 
     private List<Priority> getDefaultPriorities() {
         List<Priority> priorities = new ArrayList<>();
-        PriorityClassificationDAO dao = new PriorityClassificationDAO_JPA(em);
 
-        PriorityClassification lowestClass = dao.findByClass(PriorityClass.LOWEST);
-        PriorityClassification lowClass = dao.findByClass(PriorityClass.LOW);
-        PriorityClassification normalClass = dao.findByClass(PriorityClass.NORMAL);
-        PriorityClassification highClass = dao.findByClass(PriorityClass.HIGH);
-        PriorityClassification highestClass = dao.findByClass(PriorityClass.HIGHEST);
+        PriorityClassification lowestClass = new PriorityClassification(PriorityClass.LOWEST);
+        PriorityClassification lowClass = new PriorityClassification(PriorityClass.LOW);
+        PriorityClassification normalClass = new PriorityClassification(PriorityClass.NORMAL);
+        PriorityClassification highClass = new PriorityClassification(PriorityClass.HIGH);
+        PriorityClassification highestClass = new PriorityClassification(PriorityClass.HIGHEST);
 
         priorities.add(new Priority("lowest", lowestClass));
 
@@ -228,13 +235,12 @@ public class DBInitializer {
 
     private List<Severity> getDefaultSeverities() {
         List<Severity> severities = new ArrayList<>();
-        SeverityClassificationDAO dao = new SeverityClassificationDAO_JPA(em);
 
-        SeverityClassification trivialClass = dao.findByClass(SeverityClass.TRIVIAL);
-        SeverityClassification minorClass = dao.findByClass(SeverityClass.MINOR);
-        SeverityClassification normalClass = dao.findByClass(SeverityClass.NORMAL);
-        SeverityClassification majorClass = dao.findByClass(SeverityClass.MAJOR);
-        SeverityClassification criticalClass = dao.findByClass(SeverityClass.CRITICAL);
+        SeverityClassification trivialClass = new SeverityClassification(SeverityClass.TRIVIAL);
+        SeverityClassification minorClass = new SeverityClassification(SeverityClass.MINOR);
+        SeverityClassification normalClass = new SeverityClassification(SeverityClass.NORMAL);
+        SeverityClassification majorClass = new SeverityClassification(SeverityClass.MAJOR);
+        SeverityClassification criticalClass = new SeverityClassification(SeverityClass.CRITICAL);
 
         severities.add(new Severity("trivial", trivialClass));
 
@@ -258,17 +264,16 @@ public class DBInitializer {
 
     private List<Resolution> getDefaultResolutions() {
         List<Resolution> resolutions = new ArrayList<>();
-        ResolutionClassificationDAO dao = new ResolutionClassificationDAO_JPA(em);
 
-        ResolutionClassification invalidClass = dao.findByClass(ResolutionClass.INVALID);
-        ResolutionClassification duplicateClass = dao.findByClass(ResolutionClass.DUPLICATE);
-        ResolutionClassification wontFixClass = dao.findByClass(ResolutionClass.WONTFIX);
-        ResolutionClassification fixedClass = dao.findByClass(ResolutionClass.FIXED);
-        ResolutionClassification worksAsDesignedClass = dao.findByClass(ResolutionClass.WORKSASDESIGNED);
-        ResolutionClassification finishedClass = dao.findByClass(ResolutionClass.FINISHED);
-        ResolutionClassification worksForMeClass = dao.findByClass(ResolutionClass.WORKSFORME);
-        ResolutionClassification incompleteClass = dao.findByClass(ResolutionClass.INCOMPLETE);
-        ResolutionClassification unfinishedClass = dao.findByClass(ResolutionClass.UNFINISHED);
+        ResolutionClassification invalidClass = new ResolutionClassification(ResolutionClass.INVALID);
+        ResolutionClassification duplicateClass = new ResolutionClassification(ResolutionClass.DUPLICATE);
+        ResolutionClassification wontFixClass = new ResolutionClassification(ResolutionClass.WONTFIX);
+        ResolutionClassification fixedClass = new ResolutionClassification(ResolutionClass.FIXED);
+        ResolutionClassification worksAsDesignedClass = new ResolutionClassification(ResolutionClass.WORKSASDESIGNED);
+        ResolutionClassification finishedClass = new ResolutionClassification(ResolutionClass.FINISHED);
+        ResolutionClassification worksForMeClass = new ResolutionClassification(ResolutionClass.WORKSFORME);
+        ResolutionClassification incompleteClass = new ResolutionClassification(ResolutionClass.INCOMPLETE);
+        ResolutionClassification unfinishedClass = new ResolutionClassification(ResolutionClass.UNFINISHED);
 
         resolutions.add(new Resolution("duplicate", duplicateClass));
 
@@ -297,12 +302,11 @@ public class DBInitializer {
 
     private List<WorkUnitType> getDefaultWUTypes() {
         List<WorkUnitType> types = new ArrayList<>();
-        WorkUnitTypeClassificationDAO dao = new WorkUnitTypeClassificationDAO_JPA(em);
 
-        WorkUnitTypeClassification bugClass = dao.findByClass(WorkUnitTypeClass.BUG);
-        WorkUnitTypeClassification taskClass = dao.findByClass(WorkUnitTypeClass.TASK);
-        WorkUnitTypeClassification enhancementClass = dao.findByClass(WorkUnitTypeClass.ENHANCEMENT);
-        WorkUnitTypeClassification featureClass = dao.findByClass(WorkUnitTypeClass.FEATURE);
+        WorkUnitTypeClassification bugClass = new WorkUnitTypeClassification(WorkUnitTypeClass.BUG);
+        WorkUnitTypeClassification taskClass = new WorkUnitTypeClassification(WorkUnitTypeClass.TASK);
+        WorkUnitTypeClassification enhancementClass = new WorkUnitTypeClassification(WorkUnitTypeClass.ENHANCEMENT);
+        WorkUnitTypeClassification featureClass = new WorkUnitTypeClassification(WorkUnitTypeClass.FEATURE);
 
         types.add(new WorkUnitType("bug", bugClass));
         types.add(new WorkUnitType("defect", bugClass));
@@ -320,23 +324,22 @@ public class DBInitializer {
 
     private List<Relation> getDefaultRelations() {
         List<Relation> relations = new ArrayList<>();
-        RelationClassificationDAO dao = new RelationClassificationDAO_JPA(em);
 
-        RelationClassification duplicatesClass = dao.findByClass(RelationClass.DUPLICATES);
-        RelationClassification duplicatedByClass = dao.findByClass(RelationClass.DUPLICATEDBY);
-        RelationClassification blocksClass = dao.findByClass(RelationClass.BLOCKS);
-        RelationClassification blockedByClass = dao.findByClass(RelationClass.BLOCKEDBY);
-        RelationClassification relatesToClass = dao.findByClass(RelationClass.RELATESTO);
-        RelationClassification precedesClass = dao.findByClass(RelationClass.PRECEDES);
-        RelationClassification followsClass = dao.findByClass(RelationClass.FOLLOWS);
-        RelationClassification copiedFromClass = dao.findByClass(RelationClass.COPIEDFROM);
-        RelationClassification copiedByClass = dao.findByClass(RelationClass.COPIEDBY);
-        RelationClassification childOfClass = dao.findByClass(RelationClass.CHILDOF);
-        RelationClassification parentOfClass = dao.findByClass(RelationClass.PARENTOF);
-        RelationClassification causesClass = dao.findByClass(RelationClass.CAUSES);
-        RelationClassification causedByClass = dao.findByClass(RelationClass.CAUSEDBY);
-        RelationClassification resolvesClass = dao.findByClass(RelationClass.RESOLVES);
-        RelationClassification resolvedByClass = dao.findByClass(RelationClass.RESOLVEDBY);
+        RelationClassification duplicatesClass = new RelationClassification(RelationClass.DUPLICATES);
+        RelationClassification duplicatedByClass = new RelationClassification(RelationClass.DUPLICATEDBY);
+        RelationClassification blocksClass = new RelationClassification(RelationClass.BLOCKS);
+        RelationClassification blockedByClass = new RelationClassification(RelationClass.BLOCKEDBY);
+        RelationClassification relatesToClass = new RelationClassification(RelationClass.RELATESTO);
+        RelationClassification precedesClass = new RelationClassification(RelationClass.PRECEDES);
+        RelationClassification followsClass = new RelationClassification(RelationClass.FOLLOWS);
+        RelationClassification copiedFromClass = new RelationClassification(RelationClass.COPIEDFROM);
+        RelationClassification copiedByClass = new RelationClassification(RelationClass.COPIEDBY);
+        RelationClassification childOfClass = new RelationClassification(RelationClass.CHILDOF);
+        RelationClassification parentOfClass = new RelationClassification(RelationClass.PARENTOF);
+        RelationClassification causesClass = new RelationClassification(RelationClass.CAUSES);
+        RelationClassification causedByClass = new RelationClassification(RelationClass.CAUSEDBY);
+        RelationClassification resolvesClass = new RelationClassification(RelationClass.RESOLVES);
+        RelationClassification resolvedByClass = new RelationClassification(RelationClass.RESOLVEDBY);
 
         relations.add(new Relation("duplicates", duplicatesClass));
         relations.add(new Relation("duplicate of", duplicatesClass));

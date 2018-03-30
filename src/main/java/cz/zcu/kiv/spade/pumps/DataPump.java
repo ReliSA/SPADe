@@ -1,14 +1,9 @@
 package cz.zcu.kiv.spade.pumps;
 
 import cz.zcu.kiv.spade.App;
-import cz.zcu.kiv.spade.dao.ProjectInstanceDAO;
-import cz.zcu.kiv.spade.dao.ToolInstanceDAO;
-import cz.zcu.kiv.spade.dao.jpa.ProjectInstanceDAO_JPA;
-import cz.zcu.kiv.spade.dao.jpa.ToolInstanceDAO_JPA;
 import cz.zcu.kiv.spade.domain.*;
 import cz.zcu.kiv.spade.domain.enums.Tool;
 
-import javax.persistence.EntityManager;
 import java.io.File;
 
 /**
@@ -18,12 +13,18 @@ import java.io.File;
  */
 public abstract class DataPump<RootObjectType, SecondaryObjectType> {
 
-    public static final String SLASH = "/";
-    public static final String AT = "@";
     private static final String DELETE_TMP_DIR_PROMPT = "Delete TMP DIR !!!";
     private static final String PROTOCOL_SEPARATOR = "://";
+    public static final String COLON = ":";
+
     protected static final String HTTPS_PROTOCOL = "https" + PROTOCOL_SEPARATOR;
-    private static final String COLON = ":";
+
+    public static final String SLASH = "/";
+    public static final String AT = "@";
+    public static final String DOT = ".";
+    public static final String SPACE = " ";
+    public static final String LINE_BREAK = "\n";
+
     /**
      * URL of the project
      */
@@ -54,11 +55,6 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
      */
     protected Tool tool;
     protected PeopleMiner peopleMiner;
-    private EntityManager entityManager;
-    /**
-     * DAO object for handling Tool Instance
-     */
-    private ToolInstanceDAO toolDao;
     /**
      * @param projectHandle URL of the project instance
      * @param privateKeyLoc private key location for authenticated login
@@ -89,7 +85,7 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
                 }
             }
             if (!file.delete()) {
-                App.printLogMsg(DELETE_TMP_DIR_PROMPT, false);
+                App.printLogMsg(DataPump.class.getSimpleName(), DELETE_TMP_DIR_PROMPT);
             }
         }
     }
@@ -102,23 +98,12 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
     /**
      * gathers all data needed from project instance
      *
-     * @param em JPA entity manager for accessing the database
      * @return ProjectInstance with all data
      */
-    public ProjectInstance mineData(EntityManager em) {
-
-        ProjectInstanceDAO piDao = new ProjectInstanceDAO_JPA(em);
-        toolDao = new ToolInstanceDAO_JPA(em);
-
-        piDao.deleteByUrl(projectHandle);
-
+    public ProjectInstance mineData() {
         pi = new ProjectInstance();
         pi.setUrl(projectHandle);
         pi.setName(getProjectName());
-        pi.getProject().setName(getProjectName());
-
-        this.entityManager = em;
-
         return pi;
     }
 
@@ -128,12 +113,9 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
      * if not it creates it
      */
     protected void setToolInstance() {
-        ToolInstance ti = toolDao.findByToolInstance(getServer(), tool);
-        if (ti == null) {
-            ti = new ToolInstance();
-            ti.setExternalId(getServer());
-            ti.setTool(tool);
-        }
+        ToolInstance ti = new ToolInstance();
+        ti.setExternalId(getServer());
+        ti.setTool(tool);
 
         pi.setToolInstance(ti);
     }
@@ -143,9 +125,9 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
      *
      * @return project name
      */
-    private String getProjectName() {
-        if (projectHandle.endsWith(App.GIT_SUFFIX)) {
-            return projectHandle.substring(projectHandle.lastIndexOf(SLASH) + 1, projectHandle.lastIndexOf(App.GIT_SUFFIX));
+    protected String getProjectName() {
+        if (projectHandle.endsWith(DOT)) {
+            return projectHandle.substring(projectHandle.lastIndexOf(SLASH) + 1, projectHandle.lastIndexOf(DOT));
         } else {
             return projectHandle.substring(projectHandle.lastIndexOf(SLASH) + 1);
         }
@@ -159,7 +141,10 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
     protected String getProjectDir() {
         String cut = cutProtocolAndUser();
         String withoutPort = getServer().split(COLON)[0] + cut.substring(cut.indexOf(SLASH));
-        return withoutPort.substring(0, withoutPort.lastIndexOf(App.GIT_SUFFIX));
+        if (withoutPort.endsWith(App.GIT_SUFFIX)) {
+            return withoutPort.substring(0, withoutPort.lastIndexOf(App.GIT_SUFFIX));
+        }
+        else return withoutPort;
     }
 
     /**
@@ -204,15 +189,21 @@ public abstract class DataPump<RootObjectType, SecondaryObjectType> {
         return secondaryObject;
     }
 
-    public EntityManager getEntityManager() {
-        return entityManager;
-    }
-
     public ProjectInstance getPi() {
         return pi;
     }
 
     public PeopleMiner getPeopleMiner() {
         return peopleMiner;
+    }
+
+    public void setRepo(String repo){}
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }

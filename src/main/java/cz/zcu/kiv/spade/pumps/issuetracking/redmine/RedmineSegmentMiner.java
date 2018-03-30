@@ -38,7 +38,7 @@ class RedmineSegmentMiner extends SegmentMiner {
                 duplicate(iterations, iteration);
             }
         } catch (RedmineException e) {
-            App.printLogMsg(VERSIONS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, VERSIONS_PERMISSION_ERR_MSG);
         }
         return iterations;
     }

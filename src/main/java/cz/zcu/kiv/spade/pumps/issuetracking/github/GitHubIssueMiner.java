@@ -7,15 +7,11 @@ import org.kohsuke.github.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 
 class GitHubIssueMiner extends IssueMiner<GHIssue> {
 
     private static final String ISSUES_LISTED_LOG_MSG = "issues listed";
-    private static final String ISSUES_MINED_FORMAT = "mined %d tickets";
-    private static final int ISSUES_BATCH_SIZE = 100;
 
     private final GitHubCommentMiner commentMiner;
 
@@ -24,10 +20,17 @@ class GitHubIssueMiner extends IssueMiner<GHIssue> {
         commentMiner = new GitHubCommentMiner(pump);
     }
 
+    private List<GHIssue> getIssues() {
+        List<GHIssue> issues = new ArrayList<>();
+        if (!((GHRepository) pump.getRootObject()).hasIssues()) return issues;
+        issues = ((GHRepository) pump.getRootObject()).listIssues(GHIssueState.ALL).asList();
+        App.printLogMsg(this, ISSUES_LISTED_LOG_MSG);
+        return issues;
+    }
+
     @Override
     public void mineItems() {
-        Set<GHIssue> issues = ((GHRepository) pump.getRootObject()).listIssues(GHIssueState.ALL).asSet();
-        App.printLogMsg(ISSUES_LISTED_LOG_MSG);
+        List<GHIssue> issues = getIssues();
 
         int count = 1;
         for (int id = issues.size(); id > 0;) {
@@ -53,13 +56,13 @@ class GitHubIssueMiner extends IssueMiner<GHIssue> {
             if (!issue.isPullRequest()) {
                 mineItem(issue);
                 if ((count % ISSUES_BATCH_SIZE) == 0) {
-                    App.printLogMsg(String.format(ISSUES_MINED_FORMAT, count));
+                    App.printLogMsg(this, String.format(ISSUES_MINED_FORMAT, count + ""));
                 }
                 count++;
             }
             id--;
         }
-        App.printLogMsg(String.format(ISSUES_MINED_FORMAT, count - 1));
+        App.printLogMsg(this, String.format(ISSUES_MINED_FORMAT, (count - 1) + ""));
     }
 
     @Override

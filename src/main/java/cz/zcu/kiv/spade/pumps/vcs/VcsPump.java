@@ -29,16 +29,13 @@ public abstract class VcsPump<RootObjectType, SecondaryObjectType> extends DataP
     @Override
     protected void mineContent() {
         if (peopleMiner != null) {
-            peopleMiner.setEntityManager();
             peopleMiner.mineGroups();
             peopleMiner.minePeople();
         }
         if (commitMiner != null) {
-            commitMiner.setEntityManager();
             commitMiner.mineItems();
         }
         if (releaseMiner != null) {
-            releaseMiner.setEntityManager();
             releaseMiner.mineTags();
         }
 
@@ -48,7 +45,6 @@ public abstract class VcsPump<RootObjectType, SecondaryObjectType> extends DataP
         }
 
         if (relationMiner != null) {
-            relationMiner.setEntityManager();
             relationMiner.mineAllRelations();
         }
     }

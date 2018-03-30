@@ -2,6 +2,7 @@ package cz.zcu.kiv.spade.pumps.issuetracking.redmine;
 
 import com.taskadapter.redmineapi.bean.TimeEntry;
 import cz.zcu.kiv.spade.domain.CommittedConfiguration;
+import cz.zcu.kiv.spade.domain.WorkItemChange;
 import cz.zcu.kiv.spade.domain.WorkUnit;
 import cz.zcu.kiv.spade.pumps.issuetracking.WorklogMiner;
 
@@ -23,6 +24,13 @@ class RedmineWorklogMiner extends WorklogMiner<TimeEntry> {
         configuration.setCreated(entry.getSpentOn());
 
         configuration.getChanges().add(generateLogTimeChange(unit, spentTimeBefore, entry.getHours()));
+
+        if (!entry.getComment().isEmpty()) {
+            WorkItemChange comment = new WorkItemChange();
+            comment.setChangedItem(unit);
+            comment.setType(WorkItemChange.Type.COMMENT);
+            configuration.getChanges().add(comment);
+        }
 
         pump.getPi().getProject().getConfigurations().add(configuration);
     }

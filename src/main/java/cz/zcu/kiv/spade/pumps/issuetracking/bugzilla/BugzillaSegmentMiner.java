@@ -1,7 +1,7 @@
-package cz.zcu.kiv.spade.pumps.issuetracking.jira;
+package cz.zcu.kiv.spade.pumps.issuetracking.bugzilla;
 
-import com.atlassian.jira.rest.client.domain.Project;
-import com.atlassian.jira.rest.client.domain.Version;
+import b4j.core.Project;
+import b4j.core.Version;
 import cz.zcu.kiv.spade.domain.Activity;
 import cz.zcu.kiv.spade.domain.Iteration;
 import cz.zcu.kiv.spade.domain.Phase;
@@ -12,9 +12,9 @@ import cz.zcu.kiv.spade.pumps.issuetracking.SegmentMiner;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 
-class JiraSegmentMiner extends SegmentMiner {
+class BugzillaSegmentMiner extends SegmentMiner {
 
-    JiraSegmentMiner(JiraPump pump) {
+    BugzillaSegmentMiner(BugzillaPump pump) {
         super(pump);
     }
 
@@ -24,17 +24,14 @@ class JiraSegmentMiner extends SegmentMiner {
         for (Version version : ((Project) pump.getSecondaryObject()).getVersions()) {
             Iteration iteration = new Iteration();
             iteration.setProject(pump.getPi().getProject());
-            if (version.getId() != null) {
-                iteration.setExternalId(version.getId().toString());
-            }
+            iteration.setExternalId(version.getId().toString());
             iteration.setName(version.getName());
-            iteration.setDescription(version.getDescription());
             if (version.getReleaseDate() != null) {
-                iteration.setEndDate(version.getReleaseDate().toDate());
+                iteration.setEndDate(version.getReleaseDate());
             }
 
             iterations.add(iteration);
-            duplicate(iterations, iteration);
+            //duplicate(iterations, iteration);
         }
         return iterations;
     }

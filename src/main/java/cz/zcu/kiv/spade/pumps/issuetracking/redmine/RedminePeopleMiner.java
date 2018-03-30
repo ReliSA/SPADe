@@ -38,13 +38,22 @@ class RedminePeopleMiner extends PeopleMiner<User> {
         return identity;
     }
 
+    Identity generateIdentity(String login, String name) {
+        Identity identity = new Identity();
+        if (!login.isEmpty()){
+            identity.setName(login);
+        }
+        identity.setDescription(name);
+        return identity;
+    }
+
     @Override
     public void minePeople() {
         List<Membership> memberships = new ArrayList<>();
         try {
             memberships = ((RedmineManager) pump.getRootObject()).getMembershipManager().getMemberships(((Project) pump.getSecondaryObject()).getId());
         } catch (RedmineException e) {
-            App.printLogMsg(MEMBERSHIPS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, MEMBERSHIPS_PERMISSION_ERR_MSG);
         }
         for (Membership member : memberships) {
             if (member.getUserId() == null) continue;
@@ -79,7 +88,7 @@ class RedminePeopleMiner extends PeopleMiner<User> {
             identity.setDescription(user.getFullName());
             identity.setEmail(user.getMail());
         } catch (RedmineException e) {
-            App.printLogMsg(String.format(USER_PERMISSION_ERR_FORMAT, id.toString()), false);
+            App.printLogMsg(this, String.format(USER_PERMISSION_ERR_FORMAT, id.toString()));
         }
         return identity;
     }
@@ -90,7 +99,7 @@ class RedminePeopleMiner extends PeopleMiner<User> {
         try {
             redmineGroups = ((RedmineManager) pump.getRootObject()).getUserManager().getGroups();
         } catch (RedmineException e) {
-            App.printLogMsg(GROUPS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, GROUPS_PERMISSION_ERR_MSG);
         }
         if (redmineGroups.isEmpty()) return;
 
@@ -107,7 +116,7 @@ class RedminePeopleMiner extends PeopleMiner<User> {
         try {
             user = ((RedmineManager) pump.getRootObject()).getUserManager().getUserById(Integer.parseInt(userId));
         } catch (RedmineException e) {
-            App.printLogMsg(GROUPS_PERMISSION_ERR_MSG, false);
+            App.printLogMsg(this, GROUPS_PERMISSION_ERR_MSG);
         }
         if (user == null) return;
 

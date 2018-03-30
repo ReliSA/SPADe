@@ -1,10 +1,10 @@
 package cz.zcu.kiv.spade.pumps;
 
-import cz.zcu.kiv.spade.App;
 import cz.zcu.kiv.spade.domain.Commit;
 import cz.zcu.kiv.spade.domain.WorkItem;
 import cz.zcu.kiv.spade.domain.WorkUnit;
 import cz.zcu.kiv.spade.domain.enums.Tool;
+import cz.zcu.kiv.spade.pumps.issuetracking.bugzilla.BugzillaXmlConstants;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,8 +14,9 @@ import java.util.regex.Pattern;
 public abstract class RelationMiner extends DataMiner {
 
     // TODO unify relation miners, decide on regex by tool(s), search mentions by url
-    private static final String DEFAULT_ISSUE_MENTION_REGEX = "(?<=^#|\\W#|_#|$#)\\d{1,4}(?=\\W|_|^|$)";
-    private static final String JIRA_ISSUE_MENTION_REGEX = "(-\\d{1,4})(?=[^0-9])";
+    private static final String DEFAULT_ISSUE_MENTION_REGEX = "(?<=^#|\\W#|_#|$#)[1-9]\\d{0,8}(?=\\W|_|^|$)";
+    private static final String JIRA_ISSUE_MENTION_REGEX = "(-[1-9]\\d{0,8})(?=[^0-9])";
+    private static final String BUGZILLA_ISSUE_ID_REGEX = "\\d{0,8}";
     /**
      * regular expression for SVN revision marker
      */
@@ -24,8 +25,6 @@ public abstract class RelationMiner extends DataMiner {
      * regular expression for git commit hash
      */
     private static final String GIT_COMMIT_REGEX = "(?<=^r|\\Wr|_r|$r)\\[a-f0-9]{7}(?=\\W|_|^|$)";
-
-    protected static final String PARENT_CHILD_FORMAT = "parent -> child: %d -> %d";
 
     protected RelationMiner(DataPump pump) {
         super(pump);
@@ -118,25 +117,25 @@ public abstract class RelationMiner extends DataMiner {
      */
     protected void mineMentionedUnits(WorkItem item, String text) {
         // TODO check Bugzilla, Assembla regex
-        String regex;
+        String idRegex;
         switch (pump.tool) {
             case JIRA:
-                regex = pump.pi.getName() + JIRA_ISSUE_MENTION_REGEX;
+                idRegex = pump.pi.getName() + JIRA_ISSUE_MENTION_REGEX;
+                break;
+            case BUGZILLA:
+                idRegex = String.format(BugzillaXmlConstants.BUG_URL_FORMAT, pump.getServer()) + BUGZILLA_ISSUE_ID_REGEX;
                 break;
             default:
-                regex = DEFAULT_ISSUE_MENTION_REGEX;
+                idRegex = DEFAULT_ISSUE_MENTION_REGEX;
                 break;
         }
-        for (String mention : mineMentions(text, regex)) {
+        for (String mention : mineMentions(text, idRegex)) {
             if (pump.tool == Tool.JIRA) {
-                App.printLogMsg(mention + "\n" + text + "\n\n", false);
                 mention = Integer.toString(getNumberAfterLastDash(mention));
             }
             if (pump.pi.getProject().containsUnit(mention)) {
                 WorkUnit mentioned = pump.pi.getProject().getUnit(mention);
                 generateMentionRelation(item, mentioned);
-            } else {
-                generateDeletedIssue(Integer.parseInt(mention));
             }
         }
     }

@@ -78,7 +78,7 @@ class GitReleaseMiner extends ReleaseMiner {
             }
             count++;
             if (count % TAG_BATCH_SIZE == 0) {
-                App.printLogMsg(String.format(TAGS_MINED_FORMAT, count, refs.size()));
+                App.printLogMsg(this, String.format(TAGS_MINED_FORMAT, count, refs.size()));
             }
         }
         walk.dispose();

@@ -47,7 +47,7 @@ class RedmineRelationMiner extends IssueTrackingRelationMiner {
         for (WorkUnit unit : pump.getPi().getProject().getUnits()) {
             Issue issue = null;
             try {
-                issue = ((RedmineManager) pump.getRootObject()).getIssueManager().getIssueById(unit.getNumber(), Include.relations);
+                issue = ((RedmineManager) pump.getRootObject()).getIssueManager().getIssueById(unit.getNumber(), Include.relations, Include.children);
             } catch (RedmineException e) {
                 e.printStackTrace();
             }

@@ -20,7 +20,7 @@ public abstract class SegmentMiner extends DataMiner {
      * collects all iterations in the project
      * and assigns the proper ones to the Work Units
      */
-    void mineIterations() {
+    protected void mineIterations() {
         Collection<ProjectSegment> iterations = collectIterations();
         for (WorkUnit unit : pump.getPi().getProject().getUnits()) {
             for (ProjectSegment iteration : iterations) {

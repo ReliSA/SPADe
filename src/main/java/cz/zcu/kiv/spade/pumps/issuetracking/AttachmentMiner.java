@@ -6,7 +6,8 @@ import cz.zcu.kiv.spade.pumps.DataPump;
 
 public abstract class AttachmentMiner<AttachmentObject> extends DataMiner {
 
-    private static final String ATTACH_CHANGE_NAME = "attachment added";
+    public static final String ATTACH_CHANGE_NAME = "attachment added";
+    public static final String DETACH_CHANGE_NAME = "attachment deleted";
 
     protected AttachmentMiner(DataPump pump) {
         super(pump);
@@ -21,6 +22,9 @@ public abstract class AttachmentMiner<AttachmentObject> extends DataMiner {
     protected abstract void mineAttachments(WorkItem item, Iterable<AttachmentObject> attachments);
 
     protected void generateAttachmentConfig(WorkItem item, Artifact artifact) {
+        item.getRelatedItems().add(new WorkItemRelation(artifact, resolveRelation(HAS_ATTACHED)));
+        artifact.getRelatedItems().add(new WorkItemRelation(item, resolveRelation(ATTACHED_TO)));
+
         WorkItemChange attachChange = new WorkItemChange();
         attachChange.setChangedItem(item);
         attachChange.setType(WorkItemChange.Type.MODIFY);
