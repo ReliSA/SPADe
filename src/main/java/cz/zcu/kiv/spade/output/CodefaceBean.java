@@ -1,6 +1,6 @@
 package cz.zcu.kiv.spade.output;
 
-class CodefaceBean {
+public class CodefaceBean {
 
     private String externalId;
     private String url;

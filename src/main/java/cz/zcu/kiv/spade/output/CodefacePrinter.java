@@ -96,10 +96,12 @@ public class CodefacePrinter {
                     bean.setDescription(con.getDescription());
                     bean.setCreationDate(format.format(con.getCreated()));
 
-                    StringBuilder author = new StringBuilder();
-                    for (String email : con.getAuthor().getEmails()) {
-                        if (!author.toString().isEmpty()) author.append("@@");
-                        author.append(email);
+                    StringBuilder author = new StringBuilder("");
+                    if (con.getAuthor() != null) {
+                        for (String email : con.getAuthor().getEmails()) {
+                            if (!author.toString().isEmpty()) author.append("@@");
+                            author.append(email);
+                        }
                     }
 
                     bean.setCreatedBy(author.toString());
