@@ -113,7 +113,7 @@ public class CocaexFilePrinter {
                 relNode.put("from", nodeMap.get(item));
                 relNode.put("to", nodeMap.get(relation.getRelatedItem()));
                 List<String> cons = new ArrayList<>();
-                cons.add(relation.getRelation().getClassification().getAClass().name());
+                cons.add(relation.getRelation().getClassification().getaClass().name());
                 relNode.put("packageConnections", cons);
                 edges.add(relNode);
             }
