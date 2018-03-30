@@ -26,15 +26,6 @@
 
     <dependencies>
 
-        <!-- logger -->
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>1.7.25</version>
-        </dependency>
-
-
         <!-- JUnit testing -->
         <dependency>
             <groupId>junit</groupId>
@@ -49,15 +40,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>${mysql.connector.version}</version>
-        </dependency>
-
-
-        <!-- CSV output -->
-        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
-        <dependency>
-            <groupId>com.opencsv</groupId>
-            <artifactId>opencsv</artifactId>
-            <version>4.0</version>
         </dependency>
 
 
@@ -79,6 +61,15 @@
         </dependency>
 
 
+        <!-- CSV output -->
+        <!-- https://mvnrepository.com/artifact/com.opencsv/opencsv -->
+        <dependency>
+            <groupId>com.opencsv</groupId>
+            <artifactId>opencsv</artifactId>
+            <version>4.1</version>
+        </dependency>
+
+
         <!-- code point handling -->
         <!-- https://mvnrepository.com/artifact/com.googlecode.juniversalchardet/juniversalchardet -->
         <dependency>
@@ -90,7 +81,16 @@
         <dependency>
         <groupId>com.vdurmont</groupId>
             <artifactId>emoji-java</artifactId>
-            <version>3.3.0</version>
+            <version>4.0.0</version>
+        </dependency>
+
+
+        <!-- HTML parser -->
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.11.2</version>
         </dependency>
 
 
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
-            <version>4.9.1.201712030800-r</version>
+            <version>4.11.0.201803080745-r</version>
         </dependency>
 
 
@@ -110,7 +110,7 @@
         <dependency>
             <groupId>org.kohsuke</groupId>
             <artifactId>github-api</artifactId>
-            <version>1.90</version>
+            <version>1.92</version>
         </dependency>
 
 
@@ -119,7 +119,7 @@
         <dependency>
             <groupId>com.taskadapter</groupId>
             <artifactId>redmine-java-api</artifactId>
-            <version>3.0.1</version>
+            <version>3.1.0</version>
         </dependency>
 
 
@@ -183,7 +183,7 @@
         <dependency>
             <groupId>org.tmatesoft.svnkit</groupId>
             <artifactId>svnkit</artifactId>
-            <version>1.9.0</version>
+            <version>1.9.1</version>
         </dependency>
 
     </dependencies>
