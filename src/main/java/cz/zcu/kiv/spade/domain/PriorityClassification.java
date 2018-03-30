@@ -19,16 +19,16 @@ public class PriorityClassification extends BaseEntity {
 
     public PriorityClassification(PriorityClass aClass) {
         super();
-        this.setAClass(aClass);
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public PriorityClass getAClass() {
+    public PriorityClass getaClass() {
         return aClass;
     }
 
-    public void setAClass(PriorityClass aClass) {
+    public void setaClass(PriorityClass aClass) {
         this.aClass = aClass;
         if (aClass == PriorityClass.UNASSIGNED)
             this.superClass = PrioritySuperClass.UNASSIGNED;

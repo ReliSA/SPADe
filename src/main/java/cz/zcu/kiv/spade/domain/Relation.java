@@ -34,12 +34,12 @@ public class Relation extends DescribedEntity {
     }
 
     @Transient
-    public RelationClass getAClass() {
-        return classification.getAClass();
+    public RelationClass getaClass() {
+        return classification.getaClass();
     }
 
-    public void setAClass(RelationClass newClass) {
-        this.classification.setAClass(newClass);
+    public void setaClass(RelationClass newClass) {
+        this.classification.setaClass(newClass);
     }
 
     @Transient

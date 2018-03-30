@@ -34,12 +34,12 @@ public class Resolution extends DescribedEntity {
     }
 
     @Transient
-    public ResolutionClass getAClass() {
-        return classification.getAClass();
+    public ResolutionClass getaClass() {
+        return classification.getaClass();
     }
 
-    public void setAClass(ResolutionClass newClass) {
-        this.classification.setAClass(newClass);
+    public void setaClass(ResolutionClass newClass) {
+        this.classification.setaClass(newClass);
     }
 
     @Transient

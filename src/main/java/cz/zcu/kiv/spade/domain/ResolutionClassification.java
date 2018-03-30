@@ -19,16 +19,16 @@ public class ResolutionClassification extends BaseEntity {
 
     public ResolutionClassification(ResolutionClass aClass) {
         super();
-        this.setAClass(aClass);
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public ResolutionClass getAClass() {
+    public ResolutionClass getaClass() {
         return aClass;
     }
 
-    public void setAClass(ResolutionClass aClass) {
+    public void setaClass(ResolutionClass aClass) {
         this.aClass = aClass;
         if (aClass == ResolutionClass.UNASSIGNED)
             this.superClass = ResolutionSuperClass.UNASSIGNED;

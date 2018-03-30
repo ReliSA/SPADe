@@ -19,16 +19,16 @@ public class RelationClassification extends BaseEntity {
 
     public RelationClassification(RelationClass aClass) {
         super();
-        this.setAClass(aClass);
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public RelationClass getAClass() {
+    public RelationClass getaClass() {
         return aClass;
     }
 
-    public void setAClass(RelationClass aClass) {
+    public void setaClass(RelationClass aClass) {
         this.aClass = aClass;
         if (aClass == RelationClass.UNASSIGNED)
             this.superClass = RelationSuperClass.UNASSIGNED;

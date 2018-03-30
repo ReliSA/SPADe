@@ -19,16 +19,16 @@ public class SeverityClassification extends BaseEntity {
 
     public SeverityClassification(SeverityClass aClass) {
         super();
-        this.setAClass(aClass);
+        this.setaClass(aClass);
     }
 
     @Column(name = "class")
     @Enumerated(EnumType.STRING)
-    public SeverityClass getAClass() {
+    public SeverityClass getaClass() {
         return aClass;
     }
 
-    public void setAClass(SeverityClass aClass) {
+    public void setaClass(SeverityClass aClass) {
         this.aClass = aClass;
         if (aClass == SeverityClass.UNASSIGNED)
             this.superClass = SeveritySuperClass.UNASSIGNED;

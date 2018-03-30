@@ -34,12 +34,12 @@ public class Role extends DescribedEntity {
     }
 
     @Transient
-    public RoleClass getAClass() {
-        return classification.getAClass();
+    public RoleClass getaClass() {
+        return classification.getaClass();
     }
 
-    public void setAClass(RoleClass newClass) {
-        this.classification.setAClass(newClass);
+    public void setaClass(RoleClass newClass) {
+        this.classification.setaClass(newClass);
     }
 
     @Transient

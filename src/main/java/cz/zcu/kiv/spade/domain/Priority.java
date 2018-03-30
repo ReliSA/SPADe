@@ -34,12 +34,12 @@ public class Priority extends DescribedEntity {
     }
 
     @Transient
-    public PriorityClass getAClass() {
+    public PriorityClass getaClass() {
         return classification.getaClass();
     }
 
-    public void setAClass(PriorityClass newClass) {
-        this.classification.setAClass(newClass);
+    public void setaClass(PriorityClass newClass) {
+        this.classification.setaClass(newClass);
     }
 
     @Transient
