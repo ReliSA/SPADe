@@ -4,6 +4,8 @@ import cz.zcu.kiv.spade.dao.GenericDAO;
 import cz.zcu.kiv.spade.domain.abstracts.BaseEntity;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUtil;
 
 public class GenericDAO_JPA<E extends BaseEntity> implements GenericDAO<E> {
 

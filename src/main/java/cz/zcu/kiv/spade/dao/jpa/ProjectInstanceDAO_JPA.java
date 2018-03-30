@@ -38,14 +38,14 @@ public class ProjectInstanceDAO_JPA extends GenericDAO_JPA<ProjectInstance> impl
 
     @Override
     public void deleteByUrl(String externalId) {
-        entityManager.getTransaction().begin();
 
         ProjectInstance pi = findByUrl(externalId);
         if (pi != null) {
+            entityManager.getTransaction().begin();
             entityManager.remove(pi);
+            entityManager.getTransaction().commit();
         }
 
-        entityManager.getTransaction().commit();
     }
 
     @Override
